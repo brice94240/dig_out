@@ -20,8 +20,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_game'])) {
         $stmt = $pdo->prepare("UPDATE joueurs SET game_joined = :game_id WHERE ID = :user_id");
         $stmt->execute(['game_id' => $game_id, 'user_id' => $_SESSION['user_id']]);
         echo "Vous avez rejoint la partie avec succès !";
+
+        // Redirection vers la room de la partie
+        header("Location: waiting_room.php?game_id=" . $game_id);
+        exit;
+        
     } catch (PDOException $e) {
         echo "Erreur lors de la mise à jour de la partie : " . $e->getMessage();
+    }
+}
+
+// Traitement du formulaire de suppression de la partie
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_game'])) {
+    $game_id = intval($_POST['game_id']); // Assurez-vous que game_id est un entier
+
+
+    try {
+        // Vérifier si l'utilisateur est le créateur de la partie
+        $stmt_check_creator = $pdo->prepare("SELECT * FROM games WHERE creator_id = :game_id");
+        $stmt_check_creator->execute(['game_id' => $game_id]);
+        $game = $stmt_check_creator->fetch(PDO::FETCH_ASSOC);
+        if($game){
+
+            $stmt_delete_game = $pdo->prepare("DELETE FROM games WHERE creator_id = :game_id");
+            $stmt_delete_game->execute(['game_id' => $game_id]);
+
+            $stmt_update_player_in_this_game = $pdo->prepare("UPDATE joueurs SET game_joined = NULL WHERE game_joined = :game_id");
+            $stmt_update_player_in_this_game->execute(['game_id' => $game_id]);
+
+            echo "Partie supprimée avec succès !";
+        } else
+        {
+            echo "Vous ne pouvez pas supprimer cette partie !";
+        }
+    } catch (PDOException $e) {
+        echo "Erreur lors de la suppression de la partie : " . $e->getMessage();
     }
 }
 
@@ -36,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_game'])) {
     $code = $_POST['code'];
 
     // Validation de base des champs
-    if (!empty($game_name) && !empty($points) && !empty($min_player) && !empty($max_player) && !empty($max_cards) && !empty($code)) {
+    if (!empty($game_name) && !empty($points) && !empty($max_player) && !empty($max_cards) && !empty($code)) {
         try {
             $verify = $pdo->prepare("SELECT COUNT(*) FROM games WHERE creator_id = :creator_id");
             $verify->execute(['creator_id' => $_SESSION['user_id']]);
@@ -49,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_game'])) {
                     'name' => $game_name,
                     'points' => $points,
                     'team_activated' => $team_activated,
-                    'min_player' => $min_player,
+                    'min_player' => $max_player,
                     'max_player' => $max_player,
                     'max_cards' => $max_cards,
                     'code' => $code,
@@ -82,6 +115,7 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="./css/room.css" rel="stylesheet" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <title>Dig Out</title>
 </head>
 <body>
@@ -163,8 +197,51 @@ try {
         </div>
         <button type="submit" name="create_game">Créer</button>
     </form>
-
     <script>
+        function loadGames() {
+            $.ajax({
+                url: 'room_ajax.php',
+                type: 'POST',
+                data: { action: 'get_games' },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        $('.games-container').empty().append(response.html);
+                    } else {
+                        console.log('Erreur : ' + response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.log('Erreur AJAX : ' + error);
+                }
+            });
+        }
+
+        // Charger les parties au chargement de la page et toutes les 2 secondes
+        $(document).ready(function() {
+            loadGames(); // Charger les parties au chargement initial
+
+            setInterval(function() {
+                loadGames(); // Recharger les parties toutes les 2 secondes (2000 ms)
+            }, 2000); // Répéter toutes les 2 secondes (2000 ms)
+        });
+
+        // Fonction pour activer le bouton OUI ou NON (pour la création de partie)
+        // function activateButton(buttonType) {
+        //     var yesButton = document.getElementById('yesButton');
+        //     var noButton = document.getElementById('noButton');
+        //     var teamActivatedInput = document.getElementById('team_activated');
+
+        //     if (buttonType === 'yes') {
+        //         yesButton.classList.add('active');
+        //         noButton.classList.remove('active');
+        //         teamActivatedInput.value = "1";
+        //     } else {
+        //         noButton.classList.add('active');
+        //         yesButton.classList.remove('active');
+        //         teamActivatedInput.value = "0";
+        //     }
+        // }
         // Fonction pour activer le bouton OUI ou NON
         function activateButton(buttonType) {
             var yesButton = document.getElementById('yesButton');

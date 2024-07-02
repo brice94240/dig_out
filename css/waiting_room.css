@@ -1,0 +1,147 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #000;
+    color: #ffffff;
+}
+
+h1, h2 {
+    text-align: center;
+    color: #f37f00;
+}
+
+a {
+    color: #FFD700;
+}
+
+.games-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.game-header, .game {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 80%;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #FFD700;
+    border-radius: 5px;
+    background-color: #333;
+}
+
+.game-header {
+    font-weight: bold;
+    background-color: #444;
+}
+
+.game div, .game-header div {
+    flex: 1;
+    text-align: center;
+}
+
+.join-button {
+    padding: 5px 10px;
+    border: none;
+    background-color: #FFD700;
+    color: black;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.join-button:hover {
+    background-color: #FFA500;
+}
+
+.create_room {
+    background-color: #333;
+    padding: 20px;
+    border: 1px solid #FFD700;
+    border-radius: 5px;
+    width: 80%;
+    margin: 20px auto;
+}
+
+.create_room div {
+    margin-bottom: 10px;
+}
+
+label {
+    color: #FFD700;
+}
+
+input[type="text"], input[type="number"], input[type="checkbox"] {
+    padding: 5px;
+    width: calc(100% - 10px);
+    border: 1px solid #FFD700;
+    border-radius: 5px;
+    background-color: #555;
+    color: #FFD700;
+}
+
+button[type="submit"] {
+    padding: 10px 20px;
+    border: none;
+    background-color: #FFD700;
+    color: black;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button[type="submit"]:hover {
+    background-color: #FFA500;
+}
+.toggle-button {
+    display: inline-block;
+    padding: 8px 12px;
+    background-color: #333; /* Couleur de fond pour NON */
+    color: white;
+    cursor: pointer;
+    user-select: none;
+    border: none;
+    outline: none;
+    margin-right: 10px;
+}
+.toggle-button.active {
+    background-color: goldenrod; /* Couleur de fond pour OUI */
+}
+.delete-button {
+    padding: 5px 10px;
+    border: none;
+    background-color: #fc0909 !important;
+    color: black;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.join-button:hover {
+    background-color: #FFA500;
+}
+
+form.form_join {
+    margin: unset !important;
+    padding-right: 0.5em;
+}
+
+.game-details {
+    text-align: center;
+}
+
+form.form_launch_game {
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    padding-top: 1em;
+}
+
+form.form_launch_game_desactivate {
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    opacity: 0.5;
+    padding-top: 1em;
+}
