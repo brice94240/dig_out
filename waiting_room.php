@@ -108,6 +108,17 @@ try {
             <button id="back_button" type="submit" name="back_button">Retour à la liste des parties</button>
         </form>
     </div>
+
+    <div class="chat-container">
+        <div class="chat-messages" id="chat-messages">
+            <!-- Les messages de chat seront ajoutés ici -->
+        </div>
+        <form id="chat-form" method="post" action="">
+            <input type="text" id="chat-input" placeholder="Tapez votre message..." autocomplete="off">
+            <button type="submit">Envoyer</button>
+        </form>
+    </div>
+
 </body>
 </html>
 <script>
@@ -162,6 +173,85 @@ try {
     // Recharger les détails de la partie toutes les 2 secondes
     setInterval(function() {
         loadGameDetails();
+    }, 2000);
+
+    function timeAgo(timestamp) {
+        const now = new Date();
+        const messageTime = new Date(timestamp);
+        const diffInSeconds = Math.floor((now - messageTime) / 1000);
+
+        if (diffInSeconds < 60) {
+            return 'Now';
+        } else if (diffInSeconds < 3600) {
+            const minutes = Math.floor(diffInSeconds / 60);
+            return `${minutes} Min ago`;
+        } else if (diffInSeconds < 86400) {
+            const hours = Math.floor(diffInSeconds / 3600);
+            return `${hours} Hours ago`;
+        } else {
+            const days = Math.floor(diffInSeconds / 86400);
+            return `${days} Days ago`;
+        }
+    }
+
+    function loadChatMessages() {
+        $.ajax({
+            url: 'load_chat.php',
+            type: 'POST',
+            data: { game_id: <?php echo $game_id; ?> },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    var chatHtml = '';
+                    response.messages.forEach(function(message) {
+                        chatHtml += '<div class="chat-message"><div class="time_chatting">' + timeAgo(message.timestamp) + ' :</div><div class="player_chatting"> ' + message.pseudo + ':</div> ' + message.message + '</div>';
+                    });
+                    $('#chat-messages').html(chatHtml);
+                    $('#chat-messages').scrollTop($('#chat-messages')[0].scrollHeight);
+                } else {
+                    console.log('Erreur : ' + response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.log('Erreur AJAX : ' + error);
+            }
+        });
+    }
+
+    $('#chat-form').submit(function(e) {
+        e.preventDefault();
+        var message = $('#chat-input').val();
+        if (message.trim() !== '') {
+            $.ajax({
+                url: 'send_chat.php',
+                type: 'POST',
+                data: { 
+                    game_id: <?php echo $game_id; ?>,
+                    user_id: <?php echo $_SESSION['user_id']; ?>,
+                    message: message 
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        $('#chat-input').val('');
+                        loadChatMessages();
+                    } else {
+                        console.log('Erreur : ' + response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.log('Erreur AJAX : ' + error);
+                }
+            });
+        }
+    });
+
+    // Charger les messages de chat au chargement initial
+    loadChatMessages();
+
+    // Recharger les messages de chat toutes les 2 secondes
+    setInterval(function() {
+        loadChatMessages();
     }, 2000);
 });
 
