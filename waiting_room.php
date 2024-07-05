@@ -38,6 +38,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['leave_game'])) {
         // Mettre à jour la colonne game_joined pour l'utilisateur connecté à NULL
         $stmt = $pdo->prepare("UPDATE joueurs SET game_joined = NULL WHERE ID = :user_id");
         $stmt->execute(['user_id' => $_SESSION['user_id']]);
+
+        $stmt = $pdo->prepare("UPDATE joueurs SET team = NULL WHERE ID = :user_id");
+        $stmt->execute(['user_id' => $_SESSION['user_id']]);
         
         // Rediriger vers la liste des parties
         header("Location: ./room.php");
@@ -154,11 +157,16 @@ $players_no_team = array_filter($players, function($player) {
 
     <h2>Liste des joueurs</h2>
     <?php if (!empty($players_no_team)) : ?>
+    <div class="team-no-team-column">
+        <div class="team-no-team">
+            <?php foreach ($players_no_team as $player): ?>
+                <div class="player"><?php echo htmlspecialchars($player['pseudo']); ?></div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <?php else : ?>
         <div class="team-no-team-column">
             <div class="team-no-team">
-                <?php foreach ($players_no_team as $player): ?>
-                    <div class="player"><?php echo htmlspecialchars($player['pseudo']); ?></div>
-                <?php endforeach; ?>
             </div>
         </div>
     <?php endif; ?>
@@ -166,7 +174,7 @@ $players_no_team = array_filter($players, function($player) {
         <?php if ($game['team_activated']) { ?>
             <div class="team-column">
                 <h3>Équipe A</h3>
-                <p><?php echo count($team_a_players) . " / " . $max_players_per_team; ?> joueurs</p>
+                <p id="team-a-count"><?php echo count($team_a_players) . " / " . $max_players_per_team; ?> joueurs</p>
                 <div class="team-a">
                     <?php foreach ($team_a_players as $player): ?>
                         <div class="player"><?php echo htmlspecialchars($player['pseudo']); ?></div>
@@ -187,7 +195,7 @@ $players_no_team = array_filter($players, function($player) {
             </div>
             <div class="team-column">
                 <h3>Équipe B</h3>
-                <p><?php echo count($team_b_players) . " / " . $max_players_per_team; ?> joueurs</p>
+                <p id="team-b-count"><?php echo count($team_b_players) . " / " . $max_players_per_team; ?> joueurs</p>
                 <div class="team-b">
                     <?php foreach ($team_b_players as $player): ?>
                         <div class="player"><?php echo htmlspecialchars($player['pseudo']); ?></div>
@@ -272,19 +280,30 @@ $players_no_team = array_filter($players, function($player) {
                         $('#game-code').text(response.game.code ? 'Oui' : 'Non');
                         $('#game-creator').text(response.game.pseudo);
                         $('#game-players').text(response.game.players + '/' + response.game.max_player);
+                        var max_players_per_team = response.game.max_player/2;
 
                         if(response.game.team_activated == 1){
                             var playersHtmlA = '';
+                            var count_playerA = 0;
+                            var count_playerB = 0;
                             var playersHtmlB = '';
+                            var playersNoTeamHtml = '';
                             response.game.players_name.forEach(function(player) {
                                 if (player.team === 'A') {
                                     playersHtmlA += '<div class="player">' + player.pseudo + '</div>';
+                                    count_playerA++;
                                 } else if (player.team === 'B') {
                                     playersHtmlB += '<div class="player">' + player.pseudo + '</div>';
+                                    count_playerB++;
+                                } else {
+                                    playersNoTeamHtml += '<div class="player">' + player.pseudo + '</div>';
                                 }
                             });
                             $('.team-a').html(playersHtmlA);
                             $('.team-b').html(playersHtmlB);
+                            $('.team-no-team').html(playersNoTeamHtml);
+                            $('#team-a-count').text(count_playerA + ' / ' +max_players_per_team+ " joueurs");
+                            $('#team-b-count').text(count_playerB + ' / ' +max_players_per_team+ " joueurs");
                         } else {
                             var playersHtmlAll = '';
                             response.game.players_name.forEach(function(player) {
