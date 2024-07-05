@@ -47,9 +47,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['leave_game'])) {
     }
 }
 
+// Gérer la requête pour rejoindre l'équipe A
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_team_a'])) {
+    try {
+        $stmt = $pdo->prepare("UPDATE joueurs SET team = 'A' WHERE ID = :user_id");
+        $stmt->execute(['user_id' => $_SESSION['user_id']]);
+        // Rediriger vers la même page après avoir rejoint l'équipe
+        header("Location: ./waiting_room.php?game_id=".$game_id);
+        exit;
+    } catch (PDOException $e) {
+        echo "Erreur lors de la mise à jour de l'équipe : " . $e->getMessage();
+    }
+}
+
+// Gérer la requête pour rejoindre l'équipe B
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_team_b'])) {
+    try {
+        $stmt = $pdo->prepare("UPDATE joueurs SET team = 'B' WHERE ID = :user_id");
+        $stmt->execute(['user_id' => $_SESSION['user_id']]);
+        // Rediriger vers la même page après avoir rejoint l'équipe
+        header("Location: ./waiting_room.php?game_id=".$game_id);
+        exit;
+    } catch (PDOException $e) {
+        echo "Erreur lors de la mise à jour de l'équipe : " . $e->getMessage();
+    }
+}
+
+// Gérer la requête pour quitter l'équipe A
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['quit_team_a'])) {
+    try {
+        $stmt = $pdo->prepare("UPDATE joueurs SET team = NULL WHERE ID = :user_id");
+        $stmt->execute(['user_id' => $_SESSION['user_id']]);
+        // Rediriger vers la même page après avoir rejoint l'équipe
+        header("Location: ./waiting_room.php?game_id=".$game_id);
+        exit;
+    } catch (PDOException $e) {
+        echo "Erreur lors de la mise à jour de l'équipe : " . $e->getMessage();
+    }
+}
+
+// Gérer la requête pour quitter l'équipe B
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['quit_team_b'])) {
+    try {
+        $stmt = $pdo->prepare("UPDATE joueurs SET team = NULL WHERE ID = :user_id");
+        $stmt->execute(['user_id' => $_SESSION['user_id']]);
+        // Rediriger vers la même page après avoir rejoint l'équipe
+        header("Location: ./waiting_room.php?game_id=".$game_id);
+        exit;
+    } catch (PDOException $e) {
+        echo "Erreur lors de la mise à jour de l'équipe : " . $e->getMessage();
+    }
+}
+
 try {
     // Récupérer les détails de la partie
-
     $stmt_game = $pdo->prepare("SELECT * FROM games INNER JOIN joueurs ON games.creator_id = joueurs.id WHERE games.creator_id = :game_id");
     $stmt_game->execute(['game_id' => $game_id]);
     $game = $stmt_game->fetch(PDO::FETCH_ASSOC);
@@ -62,6 +113,30 @@ try {
     echo "Erreur lors de la récupération des données : " . $e->getMessage();
     exit;
 }
+
+$max_players_per_team = intval($game['max_player'] / 2);
+
+$team_a_players = array_filter($players, function($player) {
+    return $player['team'] == 'A';
+});
+$team_b_players = array_filter($players, function($player) {
+    return $player['team'] == 'B';
+});
+
+// Vérifier si l'utilisateur est déjà dans une équipe
+$user_team = '';
+foreach ($players as $player) {
+    if ($player['ID'] === $_SESSION['user_id']) {
+        $user_team = $player['team'];
+        break;
+    }
+}
+
+// Filtrer les joueurs sans équipe si les équipes sont activées
+$players_no_team = array_filter($players, function($player) {
+    return empty($player['team']);
+});
+
 ?>
 
 <!DOCTYPE html>
@@ -74,14 +149,73 @@ try {
     <title>Room - <?php echo htmlspecialchars($game['name']); ?></title>
 </head>
 <body>
-    <h1>Bienvenue dans la partie "<?php echo htmlspecialchars($game['name']); ?>"</h1>
+    <h1><?php echo htmlspecialchars($game['name']); ?></h1>
     <a href="logout.php">Se déconnecter</a>
 
     <h2>Liste des joueurs</h2>
+    <?php if (!empty($players_no_team)) : ?>
+        <div class="team-no-team-column">
+            <div class="team-no-team">
+                <?php foreach ($players_no_team as $player): ?>
+                    <div class="player"><?php echo htmlspecialchars($player['pseudo']); ?></div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    <?php endif; ?>
     <div class="players-container">
-        <?php foreach ($players as $player): ?>
-            <div class="player"><?php echo htmlspecialchars($player['pseudo']); ?></div>
-        <?php endforeach; ?>
+        <?php if ($game['team_activated']) { ?>
+            <div class="team-column">
+                <h3>Équipe A</h3>
+                <p><?php echo count($team_a_players) . " / " . $max_players_per_team; ?> joueurs</p>
+                <div class="team-a">
+                    <?php foreach ($team_a_players as $player): ?>
+                        <div class="player"><?php echo htmlspecialchars($player['pseudo']); ?></div>
+                    <?php endforeach; ?>
+                </div>
+                <?php if (count($team_a_players) < $max_players_per_team && $user_team !== 'A') : ?>
+                    <form id="join_team_a_form" method="post" action="">
+                        <input type="hidden" name="join_team_a" value="1">
+                        <button class="join-button" type="submit" name="join_team_a">Rejoindre</button>
+                    </form>
+                <?php endif; ?>
+                <?php if ($user_team == 'A') : ?>
+                    <form id="join_team_a_form" method="post" action="">
+                        <input type="hidden" name="quit_team_a" value="1">
+                        <button class="quit-button" type="submit" name="quit_team_a">Quitter</button>
+                    </form>
+                <?php endif; ?>
+            </div>
+            <div class="team-column">
+                <h3>Équipe B</h3>
+                <p><?php echo count($team_b_players) . " / " . $max_players_per_team; ?> joueurs</p>
+                <div class="team-b">
+                    <?php foreach ($team_b_players as $player): ?>
+                        <div class="player"><?php echo htmlspecialchars($player['pseudo']); ?></div>
+                    <?php endforeach; ?>
+                </div>
+                <?php if (count($team_b_players) < $max_players_per_team && $user_team !== 'B') : ?>
+                    <form id="join_team_b_form" method="post" action="">
+                        <input type="hidden" name="join_team_b" value="1">
+                        <button class="join-button" type="submit" name="join_team_b">Rejoindre</button>
+                    </form>
+                <?php endif; ?>
+                <?php if ($user_team == 'B') : ?>
+                    <form id="quit_team_b_form" method="post" action="">
+                        <input type="hidden" name="quit_team_b" value="1">
+                        <button class="quit-button" type="submit" name="quit_team_a">Quitter</button>
+                    </form>
+                <?php endif; ?>
+            </div>
+        <?php } else { ?>
+            <div class="team-column">
+                <h3>Tous les joueurs</h3>
+                <div class="team-all">
+                    <?php foreach ($players as $player): ?>
+                        <div class="player"><?php echo htmlspecialchars($player['pseudo']); ?></div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        <?php } ?>
     </div>
 
     <h2>Détails de la partie</h2>
@@ -89,7 +223,7 @@ try {
         <div><strong>Nom de la partie:</strong> <span id="game-name"><?php echo htmlspecialchars($game['name']); ?></span></div>
         <div><strong>Points:</strong> <span id="game-points"><?php echo htmlspecialchars($game['points']); ?></span></div>
         <div><strong>Équipe activée:</strong> <span id="game-team"><?php echo $game['team_activated'] ? 'Oui' : 'Non'; ?></span></div>
-        <div><strong>Joueurs:</strong> <span id="game-players"><?php echo $players . "/" . $game['max_player']; ?></span></div>
+        <div><strong>Joueurs:</strong> <span id="game-players"><?php echo count($players) . "/" . $game['max_player']; ?></span></div>
         <div><strong>Main de départ:</strong> <span id="game-cards"><?php echo htmlspecialchars($game['max_cards']); ?></span></div>
         <div><strong>Code:</strong> <span id="game-code"><?php echo htmlspecialchars($game['code']) ? 'Oui' : 'Non'; ?></span></div>
         <div><strong>Créateur:</strong> <span id="game-creator"><?php echo htmlspecialchars($game['pseudo']); ?></span></div>
@@ -123,118 +257,43 @@ try {
 </html>
 <script>
     $(document).ready(function() {
-    function loadGameDetails() {
-        $.ajax({
-            url: 'waiting_room_ajax.php',
-            type: 'POST',
-            data: { game_id: <?php echo $game_id; ?> },
-            dataType: 'json',
-            success: function(response) {
-                if (response.success) {
-                    $('#game-name').text(response.game.name);
-                    $('#game-points').text(response.game.points);
-                    $('#game-team').text(response.game.team_activated ? 'Oui' : 'Non');
-                    $('#game-cards').text(response.game.max_cards);
-                    $('#game-code').text(response.game.code ? 'Oui' : 'Non');
-                    $('#game-creator').text(response.game.pseudo);
-                    $('#game-players').text(response.game.players + '/' + response.game.max_player);
-                    var playersHtml = '';
-                    response.game.players_name.forEach(function(player) {
-                        playersHtml += '<div class="player">' + player.pseudo + '</div>';
-                    });
-                    $('.players-container').html(playersHtml);
-
-                    updateLaunchButtonClass(response.game.max_players_reached);
-
-                } else {
-                    console.log('Erreur : ' + response.message);
-                }
-            },
-            error: function(xhr, status, error) {
-                console.log('Erreur AJAX : ' + error);
-            }
-        });
-    }
-
-    function updateLaunchButtonClass(maxPlayersReached) {
-        if (maxPlayersReached == 1) {
-            $('#launch_button').removeClass('form_launch_game_desactivate').addClass('form_launch_game');
-            $('#launch_button').attr('disabled', false);
-        } else {
-            $('#launch_button').removeClass('form_launch_game').addClass('form_launch_game_desactivate');
-            $('#launch_button').attr('disabled', true);
-            
-        }
-    }
-
-    // Charger les détails de la partie au chargement initial
-    loadGameDetails();
-
-    // Recharger les détails de la partie toutes les 2 secondes
-    setInterval(function() {
-        loadGameDetails();
-    }, 2000);
-
-    function timeAgo(timestamp) {
-        const now = new Date();
-        const messageTime = new Date(timestamp);
-        const diffInSeconds = Math.floor((now - messageTime) / 1000);
-
-        if (diffInSeconds < 60) {
-            return 'Now';
-        } else if (diffInSeconds < 3600) {
-            const minutes = Math.floor(diffInSeconds / 60);
-            return `${minutes} Min ago`;
-        } else if (diffInSeconds < 86400) {
-            const hours = Math.floor(diffInSeconds / 3600);
-            return `${hours} Hours ago`;
-        } else {
-            const days = Math.floor(diffInSeconds / 86400);
-            return `${days} Days ago`;
-        }
-    }
-
-    function loadChatMessages() {
-        $.ajax({
-            url: 'load_chat.php',
-            type: 'POST',
-            data: { game_id: <?php echo $game_id; ?> },
-            dataType: 'json',
-            success: function(response) {
-                if (response.success) {
-                    var chatHtml = '';
-                    response.messages.forEach(function(message) {
-                        chatHtml += '<div class="chat-message"><div class="time_chatting">' + timeAgo(message.timestamp) + ' :</div><div class="player_chatting"> ' + message.pseudo + ':</div> ' + message.message + '</div>';
-                    });
-                    $('#chat-messages').html(chatHtml);
-                    $('#chat-messages').scrollTop($('#chat-messages')[0].scrollHeight);
-                } else {
-                    console.log('Erreur : ' + response.message);
-                }
-            },
-            error: function(xhr, status, error) {
-                console.log('Erreur AJAX : ' + error);
-            }
-        });
-    }
-
-    $('#chat-form').submit(function(e) {
-        e.preventDefault();
-        var message = $('#chat-input').val();
-        if (message.trim() !== '') {
+        function loadGameDetails() {
             $.ajax({
-                url: 'send_chat.php',
+                url: 'waiting_room_ajax.php',
                 type: 'POST',
-                data: { 
-                    game_id: <?php echo $game_id; ?>,
-                    user_id: <?php echo $_SESSION['user_id']; ?>,
-                    message: message 
-                },
+                data: { game_id: <?php echo $game_id; ?> },
                 dataType: 'json',
                 success: function(response) {
                     if (response.success) {
-                        $('#chat-input').val('');
-                        loadChatMessages();
+                        $('#game-name').text(response.game.name);
+                        $('#game-points').text(response.game.points);
+                        $('#game-team').text(response.game.team_activated ? 'Oui' : 'Non');
+                        $('#game-cards').text(response.game.max_cards);
+                        $('#game-code').text(response.game.code ? 'Oui' : 'Non');
+                        $('#game-creator').text(response.game.pseudo);
+                        $('#game-players').text(response.game.players + '/' + response.game.max_player);
+
+                        if(response.game.team_activated == 1){
+                            var playersHtmlA = '';
+                            var playersHtmlB = '';
+                            response.game.players_name.forEach(function(player) {
+                                if (player.team === 'A') {
+                                    playersHtmlA += '<div class="player">' + player.pseudo + '</div>';
+                                } else if (player.team === 'B') {
+                                    playersHtmlB += '<div class="player">' + player.pseudo + '</div>';
+                                }
+                            });
+                            $('.team-a').html(playersHtmlA);
+                            $('.team-b').html(playersHtmlB);
+                        } else {
+                            var playersHtmlAll = '';
+                            response.game.players_name.forEach(function(player) {
+                                playersHtmlAll += '<div class="player">' + player.pseudo + '</div>';
+                            });
+                            $('.team-all').html(playersHtmlAll);
+                        }
+
+                        updateLaunchButtonClass(response.game.max_players_reached);
                     } else {
                         console.log('Erreur : ' + response.message);
                     }
@@ -244,16 +303,102 @@ try {
                 }
             });
         }
-    });
 
-    // Charger les messages de chat au chargement initial
-    loadChatMessages();
+        function updateLaunchButtonClass(maxPlayersReached) {
+            if (maxPlayersReached == 1) {
+                $('#launch_button').removeClass('form_launch_game_desactivate').addClass('form_launch_game');
+                $('#launch_button').attr('disabled', false);
+            } else {
+                $('#launch_button').removeClass('form_launch_game').addClass('form_launch_game_desactivate');
+                $('#launch_button').attr('disabled', true);
+            }
+        }
 
-    // Recharger les messages de chat toutes les 2 secondes
-    setInterval(function() {
+        // Charger les détails de la partie au chargement initial
+        loadGameDetails();
+
+        // Recharger les détails de la partie toutes les 2 secondes
+        setInterval(function() {
+            loadGameDetails();
+        }, 2000);
+
+        function timeAgo(timestamp) {
+            const now = new Date();
+            const messageTime = new Date(timestamp);
+            const diffInSeconds = Math.floor((now - messageTime) / 1000);
+
+            if (diffInSeconds < 60) {
+                return 'Now';
+            } else if (diffInSeconds < 3600) {
+                const minutes = Math.floor(diffInSeconds / 60);
+                return `${minutes} Min ago`;
+            } else if (diffInSeconds < 86400) {
+                const hours = Math.floor(diffInSeconds / 3600);
+                return `${hours} Hours ago`;
+            } else {
+                const days = Math.floor(diffInSeconds / 86400);
+                return `${days} Days ago`;
+            }
+        }
+
+        function loadChatMessages() {
+            $.ajax({
+                url: 'load_chat.php',
+                type: 'POST',
+                data: { game_id: <?php echo $game_id; ?> },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        var chatHtml = '';
+                        response.messages.forEach(function(message) {
+                            chatHtml += '<div class="chat-message"><div class="time_chatting">' + timeAgo(message.timestamp) + ' :</div><div class="player_chatting"> ' + message.pseudo + ':</div> ' + message.message + '</div>';
+                        });
+                        $('#chat-messages').html(chatHtml);
+                        $('#chat-messages').scrollTop($('#chat-messages')[0].scrollHeight);
+                    } else {
+                        console.log('Erreur : ' + response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.log('Erreur AJAX : ' + error);
+                }
+            });
+        }
+
+        $('#chat-form').submit(function(e) {
+            e.preventDefault();
+            var message = $('#chat-input').val();
+            if (message.trim() !== '') {
+                $.ajax({
+                    url: 'send_chat.php',
+                    type: 'POST',
+                    data: { 
+                        game_id: <?php echo $game_id; ?>,
+                        user_id: <?php echo $_SESSION['user_id']; ?>,
+                        message: message 
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            $('#chat-input').val('');
+                            loadChatMessages();
+                        } else {
+                            console.log('Erreur : ' + response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.log('Erreur AJAX : ' + error);
+                    }
+                });
+            }
+        });
+
+        // Charger les messages de chat au chargement initial
         loadChatMessages();
-    }, 2000);
-});
 
+        // Recharger les messages de chat toutes les 2 secondes
+        setInterval(function() {
+            loadChatMessages();
+        }, 2000);
+    });
 </script>
-

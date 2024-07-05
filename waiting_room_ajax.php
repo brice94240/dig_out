@@ -1,8 +1,6 @@
 <?php
-// Inclure les configurations et initialisations nécessaires
 require_once 'config.php';
 
-// Vérifier la requête AJAX
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['game_id'])) {
     $game_id = $_POST['game_id'];
 
@@ -12,23 +10,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['game_id'])) {
         $stmt_game->execute(['game_id' => $game_id]);
         $game = $stmt_game->fetch(PDO::FETCH_ASSOC);
 
-        // // Récupérer le nombre de joueurs dans la partie
-        // $stmt_joueurs = $pdo->prepare("SELECT COUNT(*) AS player_count FROM joueurs WHERE game_joined = :game_id");
-        // $stmt_joueurs->execute(['game_id' => $game_id]);
-        // $joueurs = $stmt_joueurs->fetch(PDO::FETCH_ASSOC);
-
-
-        $stmt_joueurs = $pdo->prepare("SELECT pseudo FROM joueurs WHERE game_joined = :game_id");
+        // Récupérer les joueurs dans la partie
+        $stmt_joueurs = $pdo->prepare("SELECT pseudo, team FROM joueurs WHERE game_joined = :game_id");
         $stmt_joueurs->execute(['game_id' => $game_id]);
         $joueurs = $stmt_joueurs->fetchAll(PDO::FETCH_ASSOC);
         $player_count = count($joueurs);
-
-        // $stmt_players = $pdo->prepare("SELECT * FROM joueurs WHERE game_joined = :game_id");
-        // $stmt_players->execute(['game_id' => $game_id]);
-        // $players = $stmt_players->fetchAll(PDO::FETCH_ASSOC);
-        // $response['players_name'] = $players;
-
-
 
         // Vérifier si le nombre maximum de joueurs est atteint
         $max_players_reached = ($player_count == $game['max_player']) ? 1 : 0;
@@ -43,10 +29,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['game_id'])) {
                 'max_cards' => $game['max_cards'],
                 'code' => $game['code'],
                 'pseudo' => $game['pseudo'],
-                'game_id' => $game_id, // Utilisation de $game_id plutôt que $game['game_id'] si c'est l'ID que vous voulez
-                'players' => $player_count, // Nombre de joueurs dans la partie
-                'max_player' => $game['max_player'], // Nombre maximal de joueurs autorisés
-                'max_players_reached' => $max_players_reached, // Indicateur si le nombre maximum de joueurs est atteint
+                'game_id' => $game_id,
+                'players' => $player_count,
+                'max_player' => $game['max_player'],
+                'max_players_reached' => $max_players_reached,
                 'players_name' => $joueurs
             ],
         ];

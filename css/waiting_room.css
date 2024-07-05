@@ -55,6 +55,19 @@ a {
     background-color: #FFA500;
 }
 
+.quit-button {
+    padding: 5px 10px;
+    border: none;
+    background-color: #ff7a00 !important;
+    color: black;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.quit-button:hover {
+    background-color: #c5660f !important;
+}
+
 .create_room {
     background-color: #333;
     padding: 20px;
@@ -206,4 +219,75 @@ form.form_launch_game_desactivate {
 
 .chat-messages {
     font-size: 0.8em;
+}
+
+.players-container {
+    display: flex;
+    justify-content: center;
+    gap: 50px;
+}
+.team-column {
+    text-align: center;
+    border: 1px solid #ccc;
+    padding: 20px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    color:black;
+    position: relative;
+    padding-bottom: 3em;
+}
+
+.team-no-team-column {
+    text-align: center;
+    /* border: 1px solid #ccc; */
+    padding: 20px;
+    border-radius: 5px;
+    /* background-color: #f9f9f9; */
+    color:white;
+}
+
+.chat-container {
+    margin-top: 20px;
+}
+.chat-messages {
+    height: 150px;
+    overflow-y: scroll;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+.chat-messages .message {
+    margin-bottom: 10px;
+}
+.chat-messages .message .timestamp {
+    font-size: 0.8em;
+    color: gray;
+}
+
+form#join_team_a_form {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+form#join_team_b_form {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+form#quit_team_a_form {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+form#quit_team_b_form {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
 }
