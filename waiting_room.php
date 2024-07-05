@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['launch_game'])) {
         $stmt->execute(['user_id' => $_SESSION['user_id']]);
         
         // Rediriger vers la liste des parties
-        header("Location: ./game.php?id=".$game_id);
+        header("Location: ./game.php?game_id=".$game_id);
         exit;
     } catch (PDOException $e) {
         echo "Erreur lors de la mise à jour de la partie : " . $e->getMessage();
@@ -90,7 +90,7 @@ try {
         <div><strong>Points:</strong> <span id="game-points"><?php echo htmlspecialchars($game['points']); ?></span></div>
         <div><strong>Équipe activée:</strong> <span id="game-team"><?php echo $game['team_activated'] ? 'Oui' : 'Non'; ?></span></div>
         <div><strong>Joueurs:</strong> <span id="game-players"><?php echo $players . "/" . $game['max_player']; ?></span></div>
-        <!-- <div><strong>Cartes max:</strong> <span id="game-cards"><?php echo htmlspecialchars($game['max_cards']); ?></span></div> -->
+        <div><strong>Main de départ:</strong> <span id="game-cards"><?php echo htmlspecialchars($game['max_cards']); ?></span></div>
         <div><strong>Code:</strong> <span id="game-code"><?php echo htmlspecialchars($game['code']) ? 'Oui' : 'Non'; ?></span></div>
         <div><strong>Créateur:</strong> <span id="game-creator"><?php echo htmlspecialchars($game['pseudo']); ?></span></div>
     </div>

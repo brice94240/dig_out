@@ -18,43 +18,15 @@ if (!isset($_GET['game_id'])) {
 
 $game_id = intval($_GET['game_id']);
 
-// Gérer la requête de retour pour lancer la partie
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['launch_game'])) {
-    try {
-        // Mettre à jour la colonne game_joined pour l'utilisateur connecté à NULL
-        $stmt = $pdo->prepare("UPDATE games SET launched = 1 WHERE creator_id = :user_id");
-        $stmt->execute(['user_id' => $_SESSION['user_id']]);
-        
-        // Rediriger vers la liste des parties
-        header("Location: ./game.php");
-        exit;
-    } catch (PDOException $e) {
-        echo "Erreur lors de la mise à jour de la partie : " . $e->getMessage();
-    }
-}
-
-// Gérer la requête de retour pour quitter la partie
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['leave_game'])) {
-    try {
-        // Mettre à jour la colonne game_joined pour l'utilisateur connecté à NULL
-        $stmt = $pdo->prepare("UPDATE joueurs SET game_joined = NULL WHERE ID = :user_id");
-        $stmt->execute(['user_id' => $_SESSION['user_id']]);
-        
-        // Rediriger vers la liste des parties
-        header("Location: ./room.php");
-        exit;
-    } catch (PDOException $e) {
-        echo "Erreur lors de la mise à jour de la partie : " . $e->getMessage();
-    }
-}
-
+// Récupérer les détails de la partie et les joueurs
 try {
-    // Récupérer les détails de la partie
-    $stmt_game = $pdo->prepare("SELECT * FROM games INNER JOIN joueurs ON games.creator_id = joueurs.id WHERE creator_id = :game_id");
+    $stmt_game = $pdo->prepare("SELECT * FROM games WHERE creator_id = :game_id");
     $stmt_game->execute(['game_id' => $game_id]);
     $game = $stmt_game->fetch(PDO::FETCH_ASSOC);
 
-    // Récupérer les joueurs qui ont rejoint cette partie
+    // Déterminer le nombre de pièces en fonction de team_activated
+    $piece_count = $game['team_activated'] ? 7 : 6;
+
     $stmt_players = $pdo->prepare("SELECT * FROM joueurs WHERE game_joined = :game_id");
     $stmt_players->execute(['game_id' => $game_id]);
     $players = $stmt_players->fetchAll(PDO::FETCH_ASSOC);
@@ -62,6 +34,63 @@ try {
     echo "Erreur lors de la récupération des données : " . $e->getMessage();
     exit;
 }
+
+// Tableaux pour stocker les gangs
+$gangs = array(); // Tableau principal pour tous les gangs
+$gang1 = array();
+$gang2 = array();
+$gang3 = array();
+$gang4 = array();
+$gang5 = array();
+$gang6 = array();
+
+// Récupérer tous les gangs de la base de données
+try {
+    $stmt = $pdo->query("SELECT * FROM gangs");
+    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Parcourir les résultats et organiser par gang_id
+    foreach ($result as $row) {
+        $gang_id = $row['gang_id'];
+        switch ($gang_id) {
+            case 1:
+                $gang1[] = $row;
+                break;
+            case 2:
+                $gang2[] = $row;
+                break;
+            case 3:
+                $gang3[] = $row;
+                break;
+            case 4:
+                $gang4[] = $row;
+                break;
+            case 5:
+                $gang5[] = $row;
+                break;
+            case 6:
+                $gang6[] = $row;
+                break;
+            default:
+                break;
+        }
+    }
+
+    // Stocker tous les gangs dans un tableau principal
+    $gangs = array(
+        'gang1' => $gang1,
+        'gang2' => $gang2,
+        'gang3' => $gang3,
+        'gang4' => $gang4,
+        'gang5' => $gang5,
+        'gang6' => $gang6,
+    );
+
+} catch (PDOException $e) {
+    echo "Erreur lors de la récupération des gangs : " . $e->getMessage();
+    exit;
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -69,46 +98,63 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="./css/waiting_room.css" rel="stylesheet" />
-    <title>Room - <?php echo htmlspecialchars($game['name']); ?></title>
+    <link href="css/game.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <title>Game - <?php echo htmlspecialchars($game['name']); ?></title>
 </head>
 <body>
-    <h1>Bienvenue dans la partie "<?php echo htmlspecialchars($game['name']); ?>"</h1>
-    <a href="logout.php">Se déconnecter</a>
-
-    <h2>Liste des joueurs</h2>
-    <div class="players-container">
-        <?php foreach ($players as $player): ?>
-            <div class="player"><?php echo htmlspecialchars($player['pseudo']); ?></div>
-        <?php endforeach; ?>
-    </div>
-
-    <h2>Détails de la partie</h2>
-    <div class="game-details">
-        <div><strong>Nom de la partie:</strong> <?php echo htmlspecialchars($game['name']); ?></div>
-        <div><strong>Points:</strong> <?php echo htmlspecialchars($game['points']); ?></div>
-        <div><strong>Équipe activée:</strong> <?php echo $game['team_activated'] ? 'Oui' : 'Non'; ?></div>
-        <div><strong>Joueurs:</strong> <?php echo count($players) . "/" . $game['max_player']; ?></div>
-        <div><strong>Cartes max:</strong> <?php echo htmlspecialchars($game['max_cards']); ?></div>
-        <div><strong>Code:</strong> <?php echo htmlspecialchars($game['code']) ? 'Oui' : 'Non'; ?></div>
-        <div><strong>Créateur:</strong> <?php echo htmlspecialchars($game['pseudo']); ?></div>
-    </div>
-
     <?php
-    if($game['creator_id'] == $_SESSION['user_id']){?>
-        <form class='form_launch_game' method="post" action="">
-            <input type="hidden" name="launch_game" value="1">
-            <button type="submit" name="launch_button">Lancer la partie</button>
-        </form>
-    <?php
+    // Déterminer le schéma en fonction de $piece_count
+    if ($piece_count == 7) {
+        $schema = array(3, 2, 2);
+    } elseif ($piece_count == 6) {
+        $schema = array(2, 2, 2);
+    } else {
+        // Gérer le cas où $piece_count n'est ni 7 ni 6, par exemple avec une erreur ou une autre logique de traitement
+        echo "Nombre de pièces non géré.";
+        exit;
     }
-    ?>
 
-    <div class="back-button">
-        <form method="post" action="">
-            <input type="hidden" name="leave_game" value="1">
-            <button type="submit" name="back_button">Retour à la liste des parties</button>
-        </form>
+    // Générer dynamiquement les pièces en fonction de $schema
+    $piece_ids = array_map(function($i) {
+        return "piece" . $i;
+    }, range(1, $piece_count));
+    ?>
+    <?php
+    var_dump($gangs['gang1'][0]['name']);
+    ?>
+    <div class="gang-container">
+        <div class="gang">
+            <div class="gang-carte"><?php echo $gangs['gang1'][0]['name']?></div>
+            <div class="gang-carte"><?php echo $gangs['gang2'][0]['name']?></div>
+            <div class="gang-carte"><?php echo $gangs['gang3'][0]['name']?></div>
+            <div class="gang-carte"><?php echo $gangs['gang4'][0]['name']?></div>
+            <div class="gang-carte"><?php echo $gangs['gang5'][0]['name']?></div>
+            <div class="gang-carte"><?php echo $gangs['gang6'][0]['name']?></div>
+        </div>
+    </div>
+    <div class="game-container">
+        <div id="game-board">
+        <?php foreach ($schema as $row_size): ?>
+            <div class="row">
+                <?php for ($i = 0; $i < $row_size; $i++): ?>
+                    <div id="<?php echo $piece_ids[$i]; ?>" class="piece"></div>
+                <?php endfor; ?>
+                <?php $piece_ids = array_slice($piece_ids, $row_size); ?>
+            </div>
+        <?php endforeach; ?>
     </div>
 </body>
 </html>
+
+<script>
+$(document).ready(function() {
+    // JavaScript pour gérer les interactions du jeu
+    function initializeGameBoard() {
+        // Initialisation du plateau de jeu si nécessaire
+    }
+
+    // Initialiser le plateau de jeu
+    initializeGameBoard();
+});
+</script>

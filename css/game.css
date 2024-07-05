@@ -1,0 +1,64 @@
+/* Dans votre fichier game.css */
+
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+.game-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Hauteur équivalente à la taille de l'écran */
+    background-color: #f0f0f0; /* Couleur de fond du conteneur de jeu */
+}
+
+#game-board {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 80%; /* Largeur du plateau de jeu par rapport à game-container */
+    max-width: 600px; /* Largeur maximale du plateau pour éviter qu'il ne devienne trop large */
+    background-color: #ccc; /* Couleur de fond du plateau */
+    border: 2px solid #999; /* Bordure pour le plateau */
+    border-radius: 10px; /* Bordure arrondie */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Ombre légère pour le plateau */
+}
+
+.row {
+    display: flex;
+    justify-content: center;
+    width: 100%; /* Chaque ligne occupe la largeur complète du plateau */
+}
+
+.piece {
+    width: 20%; /* Largeur de chaque pièce en pourcentage */
+    padding-top: 20%; /* Aspect carré en fonction de la largeur */
+    background-color: #999; /* Couleur de fond des pièces */
+    margin: 1%; /* Marge entre les pièces */
+}
+
+.gang-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 20vh; /* Hauteur équivalente à environ 20% de l'écran */
+    background-color: #f0f0f0; /* Couleur de fond du conteneur de gang */
+}
+
+.gang {
+    display: flex;
+    justify-content: space-around;
+    width: 80%; /* Largeur du gang par rapport à gang-container */
+    max-width: 600px; /* Largeur maximale du gang pour éviter qu'il ne devienne trop large */
+}
+
+.gang-carte {
+    width: calc(16.6667% - 10px); /* Largeur de chaque case en pourcentage (6 cases en 100% / 6) */
+    padding-top: calc(16.6667% - 10px); /* Aspect carré en fonction de la largeur */
+    background-color: #999; /* Couleur de fond des cases */
+    margin: 5px; /* Marge entre les cases */
+    box-sizing: border-box; /* Pour inclure les marges dans le calcul de la largeur */
+}
