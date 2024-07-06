@@ -10,13 +10,45 @@ if (!isset($_SESSION['user_id'])) {
 
 require_once 'config.php';
 
+$stmt_verify_info_player = $pdo->prepare("SELECT * FROM joueurs WHERE ID = :user_id");
+$stmt_verify_info_player->execute(['user_id' => $_SESSION['user_id']]);
+$verify_info_player = $stmt_verify_info_player->fetch(PDO::FETCH_ASSOC);
+$game_joined_player = $verify_info_player['game_joined'];
+
 // Vérifier si game_id est passé en paramètre d'URL
 if (!isset($_GET['game_id'])) {
     echo "Identifiant de partie manquant.";
     exit;
+} elseif(intval($game_joined_player) !== intval($_GET['game_id'])) {
+    header("Location: ./room.php");
+    exit;
 }
 
 $game_id = intval($_GET['game_id']);
+
+// Récupérer les informations de la partie
+$stmt_game = $pdo->prepare("SELECT * FROM games WHERE creator_id = :game_id");
+$stmt_game->execute(['game_id' => $game_id]);
+$game = $stmt_game->fetch(PDO::FETCH_ASSOC);
+
+if (!$game) {
+    echo "La partie n'existe pas.";
+    exit;
+}
+$tab_player = explode(',', $game['tab_player']);
+
+if (!in_array($_SESSION['user_id'], $tab_player)) {
+    if(count($tab_player) == 1){
+        echo "MISE EN PLACE DE TOUT";
+    }
+    $tab_player[] = $_SESSION['user_id'];
+    $tab_player_str = implode(',', $tab_player);
+    if($tab_player_str[0]==","){
+        $tab_player_str = substr($tab_player_str,1);
+    }   
+    $stmt_update = $pdo->prepare("UPDATE games SET tab_player = :tab_player WHERE creator_id = :game_id");
+    $stmt_update->execute(['tab_player' => $tab_player_str, 'game_id' => $game_id]);
+}
 
 // Récupérer les détails de la partie et les joueurs
 try {
@@ -121,7 +153,7 @@ try {
     }, range(1, $piece_count));
     ?>
     <?php
-    var_dump($gangs['gang1'][0]['name']);
+    // var_dump($gangs['gang1'][0]['name']);
     ?>
     <div class="gang-container">
         <div class="gang">

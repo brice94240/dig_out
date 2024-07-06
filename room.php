@@ -16,14 +16,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_game'])) {
     $game_id = intval($_POST['game_id']); // Assurez-vous que game_id est un entier
 
     try {
-        // Mettre à jour la colonne game_joined pour l'utilisateur connecté
-        $stmt = $pdo->prepare("UPDATE joueurs SET game_joined = :game_id WHERE ID = :user_id");
-        $stmt->execute(['game_id' => $game_id, 'user_id' => $_SESSION['user_id']]);
-        echo "Vous avez rejoint la partie avec succès !";
+        $stmt_game = $pdo->prepare("SELECT launched FROM games WHERE creator_id = :game_id");
+        $stmt_game->execute(['game_id' => $game_id]);
+        $game = $stmt_game->fetch(PDO::FETCH_ASSOC);
 
-        // Redirection vers la room de la partie
-        header("Location: waiting_room.php?game_id=" . $game_id);
-        exit;
+        $stmt_player = $pdo->prepare("SELECT * FROM joueurs WHERE ID = :ID");
+        $stmt_player->execute(['ID' => $_SESSION['user_id']]);
+        $player_info = $stmt_player->fetch(PDO::FETCH_ASSOC);
+
+        if ($game['launched'] == 0) {
+            $stmt = $pdo->prepare("UPDATE joueurs SET game_joined = :game_id WHERE ID = :user_id");
+            $stmt->execute(['game_id' => $game_id, 'user_id' => $_SESSION['user_id']]);
+            echo "Vous avez rejoint la partie avec succès !";
+
+            // Redirection vers la room de la partie
+            header("Location: waiting_room.php?game_id=" . $game_id);
+            exit;
+        } else if($game['launched'] == 1 && $player_info['game_joined'] == $game_id) {
+            header("Location: waiting_room.php?game_id=" . $game_id);
+            exit;
+        }
         
     } catch (PDOException $e) {
         echo "Erreur lors de la mise à jour de la partie : " . $e->getMessage();

@@ -50,14 +50,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['leave_game'])) {
     }
 }
 
-// Gérer la requête pour rejoindre l'équipe A
+//Gérer la requête pour rejoindre l'équipe A
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_team_a'])) {
     try {
-        $stmt = $pdo->prepare("UPDATE joueurs SET team = 'A' WHERE ID = :user_id");
-        $stmt->execute(['user_id' => $_SESSION['user_id']]);
-        // Rediriger vers la même page après avoir rejoint l'équipe
-        header("Location: ./waiting_room.php?game_id=".$game_id);
-        exit;
+        // Récupérer les détails de la partie
+        $stmt_game = $pdo->prepare("SELECT * FROM games INNER JOIN joueurs ON games.creator_id = joueurs.id WHERE games.creator_id = :game_id");
+        $stmt_game->execute(['game_id' => $game_id]);
+        $game = $stmt_game->fetch(PDO::FETCH_ASSOC);
+
+        // Récupérer le nombre de joueurs dans l'équipe A
+        $stmt_team_a_count = $pdo->prepare("SELECT COUNT(*) FROM joueurs WHERE game_joined = :game_id AND team = 'A'");
+        $stmt_team_a_count->execute(['game_id' => $game_id]);
+        $team_a_count = $stmt_team_a_count->fetchColumn();
+
+        $max_player_team = $game['max_player']/2;
+
+        if($team_a_count<$max_player_team){
+            $stmt = $pdo->prepare("UPDATE joueurs SET team = 'A' WHERE ID = :user_id");
+            $stmt->execute(['user_id' => $_SESSION['user_id']]);
+            // Rediriger vers la même page après avoir rejoint l'équipe
+            header("Location: ./waiting_room.php?game_id=".$game_id);
+            exit;
+        }
     } catch (PDOException $e) {
         echo "Erreur lors de la mise à jour de l'équipe : " . $e->getMessage();
     }
@@ -66,11 +80,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_team_a'])) {
 // Gérer la requête pour rejoindre l'équipe B
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_team_b'])) {
     try {
-        $stmt = $pdo->prepare("UPDATE joueurs SET team = 'B' WHERE ID = :user_id");
-        $stmt->execute(['user_id' => $_SESSION['user_id']]);
-        // Rediriger vers la même page après avoir rejoint l'équipe
-        header("Location: ./waiting_room.php?game_id=".$game_id);
-        exit;
+        // Récupérer les détails de la partie
+        $stmt_game = $pdo->prepare("SELECT * FROM games INNER JOIN joueurs ON games.creator_id = joueurs.id WHERE games.creator_id = :game_id");
+        $stmt_game->execute(['game_id' => $game_id]);
+        $game = $stmt_game->fetch(PDO::FETCH_ASSOC);
+
+        $max_player_team = $game['max_player']/2;
+
+        // Récupérer le nombre de joueurs dans l'équipe A
+        $stmt_team_b_count = $pdo->prepare("SELECT COUNT(*) FROM joueurs WHERE game_joined = :game_id AND team = 'B'");
+        $stmt_team_b_count->execute(['game_id' => $game_id]);
+        $team_b_count = $stmt_team_b_count->fetchColumn();
+        if($team_b_count<$max_player_team){
+            $stmt = $pdo->prepare("UPDATE joueurs SET team = 'B' WHERE ID = :user_id");
+            $stmt->execute(['user_id' => $_SESSION['user_id']]);
+            // Rediriger vers la même page après avoir rejoint l'équipe
+            header("Location: ./waiting_room.php?game_id=".$game_id);
+            exit;
+        }
     } catch (PDOException $e) {
         echo "Erreur lors de la mise à jour de l'équipe : " . $e->getMessage();
     }
@@ -118,7 +145,6 @@ try {
 }
 
 $max_players_per_team = intval($game['max_player'] / 2);
-
 $team_a_players = array_filter($players, function($player) {
     return $player['team'] == 'A';
 });
@@ -180,16 +206,14 @@ $players_no_team = array_filter($players, function($player) {
                         <div class="player"><?php echo htmlspecialchars($player['pseudo']); ?></div>
                     <?php endforeach; ?>
                 </div>
-                <?php if (count($team_a_players) < $max_players_per_team && $user_team !== 'A') : ?>
-                    <form id="join_team_a_form" method="post" action="">
-                        <input type="hidden" name="join_team_a" value="1">
-                        <button class="join-button" type="submit" name="join_team_a">Rejoindre</button>
-                    </form>
-                <?php endif; ?>
-                <?php if ($user_team == 'A') : ?>
-                    <form id="join_team_a_form" method="post" action="">
+                <form id="join_team_a_form" method="post" action="">
+                    <input type="hidden" name="join_team_a" value="1">
+                    <button id="join-button-a" class="join-button" type="submit" name="join_team_a">Rejoindre</button>
+                </form>
+                <?php if ($user_team == 'A' && $game['team_activated'] == 1) : ?>
+                    <form id="quit_team_a_form" method="post" action="">
                         <input type="hidden" name="quit_team_a" value="1">
-                        <button class="quit-button" type="submit" name="quit_team_a">Quitter</button>
+                        <button id="quit-button-a" class="quit-button" type="submit" name="quit_team_a">Quitter</button>
                     </form>
                 <?php endif; ?>
             </div>
@@ -201,16 +225,14 @@ $players_no_team = array_filter($players, function($player) {
                         <div class="player"><?php echo htmlspecialchars($player['pseudo']); ?></div>
                     <?php endforeach; ?>
                 </div>
-                <?php if (count($team_b_players) < $max_players_per_team && $user_team !== 'B') : ?>
-                    <form id="join_team_b_form" method="post" action="">
-                        <input type="hidden" name="join_team_b" value="1">
-                        <button class="join-button" type="submit" name="join_team_b">Rejoindre</button>
-                    </form>
-                <?php endif; ?>
-                <?php if ($user_team == 'B') : ?>
+                <form id="join_team_b_form" method="post" action="">
+                    <input type="hidden" name="join_team_b" value="1">
+                    <button id="join-button-b" class="join-button" type="submit" name="join_team_b">Rejoindre</button>
+                </form>
+                <?php if ($user_team == 'B' && $game['team_activated'] == 1) : ?>
                     <form id="quit_team_b_form" method="post" action="">
                         <input type="hidden" name="quit_team_b" value="1">
-                        <button class="quit-button" type="submit" name="quit_team_a">Quitter</button>
+                        <button id="quit-button-b" class="quit-button" type="submit" name="quit_team_b">Quitter</button>
                     </form>
                 <?php endif; ?>
             </div>
@@ -281,7 +303,7 @@ $players_no_team = array_filter($players, function($player) {
                         $('#game-creator').text(response.game.pseudo);
                         $('#game-players').text(response.game.players + '/' + response.game.max_player);
                         var max_players_per_team = response.game.max_player/2;
-
+                        var user_team = response.game.user_team;
                         if(response.game.team_activated == 1){
                             var playersHtmlA = '';
                             var count_playerA = 0;
@@ -311,8 +333,13 @@ $players_no_team = array_filter($players, function($player) {
                             });
                             $('.team-all').html(playersHtmlAll);
                         }
+                        if(response.game.game_launched == 1) {
+                            window.location.href = 'game.php?game_id='+response.game.creator_id;
+                        }
 
                         updateLaunchButtonClass(response.game.max_players_reached);
+                        updateJoinButtonClass(max_players_per_team,count_playerA,count_playerB,user_team);
+                        
                     } else {
                         console.log('Erreur : ' + response.message);
                     }
@@ -333,13 +360,48 @@ $players_no_team = array_filter($players, function($player) {
             }
         }
 
+        function updateJoinButtonClass(MaxPlayerPerTeam,PlayerTeamA,PlayerTeamB,UserTeam) {
+            if (UserTeam == 'A') {
+                console.log("In Team A");
+                $('#join-button-a').removeClass('join-button').addClass('join-button-desactivate');
+            }
+            if (UserTeam == 'B') {
+                console.log("In Team B");
+                $('#join-button-b').removeClass('join-button').addClass('join-button-desactivate');
+            }
+            if(PlayerTeamA == MaxPlayerPerTeam){
+                console.log("Team A Full");
+                $('#join-button-a').removeClass('join-button').addClass('join-button-desactivate');
+            }
+            if(PlayerTeamB == MaxPlayerPerTeam){
+                console.log("Team B Full");
+                $('#join-button-b').removeClass('join-button').addClass('join-button-desactivate');
+            }
+            if (UserTeam == 'B' && PlayerTeamA < MaxPlayerPerTeam) {
+                console.log("Possible to join team A");
+                $('#join-button-a').removeClass('join-button-desactivate').addClass('join-button');
+            }
+            if (UserTeam == 'A' && PlayerTeamB < MaxPlayerPerTeam) {
+                console.log("Possible to join team B");
+                $('#join-button-b').removeClass('join-button-desactivate').addClass('join-button');
+            }
+            if (UserTeam == null && PlayerTeamA < MaxPlayerPerTeam) {
+                console.log("Possible to join team A");
+                $('#join-button-a').removeClass('join-button-desactivate').addClass('join-button');
+            }
+            if (UserTeam == null && PlayerTeamB < MaxPlayerPerTeam) {
+                console.log("Possible to join team B");
+                $('#join-button-b').removeClass('join-button-desactivate').addClass('join-button');
+            }
+        }
+
         // Charger les détails de la partie au chargement initial
         loadGameDetails();
 
         // Recharger les détails de la partie toutes les 2 secondes
         setInterval(function() {
             loadGameDetails();
-        }, 2000);
+        }, 500);
 
         function timeAgo(timestamp) {
             const now = new Date();
@@ -419,5 +481,6 @@ $players_no_team = array_filter($players, function($player) {
         setInterval(function() {
             loadChatMessages();
         }, 2000);
+        
     });
 </script>

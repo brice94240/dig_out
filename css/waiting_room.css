@@ -291,3 +291,7 @@ form#quit_team_b_form {
     left: 0;
     right: 0;
 }
+
+.join-button-desactivate {
+    display: none !important;
+}
