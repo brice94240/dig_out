@@ -37,8 +37,29 @@ if (!$game) {
 }
 $tab_player = explode(',', $game['tab_player']);
 
-// if (!in_array($_SESSION['user_id'], $tab_player)) {
-    // if(count($tab_player) == 1){
+if (!in_array($_SESSION['user_id'], $tab_player)) {
+    
+    $tab_player[] = $_SESSION['user_id'];
+    $tab_player_str = implode(',', $tab_player);
+    if($tab_player_str[0]==","){
+        $tab_player_str = substr($tab_player_str,1);
+    }
+
+    $stmt_update = $pdo->prepare("UPDATE games SET tab_player = :tab_player WHERE creator_id = :game_id");
+    $stmt_update->execute(['tab_player' => $tab_player_str, 'game_id' => $game_id]);
+
+    // Récupérer les informations de la partie
+    $stmt_game = $pdo->prepare("SELECT * FROM games WHERE creator_id = :game_id");
+    $stmt_game->execute(['game_id' => $game_id]);
+    $game = $stmt_game->fetch(PDO::FETCH_ASSOC);
+
+    if (!$game) {
+        echo "La partie n'existe pas.";
+        exit;
+    }
+    $tab_player = explode(',', $game['tab_player']);
+
+    if(count($tab_player) == 1){
         // echo "MISE EN PLACE DE TOUT";
 
         // Tableaux pour stocker les gangs
@@ -97,17 +118,23 @@ $tab_player = explode(',', $game['tab_player']);
             'gang5' => $gang5,
             'gang6' => $gang6,
         );
-    // }
-    $tab_player[] = $_SESSION['user_id'];
-    $tab_player_str = implode(',', $tab_player);
-    if($tab_player_str[0]==","){
-        $tab_player_str = substr($tab_player_str,1);
-    }   
-    // $stmt_update = $pdo->prepare("UPDATE games SET tab_player = :tab_player WHERE creator_id = :game_id");
-    // $stmt_update->execute(['tab_player' => $tab_player_str, 'game_id' => $game_id]);
-// }
 
-// Récupérer les détails de la partie et les joueurs
+        $gang_data_json = json_encode($gangs);
+        $stmt_update = $pdo->prepare("UPDATE games SET gang_data = :gangs WHERE creator_id = :game_id");
+        $stmt_update->execute(['gangs' => $gang_data_json, 'game_id' => $game_id]);
+    }
+}
+
+// Récupérer les détails des gangs
+$stmt = $pdo->prepare("SELECT gang_data FROM games WHERE creator_id = :game_id");
+$stmt->execute(['game_id' => $game_id]);
+$row = $stmt->fetch(PDO::FETCH_ASSOC);
+if ($row && $row['gang_data']) {
+    $gangs = json_decode($row['gang_data'], true);
+} else {
+    echo "Les gangs ne sont pas encore disponibles.";
+}
+
 try {
     $stmt_game = $pdo->prepare("SELECT * FROM games WHERE creator_id = :game_id");
     $stmt_game->execute(['game_id' => $game_id]);
@@ -135,116 +162,45 @@ try {
     <title>Game - <?php echo htmlspecialchars($game['name']); ?></title>
 </head>
 <body>
-    <?php
-    // Déterminer le schéma en fonction de $piece_count
-    if ($piece_count == 7) {
-        $schema = array(3, 2, 2);
-    } elseif ($piece_count == 6) {
-        $schema = array(2, 2, 2);
-    } else {
-        // Gérer le cas où $piece_count n'est ni 7 ni 6, par exemple avec une erreur ou une autre logique de traitement
-        echo "Nombre de pièces non géré.";
-        exit;
-    }
+<div class="map-container">
+    <img src="./img/map.png" alt="Game Map" class="map-image">
+    
+    <!-- Zones des gangs -->
+    <div class="map-interactive-area" id="gang1" onclick="showGangInfo('<?php echo $gangs['gang6'][0]['gang_name']; ?>', '<?php echo $gangs['gang6'][0]['name']; ?>', '<?php echo $gangs['gang6'][0]['description']; ?>')"></div>
+    <div class="map-interactive-area" id="gang2" onclick="showGangInfo('<?php echo $gangs['gang5'][0]['gang_name']; ?>', '<?php echo $gangs['gang5'][0]['name']; ?>', '<?php echo $gangs['gang5'][0]['description']; ?>')"></div>
+    <div class="map-interactive-area" id="gang3" onclick="showGangInfo('<?php echo $gangs['gang4'][0]['gang_name']; ?>', '<?php echo $gangs['gang4'][0]['name']; ?>', '<?php echo $gangs['gang4'][0]['description']; ?>')"></div>
+    <div class="map-interactive-area" id="gang4" onclick="showGangInfo('<?php echo $gangs['gang3'][0]['gang_name']; ?>', '<?php echo $gangs['gang3'][0]['name']; ?>', '<?php echo $gangs['gang3'][0]['description']; ?>')"></div>
+    <div class="map-interactive-area" id="gang5" onclick="showGangInfo('<?php echo $gangs['gang2'][0]['gang_name']; ?>', '<?php echo $gangs['gang2'][0]['name']; ?>', '<?php echo $gangs['gang2'][0]['description']; ?>')"></div>
+    <div class="map-interactive-area" id="gang6" onclick="showGangInfo('<?php echo $gangs['gang1'][0]['gang_name']; ?>', '<?php echo $gangs['gang1'][0]['name']; ?>', '<?php echo $gangs['gang1'][0]['description']; ?>')"></div>
+    
+    <!-- Zones des pièces -->
+    <div class="map-interactive-area" id="piece1" onclick="zoneClicked('Douches')"></div>
+    <div class="map-interactive-area" id="piece2" onclick="zoneClicked('Cellules')"></div>
+    <div class="map-interactive-area" id="piece3" onclick="zoneClicked('Infirmerie')"></div>
+    <div class="map-interactive-area" id="piece4" onclick="zoneClicked('Réfectoire')"></div>
+    <div class="map-interactive-area" id="piece5" onclick="zoneClicked('Isolement')"></div>
+    <div class="map-interactive-area" id="piece6" onclick="zoneClicked('Promenade')"></div>
 
-    // Générer dynamiquement les pièces en fonction de $schema
-    $piece_ids = array_map(function($i) {
-        return "piece" . $i;
-    }, range(1, $piece_count));
-    ?>
-    <?php
-    ?>
-    <!-- <div class="gang-container">
-        <div class="gang">
-            <div id="queers" class="gang-carte">
-                <?php echo '
-                <div class="gang-carte_gang_name queers">'.$gangs['gang1'][0]['gang_name'].'</div>
-                <div class="gang-carte_name">'.$gangs['gang1'][0]['name'].'</div>
-                <div class="gang-carte_description">'.$gangs['gang1'][0]['description'].'"</div>';?>
-            </div>
-            <div  id="triad" class="gang-carte">
-                <?php echo '
-                <div class="gang-carte_gang_name triad">'.$gangs['gang2'][0]['gang_name'].'</div>
-                <div class="gang-carte_name">'.$gangs['gang2'][0]['name'].'</div>
-                <div class="gang-carte_description">'.$gangs['gang2'][0]['description'].'"</div>';?>
-            </div>
-            <div id="bratva" class="gang-carte">
-                <?php echo '
-                <div class="gang-carte_gang_name bratva">'.$gangs['gang3'][0]['gang_name'].'</div>
-                <div class="gang-carte_name">'.$gangs['gang3'][0]['name'].'</div>
-                <div class="gang-carte_description">'.$gangs['gang3'][0]['description'].'"</div>';?>
-            </div>
-            <div id="bikers" class="gang-carte">
-                <?php echo '
-                <div class="gang-carte_gang_name bikers">'.$gangs['gang4'][0]['gang_name'].'</div>
-                <div class="gang-carte_name">'.$gangs['gang4'][0]['name'].'</div>
-                <div class="gang-carte_description">'.$gangs['gang4'][0]['description'].'"</div>';?>
-            </div>
-            <div id="cartel" class="gang-carte">
-                <?php echo '
-                <div class="gang-carte_gang_name cartel">'.$gangs['gang5'][0]['gang_name'].'</div>
-                <div class="gang-carte_name">'.$gangs['gang5'][0]['name'].'</div>
-                <div class="gang-carte_description">'.$gangs['gang5'][0]['description'].'"</div>';?>
-            </div>
-            <div id="crew" class="gang-carte">
-                <?php echo '
-                <div class="gang-carte_gang_name crew">'.$gangs['gang6'][0]['gang_name'].'</div>
-                <div class="gang-carte_name">'.$gangs['gang6'][0]['name'].'</div>
-                <div class="gang-carte_description">'.$gangs['gang6'][0]['description'].'"</div>';?>
-            </div>
+    <!-- Zones des cartes -->
+    <div class="map-interactive-area" id="carte1" onclick="zoneClicked('Fouilles')"></div>
+    <div class="map-interactive-area" id="carte2" onclick="zoneClicked('Armes')"></div>
+    <div class="map-interactive-area" id="carte3" onclick="zoneClicked('Pioches')"></div>
+    <div class="map-interactive-area" id="carte4" onclick="zoneClicked('Pelles')"></div>
+    <div class="map-interactive-area" id="carte5" onclick="zoneClicked('Defausse')"></div>
+</div>
+
+<!-- The Modal -->
+<div id="gangModal" class="modal">
+    <div class="modal-content">
+        <div id="modalGangName" class="gang-carte_gang_name"></div>
+        <div id="modalCardName" class="gang-carte_name"></div>
+        <div id="modalDescription" class="gang-carte_description"></div>
+        <div class="button_card">
+            <span class="close">Quitter</span>
+            <span class="close">Quitter</span>
         </div>
     </div>
-    <div class="game-container">
-        <div id="game-board">
-        <?php foreach ($schema as $row_size): ?>
-            <div class="row">
-                <?php for ($i = 0; $i < $row_size; $i++): ?>
-                    <div id="<?php echo $piece_ids[$i]; ?>" class="piece"></div>
-                <?php endfor; ?>
-                <?php $piece_ids = array_slice($piece_ids, $row_size); ?>
-            </div>
-        <?php endforeach; ?>
-    </div> -->
-    <div class="map-container">
-        <img src="./img/map.png" alt="Game Map" class="map-image">
-        
-        <!-- Zones des gangs -->
-        <div class="map-interactive-area" id="gang1" onclick="showGangInfo('<?php echo $gangs['gang6'][0]['gang_name']; ?>', '<?php echo $gangs['gang6'][0]['name']; ?>', '<?php echo $gangs['gang6'][0]['description']; ?>')"></div>
-        <div class="map-interactive-area" id="gang2" onclick="showGangInfo('<?php echo $gangs['gang5'][0]['gang_name']; ?>', '<?php echo $gangs['gang5'][0]['name']; ?>', '<?php echo $gangs['gang5'][0]['description']; ?>')"></div>
-        <div class="map-interactive-area" id="gang3" onclick="showGangInfo('<?php echo $gangs['gang4'][0]['gang_name']; ?>', '<?php echo $gangs['gang4'][0]['name']; ?>', '<?php echo $gangs['gang4'][0]['description']; ?>')"></div>
-        <div class="map-interactive-area" id="gang4" onclick="showGangInfo('<?php echo $gangs['gang3'][0]['gang_name']; ?>', '<?php echo $gangs['gang3'][0]['name']; ?>', '<?php echo $gangs['gang3'][0]['description']; ?>')"></div>
-        <div class="map-interactive-area" id="gang5" onclick="showGangInfo('<?php echo $gangs['gang2'][0]['gang_name']; ?>', '<?php echo $gangs['gang2'][0]['name']; ?>', '<?php echo $gangs['gang2'][0]['description']; ?>')"></div>
-        <div class="map-interactive-area" id="gang6" onclick="showGangInfo('<?php echo $gangs['gang1'][0]['gang_name']; ?>', '<?php echo $gangs['gang1'][0]['name']; ?>', '<?php echo $gangs['gang1'][0]['description']; ?>')"></div>
-        
-        <!-- Zones des pièces -->
-        <div class="map-interactive-area" id="piece1" onclick="zoneClicked('Douches')"></div>
-        <div class="map-interactive-area" id="piece2" onclick="zoneClicked('Cellules')"></div>
-        <div class="map-interactive-area" id="piece3" onclick="zoneClicked('Infirmerie')"></div>
-        <div class="map-interactive-area" id="piece4" onclick="zoneClicked('Réfectoire')"></div>
-        <div class="map-interactive-area" id="piece5" onclick="zoneClicked('Isolement')"></div>
-        <div class="map-interactive-area" id="piece6" onclick="zoneClicked('Promenade')"></div>
-
-        <!-- Zones des cartes -->
-        <div class="map-interactive-area" id="carte1" onclick="zoneClicked('Fouilles')"></div>
-        <div class="map-interactive-area" id="carte2" onclick="zoneClicked('Armes')"></div>
-        <div class="map-interactive-area" id="carte3" onclick="zoneClicked('Pioches')"></div>
-        <div class="map-interactive-area" id="carte4" onclick="zoneClicked('Pelles')"></div>
-        <div class="map-interactive-area" id="carte5" onclick="zoneClicked('Defausse')"></div>
-    </div>
-
-    <!-- The Modal -->
-    <div id="gangModal" class="modal">
-        <div class="modal-content">
-            <div id="modalGangName" class="gang-carte_gang_name"></div>
-            <div id="modalCardName" class="gang-carte_name"></div>
-            <div id="modalDescription" class="gang-carte_description"></div>
-            <div class="button_card">
-                <span class="close">Quitter</span>
-                <span class="close">Quitter</span>
-            </div>
-        </div>
-    </div>
-
+</div>
 </body>
 </html>
 
