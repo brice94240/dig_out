@@ -10,7 +10,6 @@ body, html {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh; /* Hauteur équivalente à la taille de l'écran */
     background-color: #f0f0f0; /* Couleur de fond du conteneur de jeu */
 }
 
@@ -19,12 +18,12 @@ body, html {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: 80%; /* Largeur du plateau de jeu par rapport à game-container */
-    max-width: 600px; /* Largeur maximale du plateau pour éviter qu'il ne devienne trop large */
-    background-color: #ccc; /* Couleur de fond du plateau */
-    border: 2px solid #999; /* Bordure pour le plateau */
-    border-radius: 10px; /* Bordure arrondie */
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Ombre légère pour le plateau */
+    width: 75%;
+    margin-top: 10em;
+    background-color: #ccc;
+    border: 2px solid #999;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .row {
@@ -33,32 +32,288 @@ body, html {
     width: 100%; /* Chaque ligne occupe la largeur complète du plateau */
 }
 
-.piece {
-    width: 20%; /* Largeur de chaque pièce en pourcentage */
-    padding-top: 20%; /* Aspect carré en fonction de la largeur */
-    background-color: #999; /* Couleur de fond des pièces */
-    margin: 1%; /* Marge entre les pièces */
+/* .piece {
+    width: 100%;
+    padding-top: 20%;
+    background-color: #999;
+    margin: 1%;
 }
 
 .gang-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 20vh; /* Hauteur équivalente à environ 20% de l'écran */
-    background-color: #f0f0f0; /* Couleur de fond du conteneur de gang */
+    height: 27vh;
+    background-color: #f0f0f0;
 }
 
 .gang {
     display: flex;
     justify-content: space-around;
-    width: 80%; /* Largeur du gang par rapport à gang-container */
-    max-width: 600px; /* Largeur maximale du gang pour éviter qu'il ne devienne trop large */
+    width: 150vh;
 }
 
 .gang-carte {
-    width: calc(16.6667% - 10px); /* Largeur de chaque case en pourcentage (6 cases en 100% / 6) */
-    padding-top: calc(16.6667% - 10px); /* Aspect carré en fonction de la largeur */
-    background-color: #999; /* Couleur de fond des cases */
-    margin: 5px; /* Marge entre les cases */
-    box-sizing: border-box; /* Pour inclure les marges dans le calcul de la largeur */
+    width: 25vh;
+    padding-top: 22em;
+    background-color: #999;
+    margin: 5px;
+    color: white;
+    box-sizing: border-box;
+}
+.gang-carte_gang_name {
+    font-weight: bolder;
+    display: none;
+}
+
+.queers {
+    color:#9b6487;
+}
+.triad {
+    color:#6c6140;
+}
+.bratva {
+    color:#5f775d;
+}
+.bikers {
+    color:#706c6c;
+}
+.cartel {
+    color:#ad504b;
+}
+.crew {
+    color:#3c5160;
+}
+#piece1 {
+    background-image: url(../img/refectoire.png);
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+#piece2 {
+    background-image: url(../img/refectoire.png);
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+#piece3 {
+    background-image: url(../img/refectoire.png);
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+#piece4 {
+    background-image: url(../img/refectoire.png);
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+#piece5 {
+    background-image: url(../img/refectoire.png);
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+#piece6 {
+    background-image: url(../img/isolement.png);
+    background-size: cover;
+    background-repeat: no-repeat;
+    width: 33%;
+}
+#piece7 {
+    background-image: url(../img/refectoire.png);
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.gang-carte .gang-carte_gang_name,
+.gang-carte .gang-carte_name,
+.gang-carte .gang-carte_description {
+    font-size: 1vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    padding: 0.5vh;
+    line-height: 1.2;
+    text-align: center;
+}
+
+.gang-carte .gang-carte_gang_name.crew {
+    font-size: calc(1rem + 1vw);
+}
+
+#crew {
+    background-image: url(../img/crew.png);
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+#cartel {
+    background-image: url(../img/cartel.png);
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+#bikers {
+    background-image: url(../img/bikers.png);
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+#bratva {
+    background-image: url(../img/bratva.png);
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+#triad {
+    background-image: url(../img/triad.png);
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+#queers {
+    background-image: url(../img/queers.png);
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.gang-carte_name {
+    font-weight: bolder;
+    color:rgb(212, 89, 13)
+} */
+
+.map-container {
+    position: relative;
+    width: 100%;
+    max-width: 1000px;
+    margin: auto;
+}
+.map-image {
+    width: 100%;
+    display: block;
+}
+.map-interactive-area {
+    position: absolute;
+    border: 2px solid transparent; /* Initialement transparent, peut être coloré pour débogage */
+    cursor: pointer;
+}
+/* Styles pour les différentes zones des gangs */
+#gang1 { top: 0%; left: 0%; width: 20%; height: 17%; }  /* CREW */
+#gang2 { top: 18%; left: 0%; width: 20%; height: 15%; } /* CARTEL */
+#gang3 { top: 34%; left: 0%; width: 20%; height: 15%; } /* BIKERS */
+#gang4 { top: 50%; left: 0%; width: 20%; height: 16%; } /* BRATVA */
+#gang5 { top: 67%; left: 0%; width: 20%; height: 15%; } /* TRIAD */
+#gang6 { top: 83%; left: 0%; width: 20%; height: 16%; } /* QUEERS */
+
+/* Styles pour les différentes zones des pièces */
+#piece1 { top: 3%; left: 23%; width: 33%; height: 24%; } /* Douches */
+#piece2 { top: 3%; left: 58%; width: 39%; height: 23%; } /* Cellules */
+#piece3 { top: 29%; left: 23%; width: 24%; height: 23%; } /* Infirmerie */
+#piece4 { top: 29%; left: 49%; width: 47%; height: 23%; } /* Réfectoire */
+#piece5 { top: 53%; left: 22%; width: 16%; height: 24%; } /* Isolement */
+#piece6 { top: 53%; left: 40%; width: 57%; height: 21%; } /* Promenade */
+
+/* Styles pour les différentes zones des pièces */
+#carte1 { top: 81%; left: 25%; width: 19%; height: 13%; } /* Fouilles */
+#carte2 { top: 75%; left: 49%; width: 12%; height: 19%; } /* Armes */
+#carte3 { top: 75%; left: 65%; width: 12%; height: 19%; } /* Pioches */
+#carte4 { top: 75%; left: 80%; width: 13%; height: 19%; } /* Pelles */
+/* #carte5 { top: 81%; left: 25%; width: 19%; height: 13%; } Defausse */
+
+/* Style global pour le modal */
+.modal {
+    display: none; /* Cache le modal par défaut */
+    position: fixed; /* Position fixe pour rester au-dessus du contenu */
+    z-index: 1; /* Place le modal au-dessus des autres éléments */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; /* Ajoute un défilement si nécessaire */
+    background-color: rgba(0, 0, 0, 0.4); /* Fond semi-transparent */
+}
+
+/* Contenu du modal de style carte */
+.modal-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #fff; /* Fond blanc */
+    margin: 15% auto; /* Centré verticalement et horizontalement */
+    padding: 5vh;
+    height: 35vh; /* Largeur fixe */
+    width: 25vh; /* Largeur fixe */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); /* Ombre douce */
+    border-radius: 10px; /* Bordures arrondies */
+    background: url(../img/crew.png);
+    background-size: cover;
+    background-position-x: center;
+    border-color: #b0b0b0;
+    border-style: ridge;
+    border-width: 1vh;
+    min-height: 38vh;
+}
+
+/* Style pour le titre du modal */
+.gang-carte_gang_name {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: center;
+    color: white; /* Couleur du texte */
+    font-weight: bolder;
+    display: none;
+
+}
+
+/* Style pour le nom de la carte */
+.gang-carte_name {
+    font-size: 1.2em;
+    margin-top: 10vh;
+    text-align: center;
+    color: #ffffff;
+    font-weight: bolder;
+    background: #000000b3;
+    padding: 0.3em;
+    border-color: white;
+    border-style: double;
+    font-family: fantasy;
+}
+
+/* Style pour la description */
+.gang-carte_description {
+    font-size: 1em;
+    color: white;
+    text-align: center;
+    line-height: 1.4;
+    background: #000000b3;;
+    padding: 0.3em;
+    border-color: white;
+    border-style: double;
+    font-family: fantasy;
+}
+
+/* Style pour le bouton de fermeture */
+.close {
+    color: #fff;
+    margin-top: 0.5vh;
+    font-size: 3vh;
+    font-weight: bold;
+    background: #850000;
+    cursor: pointer;
+    border-color: black;
+    border-style: double;
+    font-family: fantasy;
+    padding: 0.5vh;
+}
+
+.close:hover,
+.close:focus {
+    color: #333;
+    text-decoration: none;
+}
+.button_card {
+    margin-top: 1vh;
 }
