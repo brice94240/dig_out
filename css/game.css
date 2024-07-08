@@ -4,6 +4,7 @@ body, html {
     margin: 0;
     padding: 0;
     height: 100%;
+    background: grey;
 }
 
 .game-container {
@@ -31,157 +32,6 @@ body, html {
     justify-content: center;
     width: 100%; /* Chaque ligne occupe la largeur complète du plateau */
 }
-
-/* .piece {
-    width: 100%;
-    padding-top: 20%;
-    background-color: #999;
-    margin: 1%;
-}
-
-.gang-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 27vh;
-    background-color: #f0f0f0;
-}
-
-.gang {
-    display: flex;
-    justify-content: space-around;
-    width: 150vh;
-}
-
-.gang-carte {
-    width: 25vh;
-    padding-top: 22em;
-    background-color: #999;
-    margin: 5px;
-    color: white;
-    box-sizing: border-box;
-}
-.gang-carte_gang_name {
-    font-weight: bolder;
-    display: none;
-}
-
-.queers {
-    color:#9b6487;
-}
-.triad {
-    color:#6c6140;
-}
-.bratva {
-    color:#5f775d;
-}
-.bikers {
-    color:#706c6c;
-}
-.cartel {
-    color:#ad504b;
-}
-.crew {
-    color:#3c5160;
-}
-#piece1 {
-    background-image: url(../img/refectoire.png);
-    background-size: cover;
-    background-repeat: no-repeat;
-}
-#piece2 {
-    background-image: url(../img/refectoire.png);
-    background-size: cover;
-    background-repeat: no-repeat;
-}
-#piece3 {
-    background-image: url(../img/refectoire.png);
-    background-size: cover;
-    background-repeat: no-repeat;
-}
-#piece4 {
-    background-image: url(../img/refectoire.png);
-    background-size: cover;
-    background-repeat: no-repeat;
-}
-#piece5 {
-    background-image: url(../img/refectoire.png);
-    background-size: cover;
-    background-repeat: no-repeat;
-}
-#piece6 {
-    background-image: url(../img/isolement.png);
-    background-size: cover;
-    background-repeat: no-repeat;
-    width: 33%;
-}
-#piece7 {
-    background-image: url(../img/refectoire.png);
-    background-size: cover;
-    background-repeat: no-repeat;
-}
-
-.gang-carte .gang-carte_gang_name,
-.gang-carte .gang-carte_name,
-.gang-carte .gang-carte_description {
-    font-size: 1vw;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: normal;
-    padding: 0.5vh;
-    line-height: 1.2;
-    text-align: center;
-}
-
-.gang-carte .gang-carte_gang_name.crew {
-    font-size: calc(1rem + 1vw);
-}
-
-#crew {
-    background-image: url(../img/crew.png);
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
-}
-
-#cartel {
-    background-image: url(../img/cartel.png);
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
-}
-
-#bikers {
-    background-image: url(../img/bikers.png);
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
-}
-
-#bratva {
-    background-image: url(../img/bratva.png);
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
-}
-
-#triad {
-    background-image: url(../img/triad.png);
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
-}
-
-#queers {
-    background-image: url(../img/queers.png);
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
-}
-.gang-carte_name {
-    font-weight: bolder;
-    color:rgb(212, 89, 13)
-} */
 
 .map-container {
     position: relative;
@@ -214,12 +64,17 @@ body, html {
 #piece5 { top: 53%; left: 22%; width: 16%; height: 24%; } /* Isolement */
 #piece6 { top: 53%; left: 40%; width: 57%; height: 21%; } /* Promenade */
 
+#piece7 { top: 4%; left: 25%; width: 23%; height: 22%; } /* CelluleATeam */
+#piece8 { top: 4%; left: 50%; width: 20%; height: 22%; } /* DoucheTeam */
+#piece9 { top: 4%; left: 72%; width: 23%; height: 22%; } /* CelluleBTeam */
+
 /* Styles pour les différentes zones des pièces */
 #carte1 { top: 81%; left: 25%; width: 19%; height: 13%; } /* Fouilles */
-#carte2 { top: 75%; left: 49%; width: 12%; height: 19%; } /* Armes */
-#carte3 { top: 75%; left: 65%; width: 12%; height: 19%; } /* Pioches */
-#carte4 { top: 75%; left: 80%; width: 13%; height: 19%; } /* Pelles */
+#carte2 { top: 74%; left: 48.7%; width: 13%; height: 20%; } /* Armes */
+#carte3 { top: 74%; left: 64.3%; width: 13%; height: 20%; } /* Pioches */
+#carte4 { top: 74%; left: 80%; width: 13%; height: 20%; } /* Pelles */
 /* #carte5 { top: 81%; left: 25%; width: 19%; height: 13%; } Defausse */
+#carte6 { top: 30.1%; left: 65.7%; width: 13%; height: 20%; } /* Cuillere */
 
 /* Style global pour le modal */
 .modal {
