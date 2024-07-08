@@ -85,7 +85,10 @@ if (!in_array($_SESSION['user_id'], $tab_player)) {
 
         $stmt_surin = $pdo->query("SELECT * FROM fouilles WHERE `type` = 4 AND `sub_type` = 1");
         $result_surin = $stmt_surin->fetchAll(PDO::FETCH_ASSOC);
-        
+
+        $stmt_fouille = $pdo->query("SELECT * FROM fouilles WHERE `type` = 6 OR `type` = 3 OR `type` = 7 OR `type` = 5 OR `type` = 2");
+        $result_fouille = $stmt_fouille->fetchAll(PDO::FETCH_ASSOC);
+
         // Parcourir les résultats et recuperer les cuilleres
         foreach ($result_cuillere as $row_cuillere) {
             $cuillere[] = $row_cuillere;
@@ -106,6 +109,15 @@ if (!in_array($_SESSION['user_id'], $tab_player)) {
             $surin[] = $row_surin;
         }
 
+        // Parcourir les résultats et recuperer les fouilles
+        foreach ($result_fouille as $row_fouille) {
+            $fouille[] = $row_fouille;
+        }
+
+        // Mélanger les cartes fouilles
+        shuffle($fouille);
+
+
         $cuillere_data_json = json_encode($cuillere);
         $stmt_update_cuillere = $pdo->prepare("UPDATE games SET cuillere_data = :cuillere WHERE creator_id = :game_id");
         $stmt_update_cuillere->execute(['cuillere' => $cuillere_data_json, 'game_id' => $game_id]);
@@ -121,6 +133,10 @@ if (!in_array($_SESSION['user_id'], $tab_player)) {
         $surin_data_json = json_encode($surin);
         $stmt_update_surin = $pdo->prepare("UPDATE games SET surin_data = :surin WHERE creator_id = :game_id");
         $stmt_update_surin->execute(['surin' => $surin_data_json, 'game_id' => $game_id]);
+
+        $fouille_data_json = json_encode($fouille);
+        $stmt_update_fouille = $pdo->prepare("UPDATE games SET fouille_data = :fouille WHERE creator_id = :game_id");
+        $stmt_update_fouille->execute(['fouille' => $fouille_data_json, 'game_id' => $game_id]);
 
 
         // Parcourir les résultats et organiser par gang_id
@@ -171,7 +187,6 @@ if (!in_array($_SESSION['user_id'], $tab_player)) {
         $gang_data_json = json_encode($gangs);
         $stmt_update = $pdo->prepare("UPDATE games SET gang_data = :gangs WHERE creator_id = :game_id");
         $stmt_update->execute(['gangs' => $gang_data_json, 'game_id' => $game_id]);
-        
     }
 }
 
@@ -225,6 +240,37 @@ if ($row_surin && $row_surin['surin_data']) {
     echo "Les surins ne sont pas encore disponibles.";
 }
 
+// Récupérer les détails des fouilles
+$stmt_fouille = $pdo->prepare("SELECT fouille_data FROM games WHERE creator_id = :game_id");
+$stmt_fouille->execute(['game_id' => $game_id]);
+$row_fouille = $stmt_fouille->fetch(PDO::FETCH_ASSOC);
+if ($row_fouille && $row_fouille['fouille_data']) {
+    $fouilles = json_decode($row_fouille['fouille_data'], true);
+} else {
+    echo "Les fouilles ne sont pas encore disponibles.";
+}
+
+// Récupérer les nombre de tour
+$stmt_turn = $pdo->prepare("SELECT turn FROM games WHERE creator_id = :game_id");
+$stmt_turn->execute(['game_id' => $game_id]);
+$row_turn = $stmt_turn->fetch(PDO::FETCH_ASSOC);
+if ($row_turn['turn'] == 0) {
+   var_dump($row_turn['turn']);
+}
+
+// Récupérer les détails des decks
+// $stmt_deck = $pdo->prepare("SELECT deck FROM joueurs WHERE game_joined = :game_id");
+// $stmt_deck->execute(['game_id' => $game_id]);
+// $row_deck = $stmt_deck->fetch(PDO::FETCH_ASSOC);
+// if ($row_deck && $row_deck['deck_data']) {
+//     $decks = json_decode($row_deck['deck_data'], true);
+// } else {
+//     echo "Les decks ne sont pas encore disponibles.";
+// }
+
+//DISTRIBUER LES CARTES
+var_dump($fouilles[0]['name']);
+
 try {
     $stmt_game = $pdo->prepare("SELECT * FROM games WHERE creator_id = :game_id");
     $stmt_game->execute(['game_id' => $game_id]);
@@ -268,12 +314,15 @@ if($game['team_activated'] == 0){ ?>
         <div class="map-interactive-area" id="piece6" onclick="zoneClicked('Promenade')"></div>
 
         <!-- Zones des cartes -->
-        <div class="map-interactive-area" id="carte1" onclick="zoneClicked('Fouilles')"></div>
+        <div class="map-interactive-area" id="carte1" onclick="showCardsFouillesInfo('<?php echo $fouilles[0]['name']; ?>', '<?php echo $fouilles[0]['description']; ?>', '<?php echo $fouilles[0]['img']; ?>', '<?php echo $fouilles[0]['verso_card']; ?>')" style="background-image:url('./img/<?php echo $fouilles[0]['verso_card'] ?>');background-size:cover;transform: rotate(90deg);background-repeat:no-repeat;"></div>
         <div class="map-interactive-area" id="carte2" onclick="showCardsPointsInfo('<?php echo $surins[0]['name']; ?>', '<?php echo $surins[0]['description']; ?>', '<?php echo $surins[0]['img']; ?>')" style="background-image:url('./img/<?php echo $surins[0]['img'] ?>');background-size:cover;background-repeat:no-repeat;"></div>
         <div class="map-interactive-area" id="carte3" onclick="showCardsPointsInfo('<?php echo $pioches[0]['name']; ?>', '<?php echo $pioches[0]['description']; ?>', '<?php echo $pioches[0]['img']; ?>')" style="background-image:url('./img/<?php echo $pioches[0]['img'] ?>');background-size:cover;transform: rotate(90deg);background-repeat:no-repeat;"></div>
         <div class="map-interactive-area" id="carte4" onclick="showCardsPointsInfo('<?php echo $pelles[0]['name']; ?>', '<?php echo $pelles[0]['description']; ?>', '<?php echo $pelles[0]['img']; ?>')" style="background-image:url('./img/<?php echo $pelles[0]['img'] ?>');background-size:cover;transform: rotate(90deg);background-repeat:no-repeat;"></div>
         <div class="map-interactive-area" id="carte5" onclick="zoneClicked('Defausse')"></div>
         <div class="map-interactive-area" id="carte6" onclick="showCardsPointsInfo('<?php echo $cuilleres[0]['name']; ?>', '<?php echo $cuilleres[0]['description']; ?>', '<?php echo $cuilleres[0]['img']; ?>')" style="background-image:url('./img/<?php echo $cuilleres[0]['img'] ?>');background-size:cover;transform: rotate(90deg);background-repeat:no-repeat;"></div>
+
+        <!-- Zones des decks -->
+        <div class="map-interactive-area" id="deck" onclick="showCardsPointsInfo('<?php echo $cuilleres[0]['name']; ?>', '<?php echo $cuilleres[0]['description']; ?>', '<?php echo $cuilleres[0]['img']; ?>')" style="background-image:url('./img/<?php echo $cuilleres[0]['img'] ?>');background-size:cover;background-repeat:no-repeat;"></div>
 
     <!-- The Modal -->
     <div id="Modal" class="modal">
@@ -292,7 +341,7 @@ else if($game['team_activated'] == 1) { ?>
     <div class="map-container">
         <img src="./img/map_team.png" alt="Game Map" class="map-image">
         <!-- Zones des gangs -->
-        <div class="map-interactive-area" id="gang1" onclick="showGangInfo('<?php echo $gangs['gang6'][0]['gang_name']; ?>', '<?php echo $gangs['gang6'][0]['name']; ?>', '<?php echo $gangs['gang6'][0]['description']; ?>')"></div>
+        <div class="map-interactive-area" id="gang1" onclick="showGangInfo('<?php echo $gangs['gang6'][0]['gang_name']; ?>', '<?php echo $gangs['gang6'][0]['name']; ?>', '<?php echo $gangs['gang6'][0]['description']; ?>', '<?php echo $gangs['gang6'][0]['verso_card']; ?>')"></div>
         <div class="map-interactive-area" id="gang2" onclick="showGangInfo('<?php echo $gangs['gang5'][0]['gang_name']; ?>', '<?php echo $gangs['gang5'][0]['name']; ?>', '<?php echo $gangs['gang5'][0]['description']; ?>')"></div>
         <div class="map-interactive-area" id="gang3" onclick="showGangInfo('<?php echo $gangs['gang4'][0]['gang_name']; ?>', '<?php echo $gangs['gang4'][0]['name']; ?>', '<?php echo $gangs['gang4'][0]['description']; ?>')"></div>
         <div class="map-interactive-area" id="gang4" onclick="showGangInfo('<?php echo $gangs['gang3'][0]['gang_name']; ?>', '<?php echo $gangs['gang3'][0]['name']; ?>', '<?php echo $gangs['gang3'][0]['description']; ?>')"></div>
@@ -311,12 +360,15 @@ else if($game['team_activated'] == 1) { ?>
         <div class="map-interactive-area" id="piece6" onclick="zoneClicked('Promenade')"></div>
 
         <!-- Zones des cartes -->
-        <div class="map-interactive-area" id="carte1" onclick="zoneClicked('Fouilles')"></div>
+        <div class="map-interactive-area" id="carte1" onclick="showCardsFouillesInfo('<?php echo $fouilles[0]['name']; ?>', '<?php echo $fouilles[0]['description']; ?>', '<?php echo $fouilles[0]['img']; ?>', '<?php echo $fouilles[0]['verso_card']; ?>')" style="background-image:url('./img/<?php echo $fouilles[0]['verso_card'] ?>');background-size:cover;transform: rotate(90deg);background-repeat:no-repeat;"></div>
         <div class="map-interactive-area" id="carte2" onclick="showCardsPointsInfo('<?php echo $surins[0]['name']; ?>', '<?php echo $surins[0]['description']; ?>', '<?php echo $surins[0]['img']; ?>')" style="background-image:url('./img/<?php echo $surins[0]['img'] ?>');background-size:cover;background-repeat:no-repeat;"></div>
         <div class="map-interactive-area" id="carte3" onclick="showCardsPointsInfo('<?php echo $pioches[0]['name']; ?>', '<?php echo $pioches[0]['description']; ?>', '<?php echo $pioches[0]['img']; ?>')" style="background-image:url('./img/<?php echo $pioches[0]['img'] ?>');background-size:cover;background-repeat:no-repeat;"></div>
         <div class="map-interactive-area" id="carte4" onclick="showCardsPointsInfo('<?php echo $pelles[0]['name']; ?>', '<?php echo $pelles[0]['description']; ?>', '<?php echo $pelles[0]['img']; ?>')" style="background-image:url('./img/<?php echo $pelles[0]['img'] ?>');background-size:cover;background-repeat:no-repeat;"></div>
         <div class="map-interactive-area" id="carte5" onclick="zoneClicked('Defausse')"></div>
         <div class="map-interactive-area" id="carte6" onclick="showCardsPointsInfo('<?php echo $cuilleres[0]['name']; ?>', '<?php echo $cuilleres[0]['description']; ?>', '<?php echo $cuilleres[0]['img']; ?>')" style="background-image:url('./img/<?php echo $cuilleres[0]['img'] ?>');background-size:cover;transform: rotate(90deg);background-repeat:no-repeat;"></div>
+
+        <!-- Zones des decks -->
+        <div class="map-interactive-area" id="deck" onclick="showCardsPointsInfo('<?php echo $cuilleres[0]['name']; ?>', '<?php echo $cuilleres[0]['description']; ?>', '<?php echo $cuilleres[0]['img']; ?>')" style="background-image:url('./img/<?php echo $cuilleres[0]['img'] ?>');background-size:cover;background-repeat:no-repeat;"></div>
     </div>
 
     <!-- The Modal -->
@@ -364,8 +416,17 @@ function showGangInfo(gangName, cardName, description) {
     modal.style.display = "block";
 }
 
-// Function to display the modal with specific gang info
+// Function to display the modal with specific card point info
 function showCardsPointsInfo(cardName, description, cardImage) {
+    var url = 'background-image:url("./img/'+cardImage+'")';
+    document.getElementsByClassName("modal-content")[0].style = url;
+    document.getElementById("modalCardName").innerText = cardName;
+    document.getElementById("modalDescription").innerText = description;
+    modal.style.display = "block";
+}
+
+// Function to display the modal with specific fouille card info
+function showCardsFouillesInfo(cardName, description, cardImage, versoCard) {
     var url = 'background-image:url("./img/'+cardImage+'")';
     document.getElementsByClassName("modal-content")[0].style = url;
     document.getElementById("modalCardName").innerText = cardName;
