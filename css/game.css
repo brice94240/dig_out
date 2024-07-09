@@ -78,6 +78,7 @@ body, html {
 
 /* Styles pour les decks */
 #deck { top: 102%; left: 5%; width: 13%; height: 20%; } /* Deck */
+#dice { top: 107%; left: 50%; width: 10%; height: 20%; } /* Deck */
 
 /* Style global pour le modal */
 .modal {
@@ -172,6 +173,190 @@ body, html {
     color: #333;
     text-decoration: none;
 }
+
+.close_dice {
+    color: #fff;
+    margin-top: 0.5vh;
+    font-size: 3vh;
+    font-weight: bold;
+    background: #850000;
+    cursor: pointer;
+    border-color: black;
+    border-style: double;
+    font-family: fantasy;
+    padding: 0.5vh;
+}
+
+.close_dice:hover,
+.close_dice:focus {
+    color: #333;
+    text-decoration: none;
+}
+
+.launch_dice {
+    color: #fff;
+    margin-top: 0.5vh;
+    font-size: 3vh;
+    font-weight: bold;
+    background: #850000;
+    cursor: pointer;
+    border-color: black;
+    border-style: double;
+    font-family: fantasy;
+    padding: 0.5vh;
+}
+
+.launch_dice:hover,
+.launch_dice:focus {
+    color: #333;
+    text-decoration: none;
+}
 .button_card {
     margin-top: 1vh;
+}
+
+/* Deck Counter Style */
+.deck-counter {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background-color: #f8f9fa;
+    padding: 10px 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    cursor: pointer;
+}
+
+.deck-counter:hover {
+    background-color: #e2e6ea;
+}
+
+/* Modal Style */
+.modal-deck {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: #959595;
+    border-radius: 8px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+    width: 80%;
+    max-width: 600px;
+}
+
+.modal-deck-content {
+    padding: 1em;
+    color: #000000;
+    font-family: fantasy;
+    font-weight: bolder;
+}
+
+.modal-deck-footer {
+    padding: 10px 20px;
+    text-align: right;
+}
+
+.modal-deck-close {
+    color: #fff;
+    margin-top: 0.5vh;
+    font-size: 3vh;
+    font-weight: bold;
+    background: #850000;
+    cursor: pointer;
+    border-color: black;
+    border-style: double;
+    font-family: fantasy;
+    padding: 0.5vh;
+}
+
+.modal-deck-close:hover {
+    color: #333;
+    text-decoration: none;
+}
+
+#deck-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.card {
+    width: calc(33.333% - 10px);
+    box-sizing: border-box;
+}
+
+.modal-content-deck {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5vh;
+    height: 19vh;
+    width: 13vh;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    background: url(../img/crew.png);
+    background-size: cover;
+    background-position-x: center;
+    border-color: #b0b0b0;
+    border-style: ridge;
+    border-width: 1vh;
+}
+/* Style pour le nom de la carte */
+.deck-carte_name {
+    font-size: 0.5em;
+    margin-top: -5vh;
+    text-align: center;
+    color: #ffffff;
+    font-weight: bolder;
+    background: #00000052;
+    padding: 0.3em;
+    border-color: white;
+    border-style: double;
+    font-family: fantasy;
+}
+
+/* Style pour la description */
+.deck-carte_description {
+    font-size: 0.5em;
+    width: 9em;
+    color: white;
+    max-height: 2.6em;
+    padding-bottom: 2em;
+    text-align: center;
+    line-height: 1.4;
+    background: #00000052;
+    border-color: white;
+    border-style: double;
+    font-family: fantasy;
+}
+
+/* Contenu du modal de style carte */
+.modal-dice-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #fff; /* Fond blanc */
+    margin: 15% auto; /* Centré verticalement et horizontalement */
+    padding: 5vh;
+    height: 35vh; /* Largeur fixe */
+    width: 25vh; /* Largeur fixe */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); /* Ombre douce */
+    border-radius: 10px; /* Bordures arrondies */
+    background: url(../img/crew.png);
+    background-size: contain;
+    background-position-x: center;
+    border-color: #b0b0b0;
+    border-style: ridge;
+    border-width: 1vh;
+    min-height: 38vh;
+    background-repeat: no-repeat;
+    transition: background-image 0.3s ease-in-out; /* transition pour l'animation */
+}
+
+.button_dice_card {
+    margin-top: 37vh;
 }

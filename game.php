@@ -255,21 +255,63 @@ $stmt_turn = $pdo->prepare("SELECT turn FROM games WHERE creator_id = :game_id")
 $stmt_turn->execute(['game_id' => $game_id]);
 $row_turn = $stmt_turn->fetch(PDO::FETCH_ASSOC);
 if ($row_turn['turn'] == 0) {
-   var_dump($row_turn['turn']);
+    //RECUPERER LE NOMBRE DE JOUEUR DANS LA GAME
+    $stmt_joueur_deck = $pdo->prepare("SELECT * FROM joueurs WHERE game_joined = :game_id");
+    $stmt_joueur_deck->execute(['game_id' => $game_id]);
+    $row_joueur_deck = $stmt_joueur_deck->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Parcourir les résultats et recuperer les cuilleres
+    foreach ($row_joueur_deck as $row_joueurs_decks) {
+        // Initialiser un deck vide pour chaque joueur
+        $deck = [];
+
+        // Récupérer les détails des fouilles
+        $stmt_fouille = $pdo->prepare("SELECT fouille_data FROM games WHERE creator_id = :game_id");
+        $stmt_fouille->execute(['game_id' => $game_id]);
+        $row_fouille = $stmt_fouille->fetch(PDO::FETCH_ASSOC);
+        if ($row_fouille && $row_fouille['fouille_data']) {
+            $fouilles = json_decode($row_fouille['fouille_data'], true);
+            //PRENDRE A CHAQUE FOIS LES 3 PREMIERE CARTE DU TABLEAU FOUILLES ET LES METTRE DANS CHAQUE DECK
+            for ($i = 0; $i < 3; $i++) {
+                if (!empty($fouilles)) {
+                    $deck[] = array_shift($fouilles);
+                    $deck_json = json_encode($deck);
+                    $fouilles_json = json_encode($fouilles);
+                    
+                    $stmt_update_fouille = $pdo->prepare("UPDATE games SET fouille_data = :fouille WHERE creator_id = :game_id");
+                    $stmt_update_fouille->execute(['fouille' => $fouilles_json, 'game_id' => $game_id]);
+                }
+            }
+            $stmt_update_deck = $pdo->prepare("UPDATE joueurs SET deck = :deck WHERE ID = :ID");
+            $stmt_update_deck->execute(['deck' => $deck_json, 'ID' => $row_joueurs_decks['ID']]);
+            
+        } else {
+            echo "Les fouilles ne sont pas encore disponibles.";
+        }
+    }
+    //METTRE LE TOUR A 1
+    $turn = 1;
+    $stmt_update_turn_1 = $pdo->prepare("UPDATE games SET turn = :turn WHERE creator_id = :game_id");
+    $stmt_update_turn_1->execute(['turn' => $turn, 'game_id' => $game_id]);
 }
 
-// Récupérer les détails des decks
-// $stmt_deck = $pdo->prepare("SELECT deck FROM joueurs WHERE game_joined = :game_id");
-// $stmt_deck->execute(['game_id' => $game_id]);
-// $row_deck = $stmt_deck->fetch(PDO::FETCH_ASSOC);
-// if ($row_deck && $row_deck['deck_data']) {
-//     $decks = json_decode($row_deck['deck_data'], true);
-// } else {
-//     echo "Les decks ne sont pas encore disponibles.";
-// }
+// Récupérer les data des dés
+$stmt_dice = $pdo->prepare("SELECT dice_data FROM joueurs WHERE `ID` = :user_id");
+$stmt_dice->execute(['user_id' => $_SESSION['user_id']]);
+$row_dice = $stmt_dice->fetch(PDO::FETCH_ASSOC);
+    
 
-//DISTRIBUER LES CARTES
-var_dump($fouilles[0]['name']);
+// Récupérer les détails des decks
+$stmt_deck = $pdo->prepare("SELECT deck FROM joueurs WHERE game_joined = :game_id AND `ID` = :user_id");
+$stmt_deck->execute(['game_id' => $game_id, 'user_id' => $_SESSION['user_id']]);
+$row_deck = $stmt_deck->fetchAll(PDO::FETCH_ASSOC);
+foreach($row_deck as $row_decks){
+    if ($row_decks) {
+        $decks = json_decode($row_decks['deck'], true);
+    } else {
+        echo "Les decks ne sont pas encore disponibles.";
+    }
+}
 
 try {
     $stmt_game = $pdo->prepare("SELECT * FROM games WHERE creator_id = :game_id");
@@ -319,10 +361,11 @@ if($game['team_activated'] == 0){ ?>
         <div class="map-interactive-area" id="carte3" onclick="showCardsPointsInfo('<?php echo $pioches[0]['name']; ?>', '<?php echo $pioches[0]['description']; ?>', '<?php echo $pioches[0]['img']; ?>')" style="background-image:url('./img/<?php echo $pioches[0]['img'] ?>');background-size:cover;transform: rotate(90deg);background-repeat:no-repeat;"></div>
         <div class="map-interactive-area" id="carte4" onclick="showCardsPointsInfo('<?php echo $pelles[0]['name']; ?>', '<?php echo $pelles[0]['description']; ?>', '<?php echo $pelles[0]['img']; ?>')" style="background-image:url('./img/<?php echo $pelles[0]['img'] ?>');background-size:cover;transform: rotate(90deg);background-repeat:no-repeat;"></div>
         <div class="map-interactive-area" id="carte5" onclick="zoneClicked('Defausse')"></div>
-        <div class="map-interactive-area" id="carte6" onclick="showCardsPointsInfo('<?php echo $cuilleres[0]['name']; ?>', '<?php echo $cuilleres[0]['description']; ?>', '<?php echo $cuilleres[0]['img']; ?>')" style="background-image:url('./img/<?php echo $cuilleres[0]['img'] ?>');background-size:cover;transform: rotate(90deg);background-repeat:no-repeat;"></div>
+        <div class="map-interactive-area" id="carte6" onclick="showDecksPointsInfo('<?php echo $cuilleres[0]['name']; ?>', '<?php echo $cuilleres[0]['description']; ?>', '<?php echo $cuilleres[0]['img']; ?>')" style="background-image:url('./img/<?php echo $cuilleres[0]['img'] ?>');background-size:cover;transform: rotate(90deg);background-repeat:no-repeat;"></div>
 
         <!-- Zones des decks -->
-        <div class="map-interactive-area" id="deck" onclick="showCardsPointsInfo('<?php echo $cuilleres[0]['name']; ?>', '<?php echo $cuilleres[0]['description']; ?>', '<?php echo $cuilleres[0]['img']; ?>')" style="background-image:url('./img/<?php echo $cuilleres[0]['img'] ?>');background-size:cover;background-repeat:no-repeat;"></div>
+        <div class="map-interactive-area" id="deck" onclick="showCardDecksInfo()" style="background-image:url('./img/<?php echo $decks[0]['verso_card'] ?>');background-size:cover;background-repeat:no-repeat;"></div>
+        <div class="map-interactive-area" id="dice" onclick="showDice('<?php echo $row_turn['turn']; ?>,<?php echo $row_turn['dice_data']; ?>')" style="background-image:url('./img/Dice6.png');background-size:contain;background-repeat:no-repeat;background-size: contain;background-repeat: no-repeat;background-position: top;"></div>
 
     <!-- The Modal -->
     <div id="Modal" class="modal">
@@ -336,6 +379,30 @@ if($game['team_activated'] == 0){ ?>
             </div>
         </div>
     </div>
+
+    <!-- Modal Structure Deck -->
+    <div id="deck-modal" class="modal-deck">
+        <div class="modal-deck-content">
+            <h4>Mon Deck :</h4>
+            <div id="deck-cards">
+                <!-- Cartes seront affichées ici -->
+            </div>
+        </div>
+        <div class="modal-deck-footer">
+            <button id="close-deck-modal" class="modal-deck-close btn">Fermer</button>
+        </div>
+    </div>
+
+    <!-- The Modal Dice -->
+    <div id="ModalDice" class="modal">
+        <div class="modal-dice-content">
+            <div class="button_dice_card">
+                <span id ="LaunchDice" class="close_dice">Lancer</span>
+                <span class="close_dice">Quitter</span>
+            </div>
+        </div>
+    </div>
+
 <?php }
 else if($game['team_activated'] == 1) { ?>
     <div class="map-container">
@@ -368,9 +435,9 @@ else if($game['team_activated'] == 1) { ?>
         <div class="map-interactive-area" id="carte6" onclick="showCardsPointsInfo('<?php echo $cuilleres[0]['name']; ?>', '<?php echo $cuilleres[0]['description']; ?>', '<?php echo $cuilleres[0]['img']; ?>')" style="background-image:url('./img/<?php echo $cuilleres[0]['img'] ?>');background-size:cover;transform: rotate(90deg);background-repeat:no-repeat;"></div>
 
         <!-- Zones des decks -->
-        <div class="map-interactive-area" id="deck" onclick="showCardsPointsInfo('<?php echo $cuilleres[0]['name']; ?>', '<?php echo $cuilleres[0]['description']; ?>', '<?php echo $cuilleres[0]['img']; ?>')" style="background-image:url('./img/<?php echo $cuilleres[0]['img'] ?>');background-size:cover;background-repeat:no-repeat;"></div>
-    </div>
-
+        <div class="map-interactive-area" id="deck" onclick="showCardDecksInfo()" style="background-image:url('./img/<?php echo $decks[0]['verso_card'] ?>');background-size:cover;background-repeat:no-repeat;"></div>
+        <div class="map-interactive-area" id="dice" onclick="showDice('<?php echo $row_turn['turn']; ?>', '<?php echo $row_dice['dice_data']; ?>')" style="background-image:url('./img/Dice6.png');background-size:contain;background-repeat:no-repeat;background-size: contain;background-repeat: no-repeat;background-position: top;"></div>
+        
     <!-- The Modal -->
     <div id="Modal" class="modal">
         <div class="modal-content">
@@ -383,6 +450,29 @@ else if($game['team_activated'] == 1) { ?>
             </div>
         </div>
     </div>
+
+    <!-- Modal Structure Deck -->
+    <div id="deck-modal" class="modal-deck">
+        <div class="modal-deck-content">
+            <h4>Mon Deck :</h4>
+            <div id="deck-cards">
+                <!-- Cartes seront affichées ici -->
+            </div>
+        </div>
+        <div class="modal-deck-footer">
+            <button id="close-deck-modal" class="modal-deck-close btn">Fermer</button>
+        </div>
+    </div>
+
+     <!-- The Modal Dice -->
+     <div id="ModalDice" class="modal">
+        <div class="modal-dice-content">
+            <div class="button_dice_card">
+                <span id ="LaunchDice" class="launch_dice">Lancer</span>
+                <span class="close_dice">Quitter</span>
+            </div>
+        </div>
+    </div>
 <?php } ?>
 
 </body>
@@ -390,6 +480,8 @@ else if($game['team_activated'] == 1) { ?>
 <script>
 // Get the modal
 var modal = document.getElementById("Modal");
+
+var modalDice = document.getElementById("ModalDice");
 
 // Get the <span> element that closes the modal
 var span = document.getElementsByClassName("close")[0];
@@ -432,6 +524,75 @@ function showCardsFouillesInfo(cardName, description, cardImage, versoCard) {
     document.getElementById("modalCardName").innerText = cardName;
     document.getElementById("modalDescription").innerText = description;
     modal.style.display = "block";
+}
+
+// Function to display the modal with specific fouille card info
+function showCardDecksInfo() {
+    var deck = <?php echo json_encode($decks); ?>;
+
+    $('#deck-cards').empty();
+    // Montrer la modal lorsque l'utilisateur clique sur le deck
+    deck.forEach(function(card) {
+        var card_description = card.description.replace(/\\'/g, "'");
+        $('#deck-cards').append('<div class="card modal-content-deck" style="background-image:url(./img/'+card.img+');background-size:cover;background-repeat:no-repeat;"><div class="deck-carte_name">' + card.name + '</div><div class="deck-carte_description">' + card_description + '</div></div>');
+        $('#deck-modal').show();
+    });
+
+    // Close modal
+    $('#close-deck-modal').click(function() {
+        $('#deck-modal').hide();
+    });
+}
+
+// Function to open dice menu
+//TOUR
+function showDice(Turn,Dice) {
+    if(Turn == 1 && !Dice) {
+        var url = 'background-image:url("./img/Dice6.png")';
+        var style = 'background-size:contain;background-repeat:no-repeat;background-size: contain;background-repeat: no-repeat;background-position: top;';
+        document.getElementsByClassName("modal-dice-content")[0].style = url;
+        modalDice.style.display = "block";
+        console.log(Turn);
+    
+        // Close modal
+        $('.close_dice').click(function() {
+            $('#ModalDice').hide();
+        });
+    
+        // Close modal
+        $('.launch_dice').click(function() {
+        const interval = 100; // intervalle entre chaque changement d'image (en millisecondes)
+        const totalFrames = 10; // nombre total de frames d'animation
+        let currentFrame = 0;
+    
+        const faces = [
+            './img/Dice1.png', // chemin vers vos images de faces de dé
+            './img/Dice2.png',
+            './img/Dice3.png',
+            './img/Dice4.png',
+            './img/Dice5.png',
+            './img/Dice6.png'
+        ];
+    
+        const animateDice = () => {
+    
+            // Choisir aléatoirement une face du dé
+            const randomFaceIndex = Math.floor(Math.random() * faces.length);
+            const randomFace = faces[randomFaceIndex];
+    
+            // Changer l'image du dé avec une animation de transition
+            $('.modal-dice-content').css('background-image', `url('${randomFace}')`);
+    
+            currentFrame++;
+            if (currentFrame < totalFrames) {
+                setTimeout(animateDice, interval);
+            }
+        };
+    
+        // Démarrer l'animation
+        animateDice();
+        }); 
+    }
 }
 
 function zoneClicked(zoneName) {
