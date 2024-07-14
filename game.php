@@ -299,6 +299,8 @@ if ($row_turn['turn'] == 0) {
 $stmt_dice = $pdo->prepare("SELECT dice_data FROM joueurs WHERE `ID` = :user_id");
 $stmt_dice->execute(['user_id' => $_SESSION['user_id']]);
 $row_dice = $stmt_dice->fetch(PDO::FETCH_ASSOC);
+$dices = json_decode($row_dice['dice_data'], true);
+
     
 
 // Récupérer les détails des decks
@@ -366,7 +368,8 @@ if($game['team_activated'] == 0){ ?>
         <!-- Zones des decks -->
         <div class="map-interactive-area" id="deck" onclick="showCardDecksInfo()" style="background-image:url('./img/<?php echo $decks[0]['verso_card'] ?>');background-size:cover;background-repeat:no-repeat;"></div>
         <div class="map-interactive-area" id="dice" onclick="showDice('<?php echo $row_turn['turn']; ?>,<?php echo $row_turn['dice_data']; ?>')" style="background-image:url('./img/Dice6.png');background-size:contain;background-repeat:no-repeat;background-size: contain;background-repeat: no-repeat;background-position: top;"></div>
-
+        <div class="turn" value=<?php echo $row_turn['turn'] ?>></div>
+        <div id="turnMessage"></div>
     <!-- The Modal -->
     <div id="Modal" class="modal">
         <div class="modal-content">
@@ -436,8 +439,9 @@ else if($game['team_activated'] == 1) { ?>
 
         <!-- Zones des decks -->
         <div class="map-interactive-area" id="deck" onclick="showCardDecksInfo()" style="background-image:url('./img/<?php echo $decks[0]['verso_card'] ?>');background-size:cover;background-repeat:no-repeat;"></div>
-        <div class="map-interactive-area" id="dice" onclick="showDice('<?php echo $row_turn['turn']; ?>', '<?php echo $row_dice['dice_data']; ?>')" style="background-image:url('./img/Dice6.png');background-size:contain;background-repeat:no-repeat;background-size: contain;background-repeat: no-repeat;background-position: top;"></div>
-        
+        <div class="map-interactive-area" id="dice" onclick="showDice('<?php echo $row_turn['turn']; ?>', '<?php echo $dices[0]; ?>')" style="background-image:url('./img/Dice6.png');background-size:contain;background-repeat:no-repeat;background-size: contain;background-repeat: no-repeat;background-position: top;"></div>
+        <div class="turn" value=<?php echo $row_turn['turn'] ?>></div>
+        <div id="turnMessage"></div>
     <!-- The Modal -->
     <div id="Modal" class="modal">
         <div class="modal-content">
@@ -546,53 +550,84 @@ function showCardDecksInfo() {
 
 // Function to open dice menu
 //TOUR
+var diceLaunched = false;
 function showDice(Turn,Dice) {
-    if(Turn == 1 && !Dice) {
+    if($('#dice').val()){
+        var url = 'background-image:url("./img/Dice'+$('#dice').val()+'.png")';
+    }else if(Dice > 0){
+        var url = 'background-image:url("./img/Dice'+Dice+'.png")';
+    } else {
         var url = 'background-image:url("./img/Dice6.png")';
-        var style = 'background-size:contain;background-repeat:no-repeat;background-size: contain;background-repeat: no-repeat;background-position: top;';
-        document.getElementsByClassName("modal-dice-content")[0].style = url;
-        modalDice.style.display = "block";
-        console.log(Turn);
-    
-        // Close modal
-        $('.close_dice').click(function() {
-            $('#ModalDice').hide();
-        });
-    
-        // Close modal
-        $('.launch_dice').click(function() {
-        const interval = 100; // intervalle entre chaque changement d'image (en millisecondes)
-        const totalFrames = 10; // nombre total de frames d'animation
-        let currentFrame = 0;
-    
-        const faces = [
-            './img/Dice1.png', // chemin vers vos images de faces de dé
-            './img/Dice2.png',
-            './img/Dice3.png',
-            './img/Dice4.png',
-            './img/Dice5.png',
-            './img/Dice6.png'
-        ];
-    
-        const animateDice = () => {
-    
-            // Choisir aléatoirement une face du dé
-            const randomFaceIndex = Math.floor(Math.random() * faces.length);
-            const randomFace = faces[randomFaceIndex];
-    
-            // Changer l'image du dé avec une animation de transition
-            $('.modal-dice-content').css('background-image', `url('${randomFace}')`);
-    
-            currentFrame++;
-            if (currentFrame < totalFrames) {
-                setTimeout(animateDice, interval);
-            }
-        };
-    
-        // Démarrer l'animation
-        animateDice();
-        }); 
     }
+    var style = 'background-size:contain;background-repeat:no-repeat;background-size: contain;background-repeat: no-repeat;background-position: top;';
+    document.getElementsByClassName("modal-dice-content")[0].style = url;
+    modalDice.style.display = "block";
+
+    // Variable pour suivre si le dé a déjà été lancé
+
+    // Close modal
+    $('.close_dice').click(function() {
+        $('#ModalDice').hide();
+    });
+
+    // Close modal
+    $('.launch_dice').click(function() {
+        if(Turn == 1 && !Dice && diceLaunched == false) {
+            diceLaunched = true; // Marquer le dé comme lancé
+            const interval = 100; // intervalle entre chaque changement d'image (en millisecondes)
+            const totalFrames = 10; // nombre total de frames d'animation
+            let currentFrame = 0;
+        
+            const faces = [
+                './img/Dice1.png', // chemin vers vos images de faces de dé
+                './img/Dice2.png',
+                './img/Dice3.png',
+                './img/Dice4.png',
+                './img/Dice5.png',
+                './img/Dice6.png'
+            ];
+        
+            var animateDice = () => {
+    
+                // Choisir aléatoirement une face du dé
+                var randomFaceIndex = Math.floor(Math.random() * faces.length);
+                var randomFace = faces[randomFaceIndex];
+        
+                // Changer l'image du dé avec une animation de transition
+                $('.modal-dice-content').css('background-image', `url('${randomFace}')`);
+        
+                currentFrame++;
+                if (currentFrame < totalFrames) {
+                    setTimeout(animateDice, interval);
+                } else {
+                    $.ajax({
+                        url: 'dice_ajax.php',
+                        type: 'POST',
+                        data: {
+                            game_id: <?php echo $game_id; ?>,
+                            dice: randomFaceIndex+1,
+                        },
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.success) {
+                                $('#dice').val(randomFaceIndex+1);
+                                console.log(response);
+                            } else {
+                                console.log('Erreur : ' + response.message);
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.log('Erreur AJAX : ' + error);
+                        }
+                    });
+                }
+            };
+
+            // Démarrer l'animation
+            animateDice();
+        }
+        console.log(Dice);
+    });
 }
 
 function zoneClicked(zoneName) {
@@ -600,6 +635,38 @@ function zoneClicked(zoneName) {
     // Ajoutez ici le code JavaScript pour gérer les interactions spécifiques
 }
 $(document).ready(function() {
+    function RefreshTurn() {
+        var turn = $('.turn')[0].getAttribute('value');
+        $.ajax({
+            url: 'turn_ajax.php',
+            type: 'POST',
+            data: {
+                action: 'get_turn',
+                turn: turn
+             },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    if(parseInt(turn) !== parseInt(response.turn)){
+                        $('.turn')[0].setAttribute('value', response.turn);
+                        // Afficher le message au milieu de l'écran
+                        var messageElement = $('#turnMessage');
+                        if(response.turn == 1) {
+                            messageElement.html('<div class="display_turn">Tour : ' + response.turn + '</div><div class="info_turn">Lancez le Dé</div>');
+                        } else {
+                            messageElement.html('<div class="display_turn">Tour : ' + response.turn + '</div><div class="info_turn">Lancez le Dé</div>');
+                        }
+                        messageElement.fadeIn().delay(2000).fadeOut();
+                    }
+                } else {
+                    console.log('Erreur : ' + response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.log('Erreur AJAX : ' + error);
+            }
+        });
+    }
     // JavaScript pour gérer les interactions du jeu
     function initializeGameBoard() {
         // Initialisation du plateau de jeu si nécessaire
@@ -607,5 +674,9 @@ $(document).ready(function() {
 
     // Initialiser le plateau de jeu
     initializeGameBoard();
+    RefreshTurn();
+    setInterval(function() {
+        RefreshTurn(); // Recharger les parties toutes les 2 secondes (2000 ms)
+    }, 2000); // Répéter toutes les 2 secondes (2000 ms)
 });
 </script>

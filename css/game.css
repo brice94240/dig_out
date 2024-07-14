@@ -360,3 +360,17 @@ body, html {
 .button_dice_card {
     margin-top: 37vh;
 }
+
+#turnMessage {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    font-size: 24px;
+    text-align: center;
+    border-radius: 10px;
+}
