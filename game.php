@@ -440,7 +440,8 @@ else if($game['team_activated'] == 1) { ?>
         <!-- Zones des decks -->
         <div class="map-interactive-area" id="deck" onclick="showCardDecksInfo()" style="background-image:url('./img/<?php echo $decks[0]['verso_card'] ?>');background-size:cover;background-repeat:no-repeat;"></div>
         <div class="map-interactive-area" id="dice" onclick="showDice('<?php echo $row_turn['turn']; ?>', '<?php echo $dices[0]; ?>')" style="background-image:url('./img/Dice6.png');background-size:contain;background-repeat:no-repeat;background-size: contain;background-repeat: no-repeat;background-position: top;"></div>
-        <div class="turn" value=<?php echo $row_turn['turn'] ?>></div>
+        <input type="hidden" class="turn" value=<?php echo $row_turn['turn'] ?>/>
+        <input type="hidden" class="turn_id"/>
         <div id="turnMessage"></div>
     <!-- The Modal -->
     <div id="Modal" class="modal">
@@ -625,8 +626,13 @@ function showDice(Turn,Dice) {
 
             // Démarrer l'animation
             animateDice();
+        } else {
+            var turn_id = $('.turn_id')[0].getAttribute('value');
+            if(turn_id == <?php echo $_SESSION['user_id']; ?> && diceLaunched == false) {
+                console.log('JE LANCE');
+                //ICI GERER LE LANCER DE DE SI C'EST VOTRE TOUR
+            }
         }
-        console.log(Dice);
     });
 }
 
@@ -655,8 +661,12 @@ $(document).ready(function() {
                             messageElement.html('<div class="display_turn">Tour : ' + response.turn + '</div><div class="info_turn">Lancez le Dé</div>');
                         } else {
                             messageElement.html('<div class="display_turn">Tour : ' + response.turn + '</div><div class="info_turn">Tour de : '+ response.player_turn_name +'</div>');
+                            $('.turn_id')[0].setAttribute('value', response.player_turn_id);
                         }
                         messageElement.fadeIn().delay(2000).fadeOut();
+                    } else {
+                        $('.turn')[0].setAttribute('value', response.turn);
+                        $('.turn_id')[0].setAttribute('value', response.player_turn_id);
                     }
                 } else {
                     console.log('Erreur : ' + response.message);
