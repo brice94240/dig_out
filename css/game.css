@@ -374,3 +374,49 @@ body, html {
     text-align: center;
     border-radius: 10px;
 }
+
+.pawn {
+    width: 20px; /* Example dimensions */
+    height: 20px; /* Example dimensions */
+    position: absolute;
+    transform: translate(-50%, -50%);
+    border-radius: 50%; /* Make it round */
+}
+
+.teamA {
+    background:blue;
+    border: 0.5em;
+    border-color: black;
+    border-style: double;
+}
+
+.teamB {
+    background:red;
+    border: 0.5em;
+    border-color: black;
+    border-style: double;
+}
+.pawn-1 {
+    top: 30%; /* Center the pawn */
+    left: 25%; /* Center the pawn */
+}
+.pawn-2 {
+    top: 30%; /* Center the pawn */
+    left: 50%; /* Center the pawn */
+}
+.pawn-3 {
+    top: 30%; /* Center the pawn */
+    left: 75%; /* Center the pawn */
+}
+.pawn-4 {
+    top: 70%; /* Center the pawn */
+    left: 25%; /* Center the pawn */
+}
+.pawn-5 {
+    top: 70%; /* Center the pawn */
+    left: 50%; /* Center the pawn */
+}
+.pawn-6 {
+    top: 70%; /* Center the pawn */
+    left: 75%; /* Center the pawn */
+}

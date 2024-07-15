@@ -48,6 +48,15 @@ if (!in_array($_SESSION['user_id'], $tab_player)) {
     $stmt_update = $pdo->prepare("UPDATE games SET tab_player = :tab_player WHERE creator_id = :game_id");
     $stmt_update->execute(['tab_player' => $tab_player_str, 'game_id' => $game_id]);
 
+    // Mettre à jour la localisation pour l'équipe A
+    $stmt_update_localisation_a = $pdo->prepare("UPDATE joueurs SET localisation = :localisation WHERE game_joined = :game_id AND team = 'A'");
+    $stmt_update_localisation_a->execute(['localisation' => 1, 'game_id' => $game_id]);
+
+    // Mettre à jour la localisation pour l'équipe B
+    $stmt_update_localisation_b = $pdo->prepare("UPDATE joueurs SET localisation = :localisation WHERE game_joined = :game_id AND team = 'B'");
+    $stmt_update_localisation_b->execute(['localisation' => 3, 'game_id' => $game_id]);
+
+
     // Récupérer les informations de la partie
     $stmt_game = $pdo->prepare("SELECT * FROM games WHERE creator_id = :game_id");
     $stmt_game->execute(['game_id' => $game_id]);
@@ -631,6 +640,58 @@ function showDice(Turn,Dice) {
             if(turn_id == <?php echo $_SESSION['user_id']; ?> && diceLaunched == false) {
                 console.log('JE LANCE');
                 //ICI GERER LE LANCER DE DE SI C'EST VOTRE TOUR
+                diceLaunched = true; // Marquer le dé comme lancé
+                const interval = 100; // intervalle entre chaque changement d'image (en millisecondes)
+                const totalFrames = 10; // nombre total de frames d'animation
+                let currentFrame = 0;
+            
+                const faces = [
+                    './img/Dice1.png', // chemin vers vos images de faces de dé
+                    './img/Dice2.png',
+                    './img/Dice3.png',
+                    './img/Dice4.png',
+                    './img/Dice5.png',
+                    './img/Dice6.png'
+                ];
+            
+                var animateDice = () => {
+        
+                    // Choisir aléatoirement une face du dé
+                    var randomFaceIndex = Math.floor(Math.random() * faces.length);
+                    var randomFace = faces[randomFaceIndex];
+            
+                    // Changer l'image du dé avec une animation de transition
+                    $('.modal-dice-content').css('background-image', `url('${randomFace}')`);
+            
+                    currentFrame++;
+                    if (currentFrame < totalFrames) {
+                        setTimeout(animateDice, interval);
+                    } else {
+                        $.ajax({
+                            url: 'dice_ajax.php',
+                            type: 'POST',
+                            data: {
+                                game_id: <?php echo $game_id; ?>,
+                                dice: randomFaceIndex+1,
+                            },
+                            dataType: 'json',
+                            success: function(response) {
+                                if (response.success) {
+                                    $('#dice').val(randomFaceIndex+1);
+                                    console.log(response);
+                                } else {
+                                    console.log('Erreur : ' + response.message);
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                console.log('Erreur AJAX : ' + error);
+                            }
+                        });
+                    }
+                };
+
+                // Démarrer l'animation
+                animateDice();
             }
         }
     });
@@ -648,7 +709,8 @@ $(document).ready(function() {
             type: 'POST',
             data: {
                 action: 'get_turn',
-                turn: turn
+                turn: turn,
+                game_id: <?php echo $game_id; ?>,
              },
             dataType: 'json',
             success: function(response) {
@@ -668,6 +730,41 @@ $(document).ready(function() {
                         $('.turn')[0].setAttribute('value', response.turn);
                         $('.turn_id')[0].setAttribute('value', response.player_turn_id);
                     }
+                    // Mapping des localisations aux pièces de la carte
+                    const roomMapping = {
+                        1: 'piece7',
+                        2: 'piece8',
+                        3: 'piece9',
+                        4: 'piece3',
+                        5: 'piece4',
+                        6: 'piece5',
+                        7: 'piece6',
+                        
+                    };
+                    $.each(response.playerData, function(playerID, playerInfo) {
+                        const pawnId = 'pawn' + playerID;
+                        const roomElementId = roomMapping[playerInfo.localisation];
+                        if (roomElementId) {
+                            // Vérifier le nombre actuel de pions dans la pièce
+                            const currentPawns = $('#' + roomElementId).find('.pawn').length;
+
+                            if (currentPawns < 6) {
+                                if ($('#' + roomElementId).find('#' + pawnId).length === 0) {
+                                    // Calculer la classe numérotée pour le pion
+                                    const pawnClass = 'pawn team' + playerInfo.team + ' pawn-' + (currentPawns + 1);
+
+                                    // Créer le pion avec la classe correspondante
+                                    $('#'+pawnId).remove();
+                                    const pawn = $('<div class="' + pawnClass + '" id="' + pawnId + '" value="' + playerInfo.pseudo + '"></div>');
+                                    $('#' + roomElementId).append(pawn);
+                                }
+                            } else {
+                                console.log('Nombre maximum de pions atteint dans la pièce', roomElementId);
+                            }
+                        } else {
+                            console.log('Aucune correspondance de pièce pour la localisation', playerInfo.localisation);
+                        }
+                    });
                 } else {
                     console.log('Erreur : ' + response.message);
                 }
