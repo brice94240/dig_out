@@ -22,15 +22,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['game_id']) && isset($
 
         // If no existing data, initialize as an empty array
         $current_dice_data = [$_POST['dice']];
-        if ($row_dice && $row_dice['dice_data']) {
-            // Decode the existing dice data if available
-            $current_dice_data = json_decode($row_dice['dice_data'], true);
+        // if ($row_dice && $row_dice['dice_data']) {
+        //     // Decode the existing dice data if available
+        //     $current_dice_data = json_decode($row_dice['dice_data'], true);
 
-            // Ensure that the existing dice data is properly decoded
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                $current_dice_data = [];
-            }
-        }
+        //     // Ensure that the existing dice data is properly decoded
+        //     if (json_last_error() !== JSON_ERROR_NONE) {
+        //         $current_dice_data = [];
+        //     }
+        // }
 
         // Combine the new dice data with the existing data by appending each new dice individually
         foreach ($new_dice_data as $new_dice) {
@@ -133,6 +133,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['game_id']) && isset($
             echo json_encode(['success' => true, 'dice' => $current_dice_data, 'dice_count' => $row_dice_count, 'max_player' => $max_player,'team_a_sum' => $team_a_sum,'team_b_sum' => $team_b_sum, 'alternated_player' => $alternated_players]);
         } else {
             // Respond with success and the updated dice data
+
+            // Update nb_action in the database
+            $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET nb_action = nb_action -1 WHERE `ID` = :user_id");
+            $stmt_update_nb_action->execute(['user_id' => $_SESSION['user_id']]);
+            
             echo json_encode(['success' => true, 'dice' => $current_dice_data, 'dice_count' => $row_dice_count, 'max_player' => $max_player]);
         }
         
