@@ -12,9 +12,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
         $turn = $row['turn'];
         if(intval($turn) !== intval($_POST['turn'])) {
-            echo json_encode(['success' => true, 'turn' => $turn, 'new_turn' => '1', 'last_turn' => $_POST['turn']]);
+            if($row['turn'] >= 3) {
+                $real_turn = $row['turn']-3;
+
+
+                if($real_turn >= $row['max_player']){
+                    $real_turn = $real_turn-($row['max_player']);
+                }
+                $player_tab = json_decode($row['turn_data'], true);
+                $player_turn_id = $player_tab[$real_turn];
+                $stmt_joueur_turn = $pdo->prepare("SELECT * FROM joueurs  WHERE ID = :ID");
+                $stmt_joueur_turn->execute(['ID' => $player_turn_id]);
+                $row_joueur_turn = $stmt_joueur_turn->fetch(PDO::FETCH_ASSOC);
+                $player_turn_name = $row_joueur_turn['pseudo'];
+            } else {
+                $real_turn = 0;
+                $player_turn_id = "";
+                $player_turn_name = "";
+            }
+            // $turn_player = $row['turn_data'];
+            echo json_encode(['success' => true, 'turn' => $turn, 'new_turn' => '1', 'last_turn' => $_POST['turn'], 'real_turn' => $real_turn, 'player_turn_id' => $player_turn_id, 'player_turn_name' => $player_turn_name, 'player_tab' => $player_tab]);
         } else {
-            echo json_encode(['success' => true, 'turn' => $turn, 'new_turn' => '0', 'last_turn' => $_POST['turn']]);
+            echo json_encode(['success' => true, 'turn' => $turn, 'new_turn' => '0', 'last_turn' => $_POST['turn'], 'real_turn' => $real_turn, 'player_turn_id' => $player_turn_id, 'player_turn_name' => $player_turn_name, 'player_tab' => $player_tab]);
         }
 
     } catch (PDOException $e) {

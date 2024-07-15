@@ -654,7 +654,7 @@ $(document).ready(function() {
                         if(response.turn == 1) {
                             messageElement.html('<div class="display_turn">Tour : ' + response.turn + '</div><div class="info_turn">Lancez le Dé</div>');
                         } else {
-                            messageElement.html('<div class="display_turn">Tour : ' + response.turn + '</div><div class="info_turn">Lancez le Dé</div>');
+                            messageElement.html('<div class="display_turn">Tour : ' + response.turn + '</div><div class="info_turn">Tour de : '+ response.player_turn_name +'</div>');
                         }
                         messageElement.fadeIn().delay(2000).fadeOut();
                     }
