@@ -18,6 +18,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
              $stmt_update_action_to_players = $pdo->prepare("UPDATE joueurs SET nb_action = :nb_action WHERE `game_joined` = :game_id");
              $stmt_update_action_to_players->execute(['nb_action' => 0, 'game_id' => $_POST['game_id']]);
 
+             if($row['turn'] >= 2) {
+                $real_turn = $row['turn']-2;
+                if($real_turn >= $row['max_player']){
+                    $real_turn = $real_turn % $row['max_player'];
+                }
+                $player_tab = json_decode($row['turn_data'], true);
+                $player_turn_id = $player_tab[$real_turn];
+            }
+
             // Update the action to players playing
             $stmt_update_action_to_player_playing = $pdo->prepare("UPDATE joueurs SET nb_action = :nb_action WHERE `game_joined` = :game_id AND ID = :player_id");
             $stmt_update_action_to_player_playing->execute(['nb_action' => 2, 'game_id' => $_POST['game_id'], 'player_id' => $player_turn_id]);

@@ -610,118 +610,139 @@ function showDice(Turn,Dice) {
 
     // Close modal
     $('.launch_dice').click(function() {
-        if(Turn == 1 && !Dice && diceLaunched == false) {
-            diceLaunched = true; // Marquer le dé comme lancé
-            const interval = 100; // intervalle entre chaque changement d'image (en millisecondes)
-            const totalFrames = 10; // nombre total de frames d'animation
-            let currentFrame = 0;
-        
-            const faces = [
-                './img/Dice1.png', // chemin vers vos images de faces de dé
-                './img/Dice2.png',
-                './img/Dice3.png',
-                './img/Dice4.png',
-                './img/Dice5.png',
-                './img/Dice6.png'
-            ];
-        
-            var animateDice = () => {
-    
-                // Choisir aléatoirement une face du dé
-                var randomFaceIndex = Math.floor(Math.random() * faces.length);
-                var randomFace = faces[randomFaceIndex];
-        
-                // Changer l'image du dé avec une animation de transition
-                $('.modal-dice-content').css('background-image', `url('${randomFace}')`);
-        
-                currentFrame++;
-                if (currentFrame < totalFrames) {
-                    setTimeout(animateDice, interval);
-                } else {
-                    $.ajax({
-                        url: 'dice_ajax.php',
-                        type: 'POST',
-                        data: {
-                            game_id: <?php echo $game_id; ?>,
-                            dice: randomFaceIndex+1,
-                        },
-                        dataType: 'json',
-                        success: function(response) {
-                            if (response.success) {
-                                $('#dice').val(randomFaceIndex+1);
+        $.ajax({
+            url: 'get_turn_ajax.php',
+            type: 'POST',
+            data: {
+                action: 'get_turn',
+                game_id: <?php echo $game_id; ?>,
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    console.log(response);
+                    var Turn = response.turn;
+                    if(Turn == 1 && !Dice && diceLaunched == false) {
+                        diceLaunched = true; // Marquer le dé comme lancé
+                        const interval = 100; // intervalle entre chaque changement d'image (en millisecondes)
+                        const totalFrames = 10; // nombre total de frames d'animation
+                        let currentFrame = 0;
+                    
+                        const faces = [
+                            './img/Dice1.png', // chemin vers vos images de faces de dé
+                            './img/Dice2.png',
+                            './img/Dice3.png',
+                            './img/Dice4.png',
+                            './img/Dice5.png',
+                            './img/Dice6.png'
+                        ];
+                    
+                        var animateDice = () => {
+                
+                            // Choisir aléatoirement une face du dé
+                            var randomFaceIndex = Math.floor(Math.random() * faces.length);
+                            var randomFace = faces[randomFaceIndex];
+                    
+                            // Changer l'image du dé avec une animation de transition
+                            $('.modal-dice-content').css('background-image', `url('${randomFace}')`);
+                    
+                            currentFrame++;
+                            if (currentFrame < totalFrames) {
+                                setTimeout(animateDice, interval);
                             } else {
-                                console.log('Erreur : ' + response.message);
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            console.log('Erreur AJAX : ' + error);
-                        }
-                    });
-                }
-            };
-
-            // Démarrer l'animation
-            animateDice();
-        } else {
-            var turn_id = $('.turn_id')[0].getAttribute('value');
-            var turn_action = $('.turn_action')[0].getAttribute('value');
-            if(turn_id == <?php echo $_SESSION['user_id']; ?> && diceLaunched == false) {
-                //ICI GERER LE LANCER DE DE SI C'EST VOTRE TOUR
-                if(Dice == '' && turn_action > 0){
-                    diceLaunched = true; // Marquer le dé comme lancé
-                    const interval = 100; // intervalle entre chaque changement d'image (en millisecondes)
-                    const totalFrames = 10; // nombre total de frames d'animation
-                    let currentFrame = 0;
-                
-                    const faces = [
-                        './img/Dice1.png', // chemin vers vos images de faces de dé
-                        './img/Dice2.png',
-                        './img/Dice3.png',
-                        './img/Dice4.png',
-                        './img/Dice5.png',
-                        './img/Dice6.png'
-                    ];
-                
-                    var animateDice = () => {
-            
-                        // Choisir aléatoirement une face du dé
-                        var randomFaceIndex = Math.floor(Math.random() * faces.length);
-                        var randomFace = faces[randomFaceIndex];
-                
-                        // Changer l'image du dé avec une animation de transition
-                        $('.modal-dice-content').css('background-image', `url('${randomFace}')`);
-                
-                        currentFrame++;
-                        if (currentFrame < totalFrames) {
-                            setTimeout(animateDice, interval);
-                        } else {
-                            $.ajax({
-                                url: 'dice_ajax.php',
-                                type: 'POST',
-                                data: {
-                                    game_id: <?php echo $game_id; ?>,
-                                    dice: randomFaceIndex+1,
-                                },
-                                dataType: 'json',
-                                success: function(response) {
-                                    if (response.success) {
-                                        $('#dice').val(randomFaceIndex+1);
-                                    } else {
-                                        console.log('Erreur : ' + response.message);
+                                $.ajax({
+                                    url: 'dice_ajax.php',
+                                    type: 'POST',
+                                    data: {
+                                        game_id: <?php echo $game_id; ?>,
+                                        dice: randomFaceIndex+1,
+                                    },
+                                    dataType: 'json',
+                                    success: function(response) {
+                                        if (response.success) {
+                                            $('#dice').val(randomFaceIndex+1);
+                                        } else {
+                                            console.log('Erreur : ' + response.message);
+                                        }
+                                    },
+                                    error: function(xhr, status, error) {
+                                        console.log('Erreur AJAX : ' + error);
                                     }
-                                },
-                                error: function(xhr, status, error) {
-                                    console.log('Erreur AJAX : ' + error);
-                                }
-                            });
-                        }
-                    };
+                                });
+                            }
+                        };
 
-                    // Démarrer l'animation
-                    animateDice();
+                        // Démarrer l'animation
+                        animateDice();
+                    } else {
+                        var turn_id = $('.turn_id')[0].getAttribute('value');
+                        var turn_action = $('.turn_action')[0].getAttribute('value');
+                        if(turn_id == <?php echo $_SESSION['user_id']; ?> && response.dice_data == '') {
+                            //ICI GERER LE LANCER DE DE SI C'EST VOTRE TOUR
+                            if(Dice == '' && turn_action > 0){
+                                diceLaunched = true; // Marquer le dé comme lancé
+                                const interval = 100; // intervalle entre chaque changement d'image (en millisecondes)
+                                const totalFrames = 10; // nombre total de frames d'animation
+                                let currentFrame = 0;
+                            
+                                const faces = [
+                                    './img/Dice1.png', // chemin vers vos images de faces de dé
+                                    './img/Dice2.png',
+                                    './img/Dice3.png',
+                                    './img/Dice4.png',
+                                    './img/Dice5.png',
+                                    './img/Dice6.png'
+                                ];
+                            
+                                var animateDice = () => {
+                        
+                                    // Choisir aléatoirement une face du dé
+                                    var randomFaceIndex = Math.floor(Math.random() * faces.length);
+                                    var randomFace = faces[randomFaceIndex];
+                            
+                                    // Changer l'image du dé avec une animation de transition
+                                    $('.modal-dice-content').css('background-image', `url('${randomFace}')`);
+                            
+                                    currentFrame++;
+                                    if (currentFrame < totalFrames) {
+                                        setTimeout(animateDice, interval);
+                                    } else {
+                                        $.ajax({
+                                            url: 'dice_ajax.php',
+                                            type: 'POST',
+                                            data: {
+                                                game_id: <?php echo $game_id; ?>,
+                                                dice: randomFaceIndex+1,
+                                            },
+                                            dataType: 'json',
+                                            success: function(response) {
+                                                if (response.success) {
+                                                    $('#dice').val(randomFaceIndex+1);
+                                                } else {
+                                                    console.log('Erreur : ' + response.message);
+                                                }
+                                            },
+                                            error: function(xhr, status, error) {
+                                                console.log('Erreur AJAX : ' + error);
+                                            }
+                                        });
+                                    }
+                                };
+
+                                // Démarrer l'animation
+                                animateDice();
+                            }
+                        }
+                    }
+                } else {
+                    console.log('Erreur : ' + response.message);
                 }
+            },
+            error: function(xhr, status, error) {
+                console.log('Erreur AJAX : ' + error);
             }
-        }
+        });
+        
     });
 }
 

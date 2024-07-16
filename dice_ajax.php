@@ -133,7 +133,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['game_id']) && isset($
             echo json_encode(['success' => true, 'dice' => $current_dice_data, 'dice_count' => $row_dice_count, 'max_player' => $max_player,'team_a_sum' => $team_a_sum,'team_b_sum' => $team_b_sum, 'alternated_player' => $alternated_players]);
         } else {
             // Respond with success and the updated dice data
-
             // Update nb_action in the database
             $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET nb_action = nb_action -1 WHERE `ID` = :user_id");
             $stmt_update_nb_action->execute(['user_id' => $_SESSION['user_id']]);

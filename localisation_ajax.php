@@ -39,9 +39,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 if(array_search(intval($turn_dice[0]) , $diceMapping['zones'][$zone]) !== false){
                     $stmt_update_localisation_to_players = $pdo->prepare("UPDATE joueurs SET localisation = :localisation WHERE `ID` = :player_id");
                     $stmt_update_localisation_to_players->execute(['localisation' => $zone, 'player_id' => $_SESSION['user_id']]);
-
-                    $stmt_update_nb_action_to_players = $pdo->prepare("UPDATE joueurs SET nb_action = nb_action - 1 WHERE ID = :user_id");
-                    $stmt_update_nb_action_to_players->execute(['user_id' => $_SESSION['user_id']]);
     
                     // Récupérer le deck actuel du joueur
                     $stmt_get_deck = $pdo->prepare("SELECT deck FROM joueurs WHERE ID = :player_id");
