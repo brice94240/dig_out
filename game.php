@@ -51,10 +51,14 @@ if (!in_array($_SESSION['user_id'], $tab_player)) {
     // Mettre à jour la localisation pour l'équipe A
     $stmt_update_localisation_a = $pdo->prepare("UPDATE joueurs SET localisation = :localisation WHERE game_joined = :game_id AND team = 'A'");
     $stmt_update_localisation_a->execute(['localisation' => 1, 'game_id' => $game_id]);
+    $stmt_update_last_localisation_a = $pdo->prepare("UPDATE joueurs SET last_localisation = :last_localisation WHERE game_joined = :game_id AND team = 'A'");
+    $stmt_update_last_localisation_a->execute(['last_localisation' => 1, 'game_id' => $game_id]);
 
     // Mettre à jour la localisation pour l'équipe B
     $stmt_update_localisation_b = $pdo->prepare("UPDATE joueurs SET localisation = :localisation WHERE game_joined = :game_id AND team = 'B'");
     $stmt_update_localisation_b->execute(['localisation' => 3, 'game_id' => $game_id]);
+    $stmt_update_last_localisation_b = $pdo->prepare("UPDATE joueurs SET last_localisation = :last_localisation WHERE game_joined = :game_id AND team = 'B'");
+    $stmt_update_last_localisation_b->execute(['last_localisation' => 3, 'game_id' => $game_id]);
 
 
     // Récupérer les informations de la partie
@@ -359,12 +363,12 @@ if($game['team_activated'] == 0){ ?>
         <div class="map-interactive-area" id="gang6" onclick="showGangInfo('<?php echo $gangs['gang1'][0]['gang_name']; ?>', '<?php echo $gangs['gang1'][0]['name']; ?>', '<?php echo $gangs['gang1'][0]['description']; ?>')"></div>
         
         <!-- Zones des pièces -->
-        <div class="map-interactive-area" id="piece1" onclick="zoneClicked('Douches')"></div>
-        <div class="map-interactive-area" id="piece2" onclick="zoneClicked('Cellules')"></div>
-        <div class="map-interactive-area" id="piece3" onclick="zoneClicked('Infirmerie')"></div>
-        <div class="map-interactive-area" id="piece4" onclick="zoneClicked('Réfectoire')"></div>
-        <div class="map-interactive-area" id="piece5" onclick="zoneClicked('Isolement')"></div>
-        <div class="map-interactive-area" id="piece6" onclick="zoneClicked('Promenade')"></div>
+        <div class="map-interactive-area" id="piece1" onclick="zoneClicked(1)"></div>
+        <div class="map-interactive-area" id="piece2" onclick="zoneClicked(2)"></div>
+        <div class="map-interactive-area" id="piece3" onclick="zoneClicked(3)"></div>
+        <div class="map-interactive-area" id="piece4" onclick="zoneClicked(4)"></div>
+        <div class="map-interactive-area" id="piece5" onclick="zoneClicked(5)"></div>
+        <div class="map-interactive-area" id="piece6" onclick="zoneClicked(6)"></div>
 
         <!-- Zones des cartes -->
         <div class="map-interactive-area" id="carte1" onclick="showCardsFouillesInfo('<?php echo $fouilles[0]['name']; ?>', '<?php echo $fouilles[0]['description']; ?>', '<?php echo $fouilles[0]['img']; ?>', '<?php echo $fouilles[0]['verso_card']; ?>')" style="background-image:url('./img/<?php echo $fouilles[0]['verso_card'] ?>');background-size:cover;transform: rotate(90deg);background-repeat:no-repeat;"></div>
@@ -378,10 +382,11 @@ if($game['team_activated'] == 0){ ?>
         <div class="map-interactive-area" id="deck" onclick="showCardDecksInfo()" style="background-image:url('./img/<?php echo $decks[0]['verso_card'] ?>');background-size:cover;background-repeat:no-repeat;"></div>
         <div class="map-interactive-area" id="dice" onclick="showDice('<?php echo $row_turn['turn']; ?>,<?php echo $row_turn['dice_data']; ?>')" style="background-image:url('./img/Dice6.png');background-size:contain;background-repeat:no-repeat;background-size: contain;background-repeat: no-repeat;background-position: top;"></div>
         <div class="turn" value=<?php echo $row_turn['turn'] ?>></div>
-        <div id="turnMessage"></div>
         <input type="hidden" class="turn" value=<?php echo $row_turn['turn'] ?>/>
         <input type="hidden" class="turn_id"/>
         <input type="hidden" class="turn_action"/>
+        <input type="hidden" class="turn_dice"/>
+        <div id="turnMessage"></div>
     <!-- The Modal -->
     <div id="Modal" class="modal">
         <div class="modal-content">
@@ -432,14 +437,14 @@ else if($game['team_activated'] == 1) { ?>
         
         <!-- Zones des pièces -->
 
-        <div class="map-interactive-area" id="piece7" onclick="zoneClicked('CellulesA')"></div>
-        <div class="map-interactive-area" id="piece8" onclick="zoneClicked('Douches')"></div>
-        <div class="map-interactive-area" id="piece9" onclick="zoneClicked('CellulesB')"></div>
+        <div class="map-interactive-area" id="piece7" onclick="zoneClicked(1)"></div>
+        <div class="map-interactive-area" id="piece8" onclick="zoneClicked(2)"></div>
+        <div class="map-interactive-area" id="piece9" onclick="zoneClicked(3)"></div>
 
-        <div class="map-interactive-area" id="piece3" onclick="zoneClicked('Infirmerie')"></div>
-        <div class="map-interactive-area" id="piece4" onclick="zoneClicked('Réfectoire')"></div>
-        <div class="map-interactive-area" id="piece5" onclick="zoneClicked('Isolement')"></div>
-        <div class="map-interactive-area" id="piece6" onclick="zoneClicked('Promenade')"></div>
+        <div class="map-interactive-area" id="piece3" onclick="zoneClicked(4)"></div>
+        <div class="map-interactive-area" id="piece4" onclick="zoneClicked(5)"></div>
+        <div class="map-interactive-area" id="piece5" onclick="zoneClicked(6)"></div>
+        <div class="map-interactive-area" id="piece6" onclick="zoneClicked(7)"></div>
 
         <!-- Zones des cartes -->
         <div class="map-interactive-area" id="carte1" onclick="showCardsFouillesInfo('<?php echo $fouilles[0]['name']; ?>', '<?php echo $fouilles[0]['description']; ?>', '<?php echo $fouilles[0]['img']; ?>', '<?php echo $fouilles[0]['verso_card']; ?>')" style="background-image:url('./img/<?php echo $fouilles[0]['verso_card'] ?>');background-size:cover;transform: rotate(90deg);background-repeat:no-repeat;"></div>
@@ -455,6 +460,7 @@ else if($game['team_activated'] == 1) { ?>
         <input type="hidden" class="turn" value=<?php echo $row_turn['turn'] ?>/>
         <input type="hidden" class="turn_id"/>
         <input type="hidden" class="turn_action"/>
+        <input type="hidden" class="turn_dice"/>
         <div id="turnMessage"></div>
     <!-- The Modal -->
     <div id="Modal" class="modal">
@@ -546,20 +552,38 @@ function showCardsFouillesInfo(cardName, description, cardImage, versoCard) {
 
 // Function to display the modal with specific fouille card info
 function showCardDecksInfo() {
-    var deck = <?php echo json_encode($decks); ?>;
+    $.ajax({
+            url: 'decks_ajax.php',
+            type: 'POST',
+            data: {
+                action: 'get_deck',
+                game_id: <?php echo $game_id; ?>,
+             },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    var deck = response.deck;
+                    $('#deck-cards').empty();
+                    // Montrer la modal lorsque l'utilisateur clique sur le deck
+                    deck.forEach(function(card) {
+                        var card_description = card.description.replace(/\\'/g, "'");
+                        $('#deck-cards').append('<div class="card modal-content-deck" style="background-image:url(./img/'+card.img+');background-size:cover;background-repeat:no-repeat;"><div class="deck-carte_name">' + card.name + '</div><div class="deck-carte_description">' + card_description + '</div></div>');
+                        $('#deck-modal').show();
+                    });
 
-    $('#deck-cards').empty();
-    // Montrer la modal lorsque l'utilisateur clique sur le deck
-    deck.forEach(function(card) {
-        var card_description = card.description.replace(/\\'/g, "'");
-        $('#deck-cards').append('<div class="card modal-content-deck" style="background-image:url(./img/'+card.img+');background-size:cover;background-repeat:no-repeat;"><div class="deck-carte_name">' + card.name + '</div><div class="deck-carte_description">' + card_description + '</div></div>');
-        $('#deck-modal').show();
-    });
+                    // Close modal
+                    $('#close-deck-modal').click(function() {
+                        $('#deck-modal').hide();
+                    });
+                } else {
+                    console.log('Erreur : ' + response.message);
+                }
 
-    // Close modal
-    $('#close-deck-modal').click(function() {
-        $('#deck-modal').hide();
-    });
+            },
+            error: function(xhr, status, error) {
+                console.log('Erreur AJAX : ' + error);
+            }
+        });
 }
 
 // Function to open dice menu
@@ -625,7 +649,6 @@ function showDice(Turn,Dice) {
                         success: function(response) {
                             if (response.success) {
                                 $('#dice').val(randomFaceIndex+1);
-                                console.log(response);
                             } else {
                                 console.log('Erreur : ' + response.message);
                             }
@@ -683,7 +706,6 @@ function showDice(Turn,Dice) {
                                 success: function(response) {
                                     if (response.success) {
                                         $('#dice').val(randomFaceIndex+1);
-                                        console.log(response);
                                     } else {
                                         console.log('Erreur : ' + response.message);
                                     }
@@ -704,11 +726,35 @@ function showDice(Turn,Dice) {
 }
 
 function zoneClicked(zoneName) {
-    alert(zoneName + ' cliquée!');
-    // Ajoutez ici le code JavaScript pour gérer les interactions spécifiques
+    var turn_dice = $('.turn_dice')[0].getAttribute('value');
+    var zone = zoneName;
+
+    $.ajax({
+            url: 'localisation_ajax.php',
+            type: 'POST',
+            data: {
+                action: 'get_localisation',
+                turn_dice: turn_dice,
+                zone : zone,
+                game_id: <?php echo $game_id; ?>,
+             },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    showCardDecksInfo(response.deck);
+                } else {
+                    console.log('Erreur : ' + response.message);
+                }
+
+            },
+            error: function(xhr, status, error) {
+                console.log('Erreur AJAX : ' + error);
+            }
+        });
 }
 $(document).ready(function() {
     function RefreshTurn() {
+        var globalDeck = <?php echo json_encode($decks); ?>;
         var turn = $('.turn')[0].getAttribute('value');
         $.ajax({
             url: 'turn_ajax.php',
@@ -772,6 +818,11 @@ $(document).ready(function() {
                             console.log('Aucune correspondance de pièce pour la localisation', playerInfo.localisation);
                         }
                     });
+                    if(response.playerData[response.player_id]['dice_data'] !== ''){
+                        if(response.playerData[response.player_id]['localisation'] == response.playerData[response.player_id]['last_localisation']){
+                            $('.turn_dice')[0].setAttribute('value', response.playerData[response.player_id]['dice_data']);
+                        }
+                    }
                 } else {
                     console.log('Erreur : ' + response.message);
                 }
