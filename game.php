@@ -422,7 +422,7 @@ if($game['team_activated'] == 0){ ?>
             </div>
         </div>
     </div>
-
+    <button id="healButton" class="heal-button">Se soigner</button>
 <?php }
 else if($game['team_activated'] == 1) { ?>
     <div class="map-container">
@@ -496,6 +496,7 @@ else if($game['team_activated'] == 1) { ?>
             </div>
         </div>
     </div>
+    <button id="healButton" class="heal-button">Se soigner</button>
 <?php } ?>
 
 </body>
@@ -520,6 +521,10 @@ window.onclick = function(event) {
         modal.style.display = "none";
     }
 }
+
+$('#healButton').click(function() {
+    useAction('heal','heal');
+});
 
 // Function to display the modal with specific gang info
 function showGangInfo(gangName, cardName, description) {
@@ -554,6 +559,7 @@ function showGangInfo(gangName, cardName, description) {
         joinButton.innerText = 'Rejoindre';
         // Append the new "Voler" button to the button card div
         buttonCardDiv.appendChild(joinButton);
+        joinButton.setAttribute('onclick', 'useAction("join","'+gangName+'")');
     }
 }
 
@@ -587,13 +593,15 @@ function showCardsPointsInfo(cardName, description, cardImage) {
         var stealButton = document.createElement('span');
         stealButton.className = 'steal';
         stealButton.innerText = 'Voler';
+        stealButton.setAttribute('onclick', 'useAction("steal","'+cardName+'")');
         // Append the new "Voler" button to the button card div
         buttonCardDiv.appendChild(stealButton);
-    } else {
+    } else if (cardName == "Surin" || cardName == "Pioche" || cardName == "Pelle"){
         // Create the new "Fabriquer" button
         var makeButton = document.createElement('span');
         makeButton.className = 'make';
         makeButton.innerText = 'Fabriquer';
+        makeButton.setAttribute('onclick', 'useAction("make","'+cardName+'")');
         // Append the new "Voler" button to the button card div
         buttonCardDiv.appendChild(makeButton);
     }
@@ -832,6 +840,34 @@ function zoneClicked(zoneName) {
         });
 }
 
+function useAction(name_action,name) {
+    console.log(name_action);
+    console.log(name);
+
+    $.ajax({
+            url: 'make_action_ajax.php',
+            type: 'POST',
+            data: {
+                action: 'make_action',
+                name_action : name_action,
+                item_name : name,
+                game_id: <?php echo $game_id; ?>,
+             },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    // showCardDecksInfo(response.deck);
+                } else {
+                    console.log('Erreur : ' + response.message);
+                }
+                console.log(response);
+            },
+            error: function(xhr, status, error) {
+                console.log('Erreur AJAX : ' + error);
+            }
+        });
+}
+
 $(document).ready(function() {
     function RefreshTurn() {
         var globalDeck = <?php echo json_encode($decks); ?>;
@@ -902,6 +938,9 @@ $(document).ready(function() {
                         if(response.playerData[response.player_id]['localisation'] == response.playerData[response.player_id]['last_localisation']){
                             $('.turn_dice')[0].setAttribute('value', response.playerData[response.player_id]['dice_data']);
                         }
+                    }
+                    if(response.localisation == 4) {
+                        console.log(response);
                     }
                 } else {
                     console.log('Erreur : ' + response.message);
