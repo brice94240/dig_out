@@ -14,6 +14,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $stmt_update_dice_data_to_empty = $pdo->prepare("UPDATE joueurs SET dice_data = :dice_data WHERE `game_joined` = :game_id");
             $stmt_update_dice_data_to_empty->execute(['dice_data' => '', 'game_id' => $_POST['game_id']]);
 
+            // Update the point_turn in the database
+            $stmt_update_point_turn_to_empty = $pdo->prepare("UPDATE joueurs SET point_turn = :point_turn WHERE `game_joined` = :game_id");
+            $stmt_update_point_turn_to_empty->execute(['point_turn' => '', 'game_id' => $_POST['game_id']]);
+
              // Update the action to all players
              $stmt_update_action_to_players = $pdo->prepare("UPDATE joueurs SET nb_action = :nb_action WHERE `game_joined` = :game_id");
              $stmt_update_action_to_players->execute(['nb_action' => 0, 'game_id' => $_POST['game_id']]);
@@ -91,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $stmt_player_data->execute(['player_id' => $_SESSION['user_id']]);
         $row_player_data = $stmt_player_data->fetch(PDO::FETCH_ASSOC);
 
-        echo json_encode(['success' => true, 'turn' => $turn, 'new_turn' => '1', 'last_turn' => $_POST['turn'], 'real_turn' => $real_turn, 'player_turn_id' => $player_turn_id, 'player_turn_name' => $player_turn_name, 'player_tab' => $player_tab, 'playerData' => $playerData, 'nb_action' => $row_player_data['nb_action'], 'player_id' => $row_player_data['ID'], 'localisation' => $row_player_data['localisation']]);
+        echo json_encode(['success' => true, 'turn' => $turn, 'new_turn' => '1', 'last_turn' => $_POST['turn'], 'real_turn' => $real_turn, 'player_turn_id' => $player_turn_id, 'player_turn_name' => $player_turn_name, 'player_tab' => $player_tab, 'playerData' => $playerData, 'nb_action' => $row_player_data['nb_action'], 'player_id' => $row_player_data['ID'], 'localisation' => $row_player_data['localisation'], 'team' => $row_player_data['team']]);
 
     } catch (PDOException $e) {
         echo json_encode(['success' => false, 'message' => "Erreur lors de la récupération des parties : " . $e->getMessage()]);

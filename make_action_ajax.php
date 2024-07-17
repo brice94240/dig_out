@@ -17,6 +17,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $nb_action = $row_info_joueur['nb_action'];
         $raclee = $row_info_joueur['raclee'];
         $game_id = $_POST['game_id'];
+        $team = $row_info_joueur['team'];
+        $point_turn = $row_info_joueur['point_turn'];
 
         // Récupérer le deck actuel du joueur
         $stmt_get_deck = $pdo->prepare("SELECT deck FROM joueurs WHERE ID = :player_id");
@@ -28,6 +30,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $hasLien = false;
         $hasRecipient = false;
         $hasLame = false;
+
+        $hasPelle = false;
+        $hasPioche = false;
+        $hasCuillere = false;
 
         if ($name_action == "join"){
             //VEUT REJOINDRE UN GANG
@@ -43,6 +49,72 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 echo json_encode(['success' => false, 'message' => "Vous vous etes soigné une raclée"]);
             } else {
                 echo json_encode(['success' => false, 'message' => "Vous avez aucune raclée"]);
+            }
+        
+        } else if($name_action == "creuser" && $nb_action > 0) {
+            if(($localisation == 1 && $team == "A") || ($localisation == 3 && $team == "B")){
+                if($point_turn == 0){
+                    if($raclee < 2) {
+                        // Chercher les points du deck
+                        foreach ($deck as $index => $card) {
+                            if ($card['name'] === 'Pelle') {
+                                $hasPelle = true;
+                                $PelleIndex = $deck[$index];
+                            }
+                            if ($card['name'] === 'Pioche') {
+                                $hasPioche = true;
+                                $PiocheIndex = $deck[$index];
+                            }
+                            if ($card['name'] === 'Cuillère') {
+                                $hasCuillere = true;
+                                $CuillereIndex = $deck[$index];
+                            }
+                        }
+
+                        if($hasPelle) {
+                            unset($deck[$index]);
+                            $points = 3; 
+                        }
+                        else if($hasPioche) {
+                            unset($deck[$index]);
+                            $points = 2;
+                        }
+                        else if($hasCuillere) {
+                            unset($deck[$index]);
+                            $points = 1;
+                        }
+                        if($points > 0) {
+                            // Réindexer le deck pour enlever les trous laissés par unset
+                            $deck = array_values($deck);
+                            $deck_json = json_encode($deck);
+                            // Mettre à jour le deck du joueur
+                            $stmt_update_deck = $pdo->prepare("UPDATE joueurs SET deck = :deck WHERE ID = :ID");
+                            $stmt_update_deck->execute(['deck' => $deck_json, 'ID' => $_SESSION['user_id']]);
+    
+                            // Update nb_point in the database
+                            $stmt_update_nb_point = $pdo->prepare("UPDATE joueurs SET nb_point = nb_point + :points WHERE `ID` = :user_id");
+                            $stmt_update_nb_point->execute(['points' => $points , 'user_id' => $_SESSION['user_id']]);
+    
+                            // Update point_turn in the database
+                            $stmt_update_point_turn = $pdo->prepare("UPDATE joueurs SET point_turn = point_turn + :points WHERE `ID` = :user_id");
+                            $stmt_update_point_turn->execute(['points' => $points , 'user_id' => $_SESSION['user_id']]);
+    
+                            // Update nb_action in the database
+                            $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET nb_action = nb_action -1 WHERE `ID` = :user_id");
+                            $stmt_update_nb_action->execute(['user_id' => $_SESSION['user_id']]);
+            
+                            echo json_encode(['success' => false, 'message' => "Vous avez creuser pour ".$points." points"]);
+                        } else {
+                            echo json_encode(['success' => false, 'message' => "Vous n'avez aucun point en main."]);
+                        }
+                    } else {
+                        echo json_encode(['success' => false, 'message' => "Vous ne pouvez pas creuser, soignez vous."]);
+                    }
+                } else {
+                    echo json_encode(['success' => false, 'message' => "Vous ne pouvez creuser qu'une fois par tour."]);
+                }
+            } else {
+                echo json_encode(['success' => false, 'message' => "Vous ne pouvez pas creuser ici"]);
             }
         } else if($nb_action > 0) {
             if ($raclee > 0 && $name_action == "steal" && $item_name == "Cuillère"){
@@ -138,7 +210,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     }
                 } elseif ($name_action == "make" && $item_name == "Pelle"){
                     //SI LE JOUEUR VEUT CONSTRUIRE UNE PELLE
-                    if($localisation == 4 || $localisation == 5 || $localisation == 7 ) {
+                    if(($localisation == 4) || ($localisation == 5) || ($localisation == 7) || ($localisation == 3 && $team == "A") || ($localisation == 1 && $team == "B")) {
                         // Chercher et enlever le tournevis et le lien du deck
                         foreach ($deck as $index => $card) {
                             if ($card['name'] === 'Récipient') {
@@ -199,7 +271,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     }
                 } elseif ($name_action == "make" && $item_name == "Pioche"){
                     //SI LE JOUEUR VEUT CONSTRUIRE UNE PIOCHE
-                    if($localisation == 4 || $localisation == 5 || $localisation == 7 ) {
+                    if(($localisation == 4) || ($localisation == 5) || ($localisation == 7) || ($localisation == 3 && $team == "A") || ($localisation == 1 && $team == "B")) {
                         // Chercher et enlever le tournevis et le lien du deck
                         foreach ($deck as $index => $card) {
                             if ($card['name'] === 'Tournevis') {
@@ -260,7 +332,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     }
                 } elseif ($name_action == "make" && $item_name == "Surin"){
                     //SI LE JOUEUR VEUT CONSTRUIRE UNE PIOCHE
-                    if($localisation == 4 || $localisation == 5 || $localisation == 7 ) {
+                    if(($localisation == 4) || ($localisation == 5) || ($localisation == 7) || ($localisation == 3 && $team == "A") || ($localisation == 1 && $team == "B")) {
                         // Chercher et enlever le tournevis et le lien du deck
                         foreach ($deck as $index => $card) {
                             if ($card['name'] === 'Lame') {

@@ -423,6 +423,7 @@ if($game['team_activated'] == 0){ ?>
         </div>
     </div>
     <button id="healButton" class="heal-button">Se soigner</button>
+    <button id="creuserButton" class="creuser-button">Creuser</button>
 <?php }
 else if($game['team_activated'] == 1) { ?>
     <div class="map-container">
@@ -497,6 +498,7 @@ else if($game['team_activated'] == 1) { ?>
         </div>
     </div>
     <button id="healButton" class="heal-button">Se soigner</button>
+    <button id="creuserButton" class="creuser-button">Creuser</button>
 <?php } ?>
 
 </body>
@@ -525,6 +527,14 @@ window.onclick = function(event) {
 $('#healButton').click(function() {
     useAction('heal','heal');
 });
+
+$('#creuserButton').click(function() {
+    useAction('creuser','creuser');
+});
+
+// $('#healButton').click(function() {
+//     useAction('heal','heal');
+// });
 
 // Function to display the modal with specific gang info
 function showGangInfo(gangName, cardName, description) {
@@ -940,7 +950,15 @@ $(document).ready(function() {
                         }
                     }
                     if(response.localisation == 4) {
-                        console.log(response);
+                        $('#healButton').show();
+                    } else {
+                        $('#healButton').hide();
+                    }
+                    console.log(response);
+                    if((response.localisation == 1 && response.team == "A") || (response.localisation == 3 && response.team == "B")) {
+                        $('#creuserButton').show();
+                    } else {
+                        $('#creuserButton').hide();
                     }
                 } else {
                     console.log('Erreur : ' + response.message);
