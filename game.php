@@ -470,7 +470,6 @@ else if($game['team_activated'] == 1) { ?>
             <div id="modalDescription" class="gang-carte_description"></div>
             <div class="button_card">
                 <span class="close">Quitter</span>
-                <span class="close">Quitter</span>
             </div>
         </div>
     </div>
@@ -530,6 +529,32 @@ function showGangInfo(gangName, cardName, description) {
     document.getElementById("modalCardName").innerText = cardName;
     document.getElementById("modalDescription").innerText = description;
     modal.style.display = "block";
+    var buttonCardDiv = document.querySelector('.button_card');
+
+    // Remove existing "Voler" and "Fabriquer" buttons if they exist
+    var existingStealButton = document.querySelector('.steal');
+    if (existingStealButton) {
+        existingStealButton.remove();
+    }
+    
+    var existingMakeButton = document.querySelector('.make');
+    if (existingMakeButton) {
+        existingMakeButton.remove();
+    }
+
+    var existingMakeButton = document.querySelector('.join');
+    if (existingMakeButton) {
+        existingMakeButton.remove();
+    }
+
+    if(gangName == "Crew" || gangName == "Cartel" || gangName == "Bikers" || gangName == "Bratva" || gangName == "Triad" || gangName == "Queers"){
+        // Create the new "Rejoindre" button
+        var joinButton = document.createElement('span');
+        joinButton.className = 'join';
+        joinButton.innerText = 'Rejoindre';
+        // Append the new "Voler" button to the button card div
+        buttonCardDiv.appendChild(joinButton);
+    }
 }
 
 // Function to display the modal with specific card point info
@@ -539,6 +564,39 @@ function showCardsPointsInfo(cardName, description, cardImage) {
     document.getElementById("modalCardName").innerText = cardName;
     document.getElementById("modalDescription").innerText = description;
     modal.style.display = "block";
+    var buttonCardDiv = document.querySelector('.button_card');
+
+   // Remove existing "Voler" and "Fabriquer" buttons if they exist
+    var existingStealButton = document.querySelector('.steal');
+    if (existingStealButton) {
+        existingStealButton.remove();
+    }
+    
+    var existingMakeButton = document.querySelector('.make');
+    if (existingMakeButton) {
+        existingMakeButton.remove();
+    }
+
+    var existingMakeButton = document.querySelector('.join');
+    if (existingMakeButton) {
+        existingMakeButton.remove();
+    }
+
+    if(cardName == "Cuillère"){
+        // Create the new "Voler" button
+        var stealButton = document.createElement('span');
+        stealButton.className = 'steal';
+        stealButton.innerText = 'Voler';
+        // Append the new "Voler" button to the button card div
+        buttonCardDiv.appendChild(stealButton);
+    } else {
+        // Create the new "Fabriquer" button
+        var makeButton = document.createElement('span');
+        makeButton.className = 'make';
+        makeButton.innerText = 'Fabriquer';
+        // Append the new "Voler" button to the button card div
+        buttonCardDiv.appendChild(makeButton);
+    }
 }
 
 // Function to display the modal with specific fouille card info
@@ -773,6 +831,7 @@ function zoneClicked(zoneName) {
             }
         });
 }
+
 $(document).ready(function() {
     function RefreshTurn() {
         var globalDeck = <?php echo json_encode($decks); ?>;

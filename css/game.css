@@ -158,7 +158,7 @@ body, html {
 .close {
     color: #fff;
     margin-top: 0.5vh;
-    font-size: 3vh;
+    font-size: 2vh;
     font-weight: bold;
     background: #850000;
     cursor: pointer;
@@ -174,10 +174,70 @@ body, html {
     text-decoration: none;
 }
 
+/* Style pour le bouton de fermeture */
+.steal {
+    color: #fff;
+    margin-top: 0.5vh;
+    font-size: 2vh;
+    font-weight: bold;
+    background: #850000;
+    cursor: pointer;
+    border-color: black;
+    border-style: double;
+    font-family: fantasy;
+    padding: 0.5vh;
+}
+
+.steal:hover,
+.steal:focus {
+    color: #333;
+    text-decoration: none;
+}
+
+/* Style pour le bouton de fermeture */
+.make {
+    color: #fff;
+    margin-top: 0.5vh;
+    font-size: 2vh;
+    font-weight: bold;
+    background: #850000;
+    cursor: pointer;
+    border-color: black;
+    border-style: double;
+    font-family: fantasy;
+    padding: 0.5vh;
+}
+
+.make:hover,
+.make:focus {
+    color: #333;
+    text-decoration: none;
+}
+
+/* Style pour le bouton de fermeture */
+.join {
+    color: #fff;
+    margin-top: 0.5vh;
+    font-size: 2vh;
+    font-weight: bold;
+    background: #850000;
+    cursor: pointer;
+    border-color: black;
+    border-style: double;
+    font-family: fantasy;
+    padding: 0.5vh;
+}
+
+.join:hover,
+.join:focus {
+    color: #333;
+    text-decoration: none;
+}
+
 .close_dice {
     color: #fff;
     margin-top: 0.5vh;
-    font-size: 3vh;
+    font-size: 2vh;
     font-weight: bold;
     background: #850000;
     cursor: pointer;
@@ -196,7 +256,7 @@ body, html {
 .launch_dice {
     color: #fff;
     margin-top: 0.5vh;
-    font-size: 3vh;
+    font-size: 2vh;
     font-weight: bold;
     background: #850000;
     cursor: pointer;
@@ -261,7 +321,7 @@ body, html {
 .modal-deck-close {
     color: #fff;
     margin-top: 0.5vh;
-    font-size: 3vh;
+    font-size: 2vh;
     font-weight: bold;
     background: #850000;
     cursor: pointer;
@@ -381,6 +441,7 @@ body, html {
     position: absolute;
     transform: translate(-50%, -50%);
     border-radius: 50%; /* Make it round */
+    z-index: 999;
 }
 
 .teamA {
