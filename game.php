@@ -328,6 +328,18 @@ foreach($row_deck as $row_decks){
     }
 }
 
+// Récupérer les détails des defausses
+$stmt_defausse = $pdo->prepare("SELECT defausse_data FROM games WHERE creator_id = :game_id");
+$stmt_defausse->execute(['game_id' => $game_id]);
+$row_defausse = $stmt_defausse->fetchAll(PDO::FETCH_ASSOC);
+foreach($row_defausse as $row_defausses){
+    if ($row_defausses) {
+        $defausses = json_decode($row_defausses['defausse_data'], true);
+    } else {
+        echo "La defausse n'est pas encore disponibles.";
+    }
+}
+
 try {
     $stmt_game = $pdo->prepare("SELECT * FROM games WHERE creator_id = :game_id");
     $stmt_game->execute(['game_id' => $game_id]);
@@ -380,7 +392,9 @@ if($game['team_activated'] == 0){ ?>
 
         <!-- Zones des decks -->
         <div class="map-interactive-area" id="deck" onclick="showCardDecksInfo()" style="background-image:url('./img/<?php echo $decks[0]['verso_card'] ?>');background-size:cover;background-repeat:no-repeat;"></div>
+        <div class="map-interactive-area" id="defausse" onclick="showCardDefausseInfo()" style="background-image:url('./img/<?php echo $defausses[0]['img'] ?>');background-size:cover;background-repeat:no-repeat;transform: rotate(90deg);"></div>
         <div class="map-interactive-area" id="dice" onclick="showDice('<?php echo $row_turn['turn']; ?>,<?php echo $row_turn['dice_data']; ?>')" style="background-image:url('./img/Dice6.png');background-size:contain;background-repeat:no-repeat;background-size: contain;background-repeat: no-repeat;background-position: top;"></div>
+        
         <div class="turn" value=<?php echo $row_turn['turn'] ?>></div>
         <input type="hidden" class="turn" value=<?php echo $row_turn['turn'] ?>/>
         <input type="hidden" class="turn_id"/>
@@ -458,6 +472,7 @@ else if($game['team_activated'] == 1) { ?>
 
         <!-- Zones des decks -->
         <div class="map-interactive-area" id="deck" onclick="showCardDecksInfo()" style="background-image:url('./img/<?php echo $decks[0]['verso_card'] ?>');background-size:cover;background-repeat:no-repeat;"></div>
+        <div class="map-interactive-area" id="defausse" onclick="showCardDefausseInfo()" style="background-image:url('./img/<?php echo $defausses[0]['img'] ?>');background-size:cover;background-repeat:no-repeat;transform: rotate(90deg);"></div>
         <div class="map-interactive-area" id="dice" onclick="showDice('<?php echo $row_turn['turn']; ?>', '<?php echo $dices[0]; ?>')" style="background-image:url('./img/Dice6.png');background-size:contain;background-repeat:no-repeat;background-size: contain;background-repeat: no-repeat;background-position: top;"></div>
         <input type="hidden" class="turn" value=<?php echo $row_turn['turn'] ?>/>
         <input type="hidden" class="turn_id"/>
@@ -487,6 +502,19 @@ else if($game['team_activated'] == 1) { ?>
         <div class="modal-deck-footer">
             <button id="defausser-deck-modal" class="modal-deck-defausser btn">Defausser</button>
             <button id="close-deck-modal" class="modal-deck-close btn">Fermer</button>
+        </div>
+    </div>
+
+    <!-- Modal Structure Defausse -->
+    <div id="defausse-modal" class="modal-defausse">
+        <div class="modal-defausse-content">
+            <h4>La Defausse :</h4>
+            <div id="defausse-cards">
+                <!-- Cartes seront affichées ici -->
+            </div>
+        </div>
+        <div class="modal-defausse-footer">
+            <button id="close-defausse-modal" class="modal-defausse-close btn">Fermer</button>
         </div>
     </div>
 
@@ -668,6 +696,43 @@ function showCardDecksInfo() {
                         //CHOISIR LES CARTES A DEFAUSSER
                         chooseCardsToDefausser(deck);
                     });
+                } else {
+                    console.log('Erreur : ' + response.message);
+                }
+
+            },
+            error: function(xhr, status, error) {
+                console.log('Erreur AJAX : ' + error);
+            }
+        });
+}
+
+// Function to display the modal with specific fouille card info
+function showCardDefausseInfo() {
+    $.ajax({
+            url: 'defausse_ajax.php',
+            type: 'POST',
+            data: {
+                action: 'get_defausse',
+                game_id: <?php echo $game_id; ?>,
+             },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    var defausse = response.defausse;
+                    $('#defausse-cards').empty();
+                    // Montrer la modal lorsque l'utilisateur clique sur le deck
+                    defausse.forEach(function(card) {
+                        var card_description = card.description.replace(/\\'/g, "'");
+                        $('#defausse-cards').append('<div class="card-defausse modal-content-deck" style="background-image:url(./img/'+card.img+');background-size:cover;background-repeat:no-repeat;"><div class="deck-carte_name">' + card.name + '</div><div class="deck-carte_description">' + card_description + '</div></div>');
+                        $('#defausse-modal').show();
+                    });
+
+                    // Close modal
+                    $('#close-defausse-modal').click(function() {
+                        $('#defausse-modal').hide();
+                    });
+
                 } else {
                     console.log('Erreur : ' + response.message);
                 }
