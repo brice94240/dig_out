@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
             // Update the point_turn in the database
             $stmt_update_point_turn_to_empty = $pdo->prepare("UPDATE joueurs SET point_turn = :point_turn WHERE `game_joined` = :game_id");
-            $stmt_update_point_turn_to_empty->execute(['point_turn' => '', 'game_id' => $_POST['game_id']]);
+            $stmt_update_point_turn_to_empty->execute(['point_turn' => 0, 'game_id' => $_POST['game_id']]);
 
              // Update the action to all players
              $stmt_update_action_to_players = $pdo->prepare("UPDATE joueurs SET nb_action = :nb_action WHERE `game_joined` = :game_id");
@@ -71,10 +71,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $stmt_info_joueur->execute(['player_id' => $playerID]);
             $row_info_joueur = $stmt_info_joueur->fetch(PDO::FETCH_ASSOC);
 
-            if($row_player_data['nb_action'] == 2){
-                // Update the action to all players
+            if($row_info_joueur['nb_action'] == 2){
+                // Update localisation
                 $stmt_update_last_localisation_to_players = $pdo->prepare("UPDATE joueurs SET last_localisation = :last_localisation WHERE `game_joined` = :game_id");
-                $stmt_update_last_localisation_to_players->execute(['last_localisation' => $row_player_data['localisation'], 'game_id' => $_POST['game_id']]);
+                $stmt_update_last_localisation_to_players->execute(['last_localisation' => $row_info_joueur['localisation'], 'game_id' => $_POST['game_id']]);
                 $stmt_info_joueur = $pdo->prepare("SELECT * FROM joueurs WHERE ID = :player_id");
                 $stmt_info_joueur->execute(['player_id' => $playerID]);
                 $row_info_joueur = $stmt_info_joueur->fetch(PDO::FETCH_ASSOC);

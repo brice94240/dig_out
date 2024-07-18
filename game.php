@@ -424,6 +424,7 @@ if($game['team_activated'] == 0){ ?>
     </div>
     <button id="healButton" class="heal-button">Se soigner</button>
     <button id="creuserButton" class="creuser-button">Creuser</button>
+    <button id="FinTurnButton" class="finturn-button">Fin de tour</button>
 <?php }
 else if($game['team_activated'] == 1) { ?>
     <div class="map-container">
@@ -499,6 +500,7 @@ else if($game['team_activated'] == 1) { ?>
     </div>
     <button id="healButton" class="heal-button">Se soigner</button>
     <button id="creuserButton" class="creuser-button">Creuser</button>
+    <button id="FinTurnButton" class="finturn-button">Fin de tour</button>
 <?php } ?>
 
 </body>
@@ -530,6 +532,10 @@ $('#healButton').click(function() {
 
 $('#creuserButton').click(function() {
     useAction('creuser','creuser');
+});
+
+$('#FinTurnButton').click(function() {
+    finTurn();
 });
 
 // $('#healButton').click(function() {
@@ -666,6 +672,7 @@ function showCardDecksInfo() {
 //TOUR
 var diceLaunched = false;
 function showDice(Turn,Dice) {
+    $('#LaunchDice').show();
     if($('#dice').val()){
         var url = 'background-image:url("./img/Dice'+$('#dice').val()+'.png")';
     }else if(Dice > 0){
@@ -696,7 +703,7 @@ function showDice(Turn,Dice) {
             dataType: 'json',
             success: function(response) {
                 if (response.success) {
-                    console.log(response);
+                    var diceLaunched = true;
                     var Turn = response.turn;
                     if(Turn == 1 && !Dice && diceLaunched == false) {
                         diceLaunched = true; // Marquer le dé comme lancé
@@ -755,7 +762,8 @@ function showDice(Turn,Dice) {
                         var turn_action = $('.turn_action')[0].getAttribute('value');
                         if(turn_id == <?php echo $_SESSION['user_id']; ?> && response.dice_data == '') {
                             //ICI GERER LE LANCER DE DE SI C'EST VOTRE TOUR
-                            if(Dice == '' && turn_action > 0){
+                            $('#LaunchDice').hide();
+                            if(turn_action > 0){
                                 diceLaunched = true; // Marquer le dé comme lancé
                                 const interval = 100; // intervalle entre chaque changement d'image (en millisecondes)
                                 const totalFrames = 10; // nombre total de frames d'animation
@@ -851,8 +859,6 @@ function zoneClicked(zoneName) {
 }
 
 function useAction(name_action,name) {
-    console.log(name_action);
-    console.log(name);
 
     $.ajax({
             url: 'make_action_ajax.php',
@@ -870,12 +876,33 @@ function useAction(name_action,name) {
                 } else {
                     console.log('Erreur : ' + response.message);
                 }
-                console.log(response);
             },
             error: function(xhr, status, error) {
                 console.log('Erreur AJAX : ' + error);
             }
         });
+}
+
+function finTurn() {
+    $.ajax({
+        url: 'fin_turn_ajax.php',
+        type: 'POST',
+        data: {
+            action: 'fin_turn_action',
+            game_id: <?php echo $game_id; ?>,
+         },
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                
+            } else {
+                console.log('Erreur : ' + response.message);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.log('Erreur AJAX : ' + error);
+        }
+    });
 }
 
 $(document).ready(function() {
@@ -949,16 +976,20 @@ $(document).ready(function() {
                             $('.turn_dice')[0].setAttribute('value', response.playerData[response.player_id]['dice_data']);
                         }
                     }
-                    if(response.localisation == 4) {
+                    if((response.localisation == 4) && (response.player_turn_id == response.player_id) ) {
                         $('#healButton').show();
                     } else {
                         $('#healButton').hide();
                     }
-                    console.log(response);
-                    if((response.localisation == 1 && response.team == "A") || (response.localisation == 3 && response.team == "B")) {
+                    if((response.localisation == 1 && response.team == "A" && response.player_turn_id == response.player_id) || (response.localisation == 3 && response.team == "B" && response.player_turn_id == response.player_id)) {
                         $('#creuserButton').show();
                     } else {
                         $('#creuserButton').hide();
+                    }
+                    if(response.player_turn_id == response.player_id) {
+                        $('#FinTurnButton').show();
+                    } else {
+                        $('#FinTurnButton').hide();
                     }
                 } else {
                     console.log('Erreur : ' + response.message);
@@ -979,6 +1010,6 @@ $(document).ready(function() {
     RefreshTurn();
     setInterval(function() {
         RefreshTurn(); // Recharger les parties toutes les 2 secondes (2000 ms)
-    }, 2000); // Répéter toutes les 2 secondes (2000 ms)
+    }, 500); // Répéter toutes les 2 secondes (2000 ms)
 });
 </script>

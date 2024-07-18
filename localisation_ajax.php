@@ -15,8 +15,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $turn_dice = json_decode($_POST['turn_dice']);
         $game_id = $_POST['game_id'];
         $last_localisation = $row_info_joueur['last_localisation'];
+        $localisation = $row_info_joueur['localisation'];
 
-        if(intval($zone) !== intval($last_localisation)){
+        if((intval($zone) !== intval($last_localisation)) && ($last_localisation == $localisation)){
             $diceMapping = [
                 'zones' => [
                     1 => [1, 2, 3],
@@ -93,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 echo json_encode(['success' => false, 'message' => "Vous n'avez pas d'action disponible"]);
             }
         } else {
-            echo json_encode(['success' => false, 'message' => "Deja dans cette zone"]);
+            echo json_encode(['success' => false, 'message' => "Ne peux pas allez ici"]);
         }
 
     } catch (PDOException $e) {
