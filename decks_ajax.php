@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
             foreach ($deck as $index => $card) {
                 if ($card['ID'] == $cardId) {
-                    $defausseData[] = $card; // Ajouter la carte à la defausse_data
+                    array_unshift($defausseData, $card); // Ajouter la carte au début de defausse_data
                     unset($deck[$index]); // Enlever la carte du deck
                     break;
                 }

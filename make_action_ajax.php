@@ -220,12 +220,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         foreach ($deck as $index => $card) {
                             if ($card['name'] === 'Récipient' && $hasRecipient == false) {
                                 $hasRecipient = true;
-                                $defausseData[] = $card; // Ajouter la carte à la défausse
+                                array_unshift($defausseData, $card); // Ajouter la carte au début de defausse_data
                                 unset($deck[$index]); // Enlever le récipient
                             }
                             if ($card['name'] === 'Lien' && $hasLien == false) {
                                 $hasLien = true;
-                                $defausseData[] = $card; // Ajouter la carte à la défausse
+                                array_unshift($defausseData, $card); // Ajouter la carte au début de defausse_data
                                 unset($deck[$index]); // Enlever le lien
                             }
                         }
@@ -277,12 +277,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         foreach ($deck as $index => $card) {
                             if ($card['name'] === 'Tournevis' && $hasTournevis == false) {
                                 $hasTournevis = true;
-                                $defausseData[] = $card; // Ajouter la carte à la defausse_data
+                                array_unshift($defausseData, $card); // Ajouter la carte au début de defausse_data
                                 unset($deck[$index]); // Enlever le tournevis
                             }
                             if ($card['name'] === 'Lien' && $hasLien == false) {
                                 $hasLien = true;
-                                $defausseData[] = $card; // Ajouter la carte à la defausse_data
+                                array_unshift($defausseData, $card); // Ajouter la carte au début de defausse_data
                                 unset($deck[$index]); // Enlever le lien
                             }
                         }
@@ -344,12 +344,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         foreach ($deck as $index => $card) {
                             if ($card['name'] === 'Lame' && $hasLame == false) {
                                 $hasLame = true;
-                                $defausseData[] = $card; // Ajouter la carte à la défausse
+                                array_unshift($defausseData, $card); // Ajouter la carte au début de defausse_data
                                 unset($deck[$index]); // Enlever le tournevis
                             }
                             if ($card['name'] === 'Lien' && $hasLien == false) {
                                 $hasLien = true;
-                                $defausseData[] = $card; // Ajouter la carte à la défausse
+                                array_unshift($defausseData, $card); // Ajouter la carte au début de defausse_data
                                 unset($deck[$index]); // Enlever le lien
                             }
                         }
