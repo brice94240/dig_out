@@ -16,6 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $game_id = $_POST['game_id'];
         $last_localisation = $row_info_joueur['last_localisation'];
         $localisation = $row_info_joueur['localisation'];
+        $dice_data = $row_info_joueur['dice_data'];
 
         if((intval($zone) !== intval($last_localisation)) && ($last_localisation == $localisation)){
             $diceMapping = [
@@ -36,7 +37,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     7 => [2],
                 ],
             ];
-            if($row_info_joueur['nb_action'] > 0){
+            // if($row_info_joueur['nb_action'] > 0){
+            if($dice_data !== "" && $localisation == $last_localisation){
                 if(array_search(intval($turn_dice[0]) , $diceMapping['zones'][$zone]) !== false){
                     $stmt_update_localisation_to_players = $pdo->prepare("UPDATE joueurs SET localisation = :localisation WHERE `ID` = :player_id");
                     $stmt_update_localisation_to_players->execute(['localisation' => $zone, 'player_id' => $_SESSION['user_id']]);
