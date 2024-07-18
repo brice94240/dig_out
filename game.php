@@ -485,6 +485,7 @@ else if($game['team_activated'] == 1) { ?>
             </div>
         </div>
         <div class="modal-deck-footer">
+            <button id="defausser-deck-modal" class="modal-deck-defausser btn">Defausser</button>
             <button id="close-deck-modal" class="modal-deck-close btn">Fermer</button>
         </div>
     </div>
@@ -652,10 +653,20 @@ function showCardDecksInfo() {
                         $('#deck-cards').append('<div class="card modal-content-deck" style="background-image:url(./img/'+card.img+');background-size:cover;background-repeat:no-repeat;"><div class="deck-carte_name">' + card.name + '</div><div class="deck-carte_description">' + card_description + '</div></div>');
                         $('#deck-modal').show();
                     });
+                    if(response.deck.length > 10) {
+                        $('#defausser-deck-modal').show();
+                    } else {
+                        $('#defausser-deck-modal').hide();
+                    }
 
                     // Close modal
                     $('#close-deck-modal').click(function() {
                         $('#deck-modal').hide();
+                    });
+
+                    $('#defausser-deck-modal').click(function() {
+                        //CHOISIR LES CARTES A DEFAUSSER
+                        chooseCardsToDefausser(deck);
                     });
                 } else {
                     console.log('Erreur : ' + response.message);
@@ -666,6 +677,47 @@ function showCardDecksInfo() {
                 console.log('Erreur AJAX : ' + error);
             }
         });
+}
+
+function chooseCardsToDefausser(deck) {
+    $('#deck-cards').empty();
+    deck.forEach(function(card) {
+        var card_description = card.description.replace(/\\'/g, "'");
+        var cardDiv = $('<div class="card modal-content-deck" style="background-image:url(./img/'+card.img+');background-size:cover;background-repeat:no-repeat;"><div class="deck-carte_name">' + card.name + '</div><div class="deck-carte_description">' + card_description + '</div></div>');
+
+        var defausserButton = $('<button class="defausser-btn" data-card-id="' + card.ID + '">Défausser</button>');
+        cardDiv.append(defausserButton);
+        $('#deck-cards').append(cardDiv);
+    });
+
+    $('.defausser-btn').click(function() {
+        var cardId = $(this).data('card-id');
+        defausserCard(cardId);
+    });
+}
+
+function defausserCard(cardId) {
+    $.ajax({
+        url: 'decks_ajax.php',
+        type: 'POST',
+        data: {
+            action: 'defausser_card',
+            card_id: cardId,
+            game_id: <?php echo $game_id; ?>
+        },
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                console.log('Carte défaussée avec succès');
+                showCardDecksInfo(); // Refresh the deck
+            } else {
+                console.log('Erreur : ' + response.message);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.log('Erreur AJAX : ' + error);
+        }
+    });
 }
 
 // Function to open dice menu
@@ -1010,6 +1062,6 @@ $(document).ready(function() {
     RefreshTurn();
     setInterval(function() {
         RefreshTurn(); // Recharger les parties toutes les 2 secondes (2000 ms)
-    }, 500); // Répéter toutes les 2 secondes (2000 ms)
+    }, 50); // Répéter toutes les 2 secondes (2000 ms)
 });
 </script>

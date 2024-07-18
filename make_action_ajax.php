@@ -26,6 +26,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $row_deck = $stmt_get_deck->fetch(PDO::FETCH_ASSOC);
         $deck = json_decode($row_deck['deck'], true) ?: [];
 
+        // Récupérer defausse_data du jeu
+        $stmt_game = $pdo->prepare("SELECT defausse_data FROM games WHERE creator_id = :game_id");
+        $stmt_game->execute(['game_id' => $gameId]);
+        $row_game = $stmt_game->fetch(PDO::FETCH_ASSOC);
+        $defausseData = json_decode($row_game['defausse_data'], true) ?: [];
+
         $hasTournevis = false;
         $hasLien = false;
         $hasRecipient = false;
@@ -34,6 +40,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $hasPelle = false;
         $hasPioche = false;
         $hasCuillere = false;
+        $defausseData = [];
+        
 
         if ($name_action == "join"){
             //VEUT REJOINDRE UN GANG
@@ -215,16 +223,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         foreach ($deck as $index => $card) {
                             if ($card['name'] === 'Récipient') {
                                 $hasRecipient = true;
+                                $defausseData[] = $card; // Ajouter la carte à la defausse_data
                                 unset($deck[$index]); // Enlever le tournevis
                             }
                             if ($card['name'] === 'Lien') {
                                 $hasLien = true;
+                                $defausseData[] = $card; // Ajouter la carte à la defausse_data
                                 unset($deck[$index]); // Enlever le lien
                             }
                         }
                         if ($hasRecipient && $hasLien) {
                             // Réindexer le deck pour enlever les trous laissés par unset
                             $deck = array_values($deck);
+                            $defausse_json = json_encode($defausseData);
                             // CONSTRUIRE LA PELLE
                             // Récupérer les détails des cuillere
                             $stmt_pelle = $pdo->prepare("SELECT pelle_data FROM games WHERE creator_id = :game_id");
@@ -243,6 +254,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                 // Mettre à jour les détails des pelles
                                 $stmt_update_pelle = $pdo->prepare("UPDATE games SET pelle_data = :pelle WHERE creator_id = :game_id");
                                 $stmt_update_pelle->execute(['pelle' => $pelles_json, 'game_id' => $game_id]);
+
+                                // Mettre à jour defausse_data du jeu
+                                $stmt_update_defausse = $pdo->prepare("UPDATE games SET defausse_data = :defausse WHERE creator_id = :game_id");
+                                $stmt_update_defausse->execute(['defausse' => $defausse_json, 'game_id' => $gameId]);
+
 
                                 // Mettre à jour le deck du joueur
                                 $stmt_update_deck = $pdo->prepare("UPDATE joueurs SET deck = :deck WHERE ID = :ID");
@@ -276,16 +292,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         foreach ($deck as $index => $card) {
                             if ($card['name'] === 'Tournevis') {
                                 $hasTournevis = true;
+                                $defausseData[] = $card; // Ajouter la carte à la defausse_data
                                 unset($deck[$index]); // Enlever le tournevis
                             }
                             if ($card['name'] === 'Lien') {
                                 $hasLien = true;
+                                $defausseData[] = $card; // Ajouter la carte à la defausse_data
                                 unset($deck[$index]); // Enlever le lien
                             }
                         }
                         if ($hasTournevis && $hasLien) {
                             // Réindexer le deck pour enlever les trous laissés par unset
                             $deck = array_values($deck);
+                            $defausse_json = json_encode($defausseData);
                             // CONSTRUIRE LA PELLE
                             // Récupérer les détails des cuillere
                             $stmt_pioche = $pdo->prepare("SELECT pioche_data FROM games WHERE creator_id = :game_id");
@@ -304,6 +323,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                 // Mettre à jour les détails des pioches
                                 $stmt_update_pioche = $pdo->prepare("UPDATE games SET pioche_data = :pioche WHERE creator_id = :game_id");
                                 $stmt_update_pioche->execute(['pioche' => $pioches_json, 'game_id' => $game_id]);
+
+                                // Mettre à jour defausse_data du jeu
+                                $stmt_update_defausse = $pdo->prepare("UPDATE games SET defausse_data = :defausse WHERE creator_id = :game_id");
+                                $stmt_update_defausse->execute(['defausse' => $defausse_json, 'game_id' => $gameId]);
+
 
                                 // Mettre à jour le deck du joueur
                                 $stmt_update_deck = $pdo->prepare("UPDATE joueurs SET deck = :deck WHERE ID = :ID");
@@ -337,16 +361,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         foreach ($deck as $index => $card) {
                             if ($card['name'] === 'Lame') {
                                 $hasLame = true;
+                                $defausseData[] = $card; // Ajouter la carte à la defausse_data
                                 unset($deck[$index]); // Enlever le tournevis
                             }
                             if ($card['name'] === 'Lien') {
                                 $hasLien = true;
+                                $defausseData[] = $card; // Ajouter la carte à la defausse_data
                                 unset($deck[$index]); // Enlever le lien
                             }
                         }
                         if ($hasLame && $hasLien) {
                             // Réindexer le deck pour enlever les trous laissés par unset
                             $deck = array_values($deck);
+                            $defausse_json = json_encode($defausseData);
                             // CONSTRUIRE LA PELLE
                             // Récupérer les détails des cuillere
                             $stmt_surin = $pdo->prepare("SELECT surin_data FROM games WHERE creator_id = :game_id");
@@ -357,7 +384,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                 $surins = json_decode($row_surin['surin_data'], true);
                                 //METTRE UNE PELLE DU PLATEAU AU DECK
                                 if (!empty($surins)) {
-                                    $deck[] = array_shift($surins);
+                                    for($i = 0; $i < 2; $i++)
+                                    {
+                                        $deck[] = array_shift($surins);
+                                    }
                                 }
                                 $deck_json = json_encode($deck);
                                 $surins_json = json_encode($surins);
@@ -365,6 +395,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                 // Mettre à jour les détails des pioches
                                 $stmt_update_surin = $pdo->prepare("UPDATE games SET surin_data = :surin WHERE creator_id = :game_id");
                                 $stmt_update_surin->execute(['surin' => $surins_json, 'game_id' => $game_id]);
+
+                                // Mettre à jour defausse_data du jeu
+                                $stmt_update_defausse = $pdo->prepare("UPDATE games SET defausse_data = :defausse WHERE creator_id = :game_id");
+                                $stmt_update_defausse->execute(['defausse' => $defausse_json, 'game_id' => $gameId]);
 
                                 // Mettre à jour le deck du joueur
                                 $stmt_update_deck = $pdo->prepare("UPDATE joueurs SET deck = :deck WHERE ID = :ID");

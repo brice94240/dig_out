@@ -383,7 +383,7 @@ body, html {
     font-size: 0.5em;
     width: 9em;
     color: white;
-    max-height: 2.6em;
+    max-height: 3.5em;
     padding-bottom: 2em;
     text-align: center;
     line-height: 1.4;
@@ -534,4 +534,35 @@ body, html {
 
 .finturn-button:hover {
     background-color: #fd1206;
+}
+
+.modal-deck-defausser {
+    color: #fff;
+    margin-top: 0.5vh;
+    font-size: 2vh;
+    font-weight: bold;
+    background: #850000;
+    cursor: pointer;
+    border-color: black;
+    border-style: double;
+    font-family: fantasy;
+    padding: 0.5vh;
+}
+
+.modal-deck-defausser:hover {
+    color: #333;
+    text-decoration: none;
+}
+
+.defausser-btn {
+    color: #fff;
+    margin-top: 0.5vh;
+    font-size: 1.5vh;
+    font-weight: bold;
+    background: #850000;
+    cursor: pointer;
+    border-color: black;
+    border-style: double;
+    font-family: fantasy;
+    padding: 0.5vh;
 }
