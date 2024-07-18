@@ -65,28 +65,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         foreach ($deck as $index => $card) {
                             if ($card['name'] === 'Pelle') {
                                 $hasPelle = true;
-                                $PelleIndex = $deck[$index];
+                                $PelleIndex = $index;
                             }
                             if ($card['name'] === 'Pioche') {
                                 $hasPioche = true;
-                                $PiocheIndex = $deck[$index];
+                                $PiocheIndex = $index;
                             }
                             if ($card['name'] === 'Cuillère') {
                                 $hasCuillere = true;
-                                $CuillereIndex = $deck[$index];
+                                $CuillereIndex = $index;
                             }
                         }
 
                         if($hasPelle) {
-                            unset($deck[$index]);
+                            unset($deck[$PelleIndex]);
                             $points = 3; 
                         }
                         else if($hasPioche) {
-                            unset($deck[$index]);
+                            unset($deck[$PiocheIndex]);
                             $points = 2;
                         }
                         else if($hasCuillere) {
-                            unset($deck[$index]);
+                            unset($deck[$CuillereIndex]);
                             $points = 1;
                         }
                         if($points > 0) {

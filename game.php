@@ -394,7 +394,8 @@ if($game['team_activated'] == 0){ ?>
         <div class="map-interactive-area" id="deck" onclick="showCardDecksInfo()" style="background-image:url('./img/<?php echo $decks[0]['verso_card'] ?>');background-size:cover;background-repeat:no-repeat;"></div>
         <div class="map-interactive-area" id="defausse" onclick="showCardDefausseInfo()" style="background-image:url('./img/<?php echo $defausses[0]['img'] ?>');background-size:cover;background-repeat:no-repeat;transform: rotate(90deg);"></div>
         <div class="map-interactive-area" id="dice" onclick="showDice('<?php echo $row_turn['turn']; ?>,<?php echo $row_turn['dice_data']; ?>')" style="background-image:url('./img/Dice6.png');background-size:contain;background-repeat:no-repeat;background-size: contain;background-repeat: no-repeat;background-position: top;"></div>
-        
+        <div class="map-interactive-area" id="cigarette" style="background-image:url('./img/cigarette.png');background-size:cover;background-repeat:no-repeat;background-size: cover;background-repeat: no-repeat;background-position: top;"><div class="count_cigarette"><?php echo $verify_info_player['cigarette'] ?></div></div>
+
         <div class="turn" value=<?php echo $row_turn['turn'] ?>></div>
         <input type="hidden" class="turn" value=<?php echo $row_turn['turn'] ?>/>
         <input type="hidden" class="turn_id"/>
@@ -474,6 +475,7 @@ else if($game['team_activated'] == 1) { ?>
         <div class="map-interactive-area" id="deck" onclick="showCardDecksInfo()" style="background-image:url('./img/<?php echo $decks[0]['verso_card'] ?>');background-size:cover;background-repeat:no-repeat;"></div>
         <div class="map-interactive-area" id="defausse" onclick="showCardDefausseInfo()" style="background-image:url('./img/<?php echo $defausses[0]['img'] ?>');background-size:cover;background-repeat:no-repeat;transform: rotate(90deg);"></div>
         <div class="map-interactive-area" id="dice" onclick="showDice('<?php echo $row_turn['turn']; ?>', '<?php echo $dices[0]; ?>')" style="background-image:url('./img/Dice6.png');background-size:contain;background-repeat:no-repeat;background-size: contain;background-repeat: no-repeat;background-position: top;"></div>
+        <div class="map-interactive-area" id="cigarette" style="background-image:url('./img/cigarette.png');background-size:cover;background-repeat:no-repeat;background-size: cover;background-repeat: no-repeat;background-position: top;"><div class="count_cigarette"><?php echo $verify_info_player['cigarette'] ?></div></div>
         <input type="hidden" class="turn" value=<?php echo $row_turn['turn'] ?>/>
         <input type="hidden" class="turn_id"/>
         <input type="hidden" class="turn_action"/>
@@ -820,7 +822,7 @@ function showDice(Turn,Dice) {
             dataType: 'json',
             success: function(response) {
                 if (response.success) {
-                    var diceLaunched = true;
+                    // var diceLaunched = true;
                     var Turn = response.turn;
                     if(Turn == 1 && !Dice && diceLaunched == false) {
                         diceLaunched = true; // Marquer le dé comme lancé

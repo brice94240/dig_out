@@ -77,8 +77,9 @@ body, html {
 
 /* Styles pour les decks */
 #deck { top: 102%; left: 5%; width: 13%; height: 20%; } /* Deck */
-#dice { top: 107%; left: 50%; width: 10%; height: 20%; } /* Deck */
+#dice { top: 102%; left: 50%; width: 10%; height: 20%; } /* Deck */
 #defausse { top: 97%; left: 28%; width: 12%; height: 19%; } /* Defausse */
+#cigarette { top: 100%; left: 65%; width: 12%; height: 19%; } /* Defausse */
 
 /* Style global pour le modal */
 .modal {
@@ -677,4 +678,15 @@ body, html {
     background-size: cover;
     background-repeat: no-repeat;
     margin-bottom: 10px; /* Espace en bas de chaque carte */
+}
+
+.count_cigarette {
+    text-align: center;
+    font-size: 3vw;
+    font-family: cursive;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: -webkit-fill-available;
+    color: #ff7100;
 }
