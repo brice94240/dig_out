@@ -1110,6 +1110,15 @@ $(document).ready(function() {
                     } else {
                         $('#FinTurnButton').hide();
                     }
+                    if(response.defausse_data !== "") {
+                        var tab_defausse = JSON.parse(response.defausse_data);
+                        var globalDefausse = tab_defausse[0].img;
+                    } else {
+                        var globalDefausse = "";
+                    }
+                    var url_defausse = 'background-image:url("./img/'+globalDefausse+'");background-size:cover;background-repeat:no-repeat;transform: rotate(90deg);';
+
+                    $("#defausse")[0].style = url_defausse;
                 } else {
                     console.log('Erreur : ' + response.message);
                 }

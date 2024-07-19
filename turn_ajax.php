@@ -95,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $stmt_player_data->execute(['player_id' => $_SESSION['user_id']]);
         $row_player_data = $stmt_player_data->fetch(PDO::FETCH_ASSOC);
 
-        echo json_encode(['success' => true, 'turn' => $turn, 'new_turn' => '1', 'last_turn' => $_POST['turn'], 'real_turn' => $real_turn, 'player_turn_id' => $player_turn_id, 'player_turn_name' => $player_turn_name, 'player_tab' => $player_tab, 'playerData' => $playerData, 'nb_action' => $row_player_data['nb_action'], 'player_id' => $row_player_data['ID'], 'localisation' => $row_player_data['localisation'], 'team' => $row_player_data['team']]);
+        echo json_encode(['success' => true, 'turn' => $turn, 'new_turn' => '1', 'last_turn' => $_POST['turn'], 'real_turn' => $real_turn, 'player_turn_id' => $player_turn_id, 'player_turn_name' => $player_turn_name, 'player_tab' => $player_tab, 'playerData' => $playerData, 'nb_action' => $row_player_data['nb_action'], 'player_id' => $row_player_data['ID'], 'localisation' => $row_player_data['localisation'], 'team' => $row_player_data['team'], 'defausse_data' => $row['defausse_data']]);
 
     } catch (PDOException $e) {
         echo json_encode(['success' => false, 'message' => "Erreur lors de la récupération des parties : " . $e->getMessage()]);
