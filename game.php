@@ -387,7 +387,6 @@ if($game['team_activated'] == 0){ ?>
         <div class="map-interactive-area" id="carte2" onclick="showCardsPointsInfo('<?php echo $surins[0]['name']; ?>', '<?php echo $surins[0]['description']; ?>', '<?php echo $surins[0]['img']; ?>')" style="background-image:url('./img/<?php echo $surins[0]['img'] ?>');background-size:cover;background-repeat:no-repeat;"></div>
         <div class="map-interactive-area" id="carte3" onclick="showCardsPointsInfo('<?php echo $pioches[0]['name']; ?>', '<?php echo $pioches[0]['description']; ?>', '<?php echo $pioches[0]['img']; ?>')" style="background-image:url('./img/<?php echo $pioches[0]['img'] ?>');background-size:cover;transform: rotate(90deg);background-repeat:no-repeat;"></div>
         <div class="map-interactive-area" id="carte4" onclick="showCardsPointsInfo('<?php echo $pelles[0]['name']; ?>', '<?php echo $pelles[0]['description']; ?>', '<?php echo $pelles[0]['img']; ?>')" style="background-image:url('./img/<?php echo $pelles[0]['img'] ?>');background-size:cover;transform: rotate(90deg);background-repeat:no-repeat;"></div>
-        <div class="map-interactive-area" id="carte5" onclick="zoneClicked('Defausse')"></div>
         <div class="map-interactive-area" id="carte6" onclick="showDecksPointsInfo('<?php echo $cuilleres[0]['name']; ?>', '<?php echo $cuilleres[0]['description']; ?>', '<?php echo $cuilleres[0]['img']; ?>')" style="background-image:url('./img/<?php echo $cuilleres[0]['img'] ?>');background-size:cover;transform: rotate(90deg);background-repeat:no-repeat;"></div>
 
         <!-- Zones des decks -->
@@ -468,7 +467,6 @@ else if($game['team_activated'] == 1) { ?>
         <div class="map-interactive-area" id="carte2" onclick="showCardsPointsInfo('<?php echo $surins[0]['name']; ?>', '<?php echo $surins[0]['description']; ?>', '<?php echo $surins[0]['img']; ?>')" style="background-image:url('./img/<?php echo $surins[0]['img'] ?>');background-size:cover;background-repeat:no-repeat;"></div>
         <div class="map-interactive-area" id="carte3" onclick="showCardsPointsInfo('<?php echo $pioches[0]['name']; ?>', '<?php echo $pioches[0]['description']; ?>', '<?php echo $pioches[0]['img']; ?>')" style="background-image:url('./img/<?php echo $pioches[0]['img'] ?>');background-size:cover;background-repeat:no-repeat;"></div>
         <div class="map-interactive-area" id="carte4" onclick="showCardsPointsInfo('<?php echo $pelles[0]['name']; ?>', '<?php echo $pelles[0]['description']; ?>', '<?php echo $pelles[0]['img']; ?>')" style="background-image:url('./img/<?php echo $pelles[0]['img'] ?>');background-size:cover;background-repeat:no-repeat;"></div>
-        <div class="map-interactive-area" id="carte5" onclick="zoneClicked('Defausse')"></div>
         <div class="map-interactive-area" id="carte6" onclick="showCardsPointsInfo('<?php echo $cuilleres[0]['name']; ?>', '<?php echo $cuilleres[0]['description']; ?>', '<?php echo $cuilleres[0]['img']; ?>')" style="background-image:url('./img/<?php echo $cuilleres[0]['img'] ?>');background-size:cover;transform: rotate(90deg);background-repeat:no-repeat;"></div>
 
         <!-- Zones des decks -->
@@ -503,6 +501,8 @@ else if($game['team_activated'] == 1) { ?>
         </div>
         <div class="modal-deck-footer">
             <button id="defausser-deck-modal" class="modal-deck-defausser btn">Defausser</button>
+            <button id="sell-deck-modal" class="modal-deck-sell btn">Vendre</button>
+            <button id="sell-deck-modal-confirm" class="modal-deck-sell btn">Confirmer</button>
             <button id="close-deck-modal" class="modal-deck-close btn">Fermer</button>
         </div>
     </div>
@@ -531,6 +531,7 @@ else if($game['team_activated'] == 1) { ?>
     </div>
     <button id="healButton" class="heal-button">Se soigner</button>
     <button id="creuserButton" class="creuser-button">Creuser</button>
+    <button id="sellButton" class="sell-button">Vendre</button>
     <button id="FinTurnButton" class="finturn-button">Fin de tour</button>
 <?php } ?>
 
@@ -569,9 +570,9 @@ $('#FinTurnButton').click(function() {
     finTurn();
 });
 
-// $('#healButton').click(function() {
-//     useAction('heal','heal');
-// });
+$('#sellButton').click(function() {
+    useAction('sell','cigarette');
+});
 
 // Function to display the modal with specific gang info
 function showGangInfo(gangName, cardName, description) {
@@ -619,7 +620,7 @@ function showCardsPointsInfo(cardName, description, cardImage) {
     modal.style.display = "block";
     var buttonCardDiv = document.querySelector('.button_card');
 
-   // Remove existing "Voler" and "Fabriquer" buttons if they exist
+    // Remove existing "Voler" and "Fabriquer" buttons if they exist
     var existingStealButton = document.querySelector('.steal');
     if (existingStealButton) {
         existingStealButton.remove();
@@ -671,7 +672,7 @@ function showCardDecksInfo() {
             data: {
                 action: 'get_deck',
                 game_id: <?php echo $game_id; ?>,
-             },
+            },
             dataType: 'json',
             success: function(response) {
                 if (response.success) {
@@ -710,6 +711,59 @@ function showCardDecksInfo() {
 }
 
 // Function to display the modal with specific fouille card info
+function showCardDecksForSellInfo() {
+    $.ajax({
+            url: 'decks_ajax.php',
+            type: 'POST',
+            data: {
+                action: 'get_deck_to_sell',
+                game_id: <?php echo $game_id; ?>,
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    var deck = response.deck;
+                    $('#deck-cards').empty();
+                    // Montrer la modal lorsque l'utilisateur clique sur le deck
+                    deck.forEach(function(card) {
+                        var card_description = card.description.replace(/\\'/g, "'");
+                        $('#deck-cards').append('<div class="card modal-content-deck" style="background-image:url(./img/'+card.img+');background-size:cover;background-repeat:no-repeat;"><div class="deck-carte_name">' + card.name + '</div><div class="deck-carte_description">' + card_description + '</div></div>');
+                        $('#deck-modal').show();
+                    });
+                    console.log(response.localisation);
+                    if(response.deck.length > 10) {
+                        $('#defausser-deck-modal').show();
+                    } else {
+                        $('#defausser-deck-modal').hide();
+                    }
+
+                    if(response.localisation == 7) {
+                        $('#sell-deck-modal').show();
+                    } else {
+                        $('#sell-deck-modal').hide();
+                    }
+                    $('#sell-deck-modal-confirm').hide();
+                    // Close modal
+                    $('#close-deck-modal').click(function() {
+                        $('#deck-modal').hide();
+                    });
+
+                    $('#sell-deck-modal').click(function() {
+                        //CHOISIR LES CARTES A DEFAUSSER
+                        chooseCardsToSell(deck);
+                    });
+                } else {
+                    console.log('Erreur : ' + response.message);
+                }
+
+            },
+            error: function(xhr, status, error) {
+                console.log('Erreur AJAX : ' + error);
+            }
+        });
+}
+
+// Function to display the modal with specific fouille card info
 function showCardDefausseInfo() {
     $.ajax({
             url: 'defausse_ajax.php',
@@ -717,7 +771,7 @@ function showCardDefausseInfo() {
             data: {
                 action: 'get_defausse',
                 game_id: <?php echo $game_id; ?>,
-             },
+            },
             dataType: 'json',
             success: function(response) {
                 if (response.success) {
@@ -763,6 +817,66 @@ function chooseCardsToDefausser(deck) {
     });
 }
 
+function chooseCardsToSell(deck) {
+    $('#deck-cards').empty();
+    deck.forEach(function(card) {
+        var card_description = card.description.replace(/\\'/g, "'");
+        var cardDiv = $('<div class="card modal-content-deck" style="background-image:url(./img/'+card.img+');background-size:cover;background-repeat:no-repeat;"><div class="deck-carte_name">' + card.name + '</div><div class="deck-carte_description">' + card_description + '</div></div>');
+        var sellButton = $('<button class="sell-btn" data-card-id="' + card.ID + '" data-card-cigarette="'+ card.val_cigarette +'">Sélectionner</button>');
+        var CigaretteNumber = $('<div class="cigarette">Prix</br>'+card.val_cigarette+'</div>');
+        cardDiv.append(CigaretteNumber);
+        cardDiv.append(sellButton);
+        $('#deck-cards').append(cardDiv);
+        $('#sell-deck-modal').hide();
+        $('#sell-deck-modal-confirm').show();
+    });
+    $('.deck-carte_description').hide();
+    var tab_sell = [];
+    $('.sell-btn').click(function() {
+        var cardId = $(this).data('card-id');
+        // Si la carte n'est pas déjà dans le tableau
+        if (!tab_sell.find(element => element === cardId)) {
+            tab_sell.push(cardId);
+            console.log(cardId);
+            // Transformer le bouton sell-btn en unsell-btn
+            $(this).text('Annuler');
+        } else {
+            var index = tab_sell.findIndex(element => element === cardId);
+            tab_sell.splice(index, 1);
+            $(this).text('Sélectionner');
+        }
+        console.log(tab_sell);
+    });
+    
+    $('#sell-deck-modal-confirm').click(function() {
+        SellCards(tab_sell);
+    });
+}
+
+function SellCards(tab_sell) {
+    $.ajax({
+        url: 'decks_ajax.php',
+        type: 'POST',
+        data: {
+            action: 'sell_card',
+            tab_sell: tab_sell,
+            game_id: <?php echo $game_id; ?>
+        },
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                showCardDecksInfo(); // Refresh the deck
+            } else {
+                console.log('Erreur : ' + response.message);
+            }
+            console.log(response);
+        },
+        error: function(xhr, status, error) {
+            console.log('Erreur AJAX : ' + error);
+        }
+    });
+}
+
 function defausserCard(cardId) {
     $.ajax({
         url: 'decks_ajax.php',
@@ -776,6 +890,30 @@ function defausserCard(cardId) {
         success: function(response) {
             if (response.success) {
                 console.log('Carte défaussée avec succès');
+                showCardDecksInfo(); // Refresh the deck
+            } else {
+                console.log('Erreur : ' + response.message);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.log('Erreur AJAX : ' + error);
+        }
+    });
+}
+
+function SellCard(cardId) {
+    $.ajax({
+        url: 'decks_ajax.php',
+        type: 'POST',
+        data: {
+            action: 'defausser_card',
+            card_id: cardId,
+            game_id: <?php echo $game_id; ?>
+        },
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                console.log('Cartes vendues avec succès');
                 showCardDecksInfo(); // Refresh the deck
             } else {
                 console.log('Erreur : ' + response.message);
@@ -961,7 +1099,7 @@ function zoneClicked(zoneName) {
                 turn_dice: turn_dice,
                 zone : zone,
                 game_id: <?php echo $game_id; ?>,
-             },
+            },
             dataType: 'json',
             success: function(response) {
                 if (response.success) {
@@ -987,13 +1125,17 @@ function useAction(name_action,name) {
                 name_action : name_action,
                 item_name : name,
                 game_id: <?php echo $game_id; ?>,
-             },
+            },
             dataType: 'json',
             success: function(response) {
                 if (response.success) {
                     // showCardDecksInfo(response.deck);
                 } else {
                     console.log('Erreur : ' + response.message);
+                }
+                if(response.sell == true){
+                    showCardDecksForSellInfo(response.deck);
+                    // console.log(response.sell);
                 }
             },
             error: function(xhr, status, error) {
@@ -1009,7 +1151,7 @@ function finTurn() {
         data: {
             action: 'fin_turn_action',
             game_id: <?php echo $game_id; ?>,
-         },
+        },
         dataType: 'json',
         success: function(response) {
             if (response.success) {
@@ -1105,20 +1247,70 @@ $(document).ready(function() {
                     } else {
                         $('#creuserButton').hide();
                     }
+                    if(response.localisation == 7 ) {
+                        $('#sellButton').show();
+                    } else {
+                        $('#sellButton').hide();
+                    }
                     if(response.player_turn_id == response.player_id) {
                         $('#FinTurnButton').show();
                     } else {
                         $('#FinTurnButton').hide();
                     }
+
+
                     if(response.defausse_data !== "") {
                         var tab_defausse = JSON.parse(response.defausse_data);
                         var globalDefausse = tab_defausse[0].img;
+                        if(globalDefausse !== null){
+                            var url_defausse = 'background-image:url("./img/'+globalDefausse+'");background-size:cover;background-repeat:no-repeat;transform: rotate(90deg);';
+                            $("#defausse")[0].style = url_defausse;
+                        }
                     } else {
                         var globalDefausse = "";
                     }
-                    var url_defausse = 'background-image:url("./img/'+globalDefausse+'");background-size:cover;background-repeat:no-repeat;transform: rotate(90deg);';
 
-                    $("#defausse")[0].style = url_defausse;
+                    if(response.pelle_data !== "") {
+                        var tab_pelle = JSON.parse(response.pelle_data);
+                        var globalPelle = tab_pelle[0].img;
+                    } else {
+                        var globalPelle = "";
+                    }
+                    var url_pelle = 'background-image:url("./img/'+globalPelle+'");background-size:cover;background-repeat:no-repeat;';
+                    $("#carte4")[0].style = url_pelle;
+
+                    if(response.pioche_data !== "") {
+                        var tab_pioche = JSON.parse(response.pioche_data);
+                        var globalPioche = tab_pioche[0].img;
+                    } else {
+                        var globalPioche = "";
+                    }
+                    var url_pioche = 'background-image:url("./img/'+globalPioche+'");background-size:cover;background-repeat:no-repeat;';
+                    $("#carte3")[0].style = url_pioche;
+
+                    if(response.cuillere_data !== "") {
+                        var tab_cuillere = JSON.parse(response.cuillere_data);
+                        var globalCuillere = tab_cuillere[0].img;
+                    } else {
+                        var globalCuillere = "";
+                    }
+                    var url_cuillere = 'background-image:url("./img/'+globalCuillere+'");background-size:cover;background-repeat:no-repeat;transform: rotate(90deg);';
+                    $("#carte6")[0].style = url_cuillere;
+
+                    if(response.surin_data !== "") {
+                        var tab_surin = JSON.parse(response.surin_data);
+                        var globalSurin = tab_surin[0].img;
+                    } else {
+                        var globalSurin = "";
+                    }
+                    var url_surin = 'background-image:url("./img/'+globalSurin+'");background-size:cover;background-repeat:no-repeat;';
+                    $("#carte2")[0].style = url_surin;
+                    $(".count_cigarette")[0].innerHTML = response.cigarette;
+
+                    if(response.playerData[<?php echo $_SESSION['user_id']?>].dice_data[0] > 0){
+                        $dice_data_player = JSON.parse(response.playerData[<?php echo $_SESSION['user_id']?>].dice_data)[0];
+                        $("#dice")[0].style = 'background-image:url("./img/Dice'+$dice_data_player+'.png");background-size:contain;background-repeat:no-repeat;background-size: contain;background-repeat: no-repeat;background-position: top;';
+                    }
                 } else {
                     console.log('Erreur : ' + response.message);
                 }

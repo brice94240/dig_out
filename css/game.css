@@ -537,6 +537,24 @@ body, html {
     background-color: #fd1206;
 }
 
+.sell-button {
+    position: fixed;
+    bottom: 113px;
+    right: 20px;
+    background-color: #14d9c5;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 1000; /* Ensure it's above other elements */
+}
+
+.sell-button:hover {
+    background-color: #06b4a2;
+}
+
 .modal-deck-defausser {
     color: #fff;
     margin-top: 0.5vh;
@@ -556,6 +574,37 @@ body, html {
 }
 
 .defausser-btn {
+    color: #fff;
+    margin-top: 0.5vh;
+    font-size: 1.5vh;
+    font-weight: bold;
+    background: #850000;
+    cursor: pointer;
+    border-color: black;
+    border-style: double;
+    font-family: fantasy;
+    padding: 0.5vh;
+}
+
+.modal-deck-sell {
+    color: #fff;
+    margin-top: 0.5vh;
+    font-size: 2vh;
+    font-weight: bold;
+    background: #850000;
+    cursor: pointer;
+    border-color: black;
+    border-style: double;
+    font-family: fantasy;
+    padding: 0.5vh;
+}
+
+.modal-deck-sell:hover {
+    color: #333;
+    text-decoration: none;
+}
+
+.sell-btn {
     color: #fff;
     margin-top: 0.5vh;
     font-size: 1.5vh;
@@ -689,4 +738,10 @@ body, html {
     justify-content: center;
     height: -webkit-fill-available;
     color: #ff7100;
+}
+
+.cigarette {
+    color:white;
+    text-align: center;
+    font-size: 1vw;
 }

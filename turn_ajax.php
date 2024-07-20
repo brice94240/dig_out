@@ -94,8 +94,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $stmt_player_data = $pdo->prepare("SELECT * FROM joueurs WHERE ID = :player_id");
         $stmt_player_data->execute(['player_id' => $_SESSION['user_id']]);
         $row_player_data = $stmt_player_data->fetch(PDO::FETCH_ASSOC);
+        $pelle_data = $row['pelle_data'];
+        $pioche_data = $row['pioche_data'];
+        $cuillere_data = $row['cuillere_data'];
+        $gang_data = $row['gang_data'];
+        $surin_data = $row['surin_data'];
+        $cigarette = $row_player_data['cigarette'];
 
-        echo json_encode(['success' => true, 'turn' => $turn, 'new_turn' => '1', 'last_turn' => $_POST['turn'], 'real_turn' => $real_turn, 'player_turn_id' => $player_turn_id, 'player_turn_name' => $player_turn_name, 'player_tab' => $player_tab, 'playerData' => $playerData, 'nb_action' => $row_player_data['nb_action'], 'player_id' => $row_player_data['ID'], 'localisation' => $row_player_data['localisation'], 'team' => $row_player_data['team'], 'defausse_data' => $row['defausse_data']]);
+        echo json_encode(['success' => true, 'turn' => $turn, 'new_turn' => '1', 'last_turn' => $_POST['turn'], 'real_turn' => $real_turn, 'player_turn_id' => $player_turn_id, 'player_turn_name' => $player_turn_name, 'player_tab' => $player_tab, 'playerData' => $playerData, 'nb_action' => $row_player_data['nb_action'], 'player_id' => $row_player_data['ID'], 'localisation' => $row_player_data['localisation'], 'team' => $row_player_data['team'], 'defausse_data' => $row['defausse_data'], 'pelle_data' => $pelle_data, 'pioche_data' => $pioche_data, 'cuillere_data' => $cuillere_data, 'surin_data' => $surin_data, 'cigarette' => $cigarette]);
 
     } catch (PDOException $e) {
         echo json_encode(['success' => false, 'message' => "Erreur lors de la récupération des parties : " . $e->getMessage()]);

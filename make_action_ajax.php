@@ -123,7 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 echo json_encode(['success' => false, 'message' => "Vous ne pouvez pas creuser ici"]);
             }
         } else if($nb_action > 0) {
-            if ($raclee > 0 && $name_action == "steal" && $item_name == "Cuillère"){
+            if ($name_action == "steal" && $item_name == "Cuillère"){
                 if($localisation == 5) {
                     //RACLEE MAIS VEUT VOLER UNE CUILLERE
                     //VOLER UNE CUILLERE
@@ -167,52 +167,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 } else {
                     echo json_encode(['success' => false, 'message' => "Vous devez etre dans le réféctoire"]);
                 }
+            } elseif ($name_action == "sell" && $item_name == "cigarette"){
+                if($localisation == 7) {
+                    echo json_encode(['success' => true, 'deck' => $deck, 'sell' => true]);
+                } else {
+                    echo json_encode(['success' => false, 'message' => "Vous devez etre dans le réféctoire"]);
+                }
             } else if($raclee == 0){
-                if ($name_action == "steal" && $item_name == "Cuillère"){
-                    if($localisation == 5) {
-                        //RACLEE MAIS VEUT VOLER UNE CUILLERE
-                        //VOLER UNE CUILLERE
-                        // Récupérer les détails des cuillere
-                        $stmt_cuillere = $pdo->prepare("SELECT cuillere_data FROM games WHERE creator_id = :game_id");
-                        $stmt_cuillere->execute(['game_id' => $game_id]);
-                        $row_cuillere = $stmt_cuillere->fetch(PDO::FETCH_ASSOC);
-    
-                        if ($row_cuillere && $row_cuillere['cuillere_data']) {
-                            $cuilleres = json_decode($row_cuillere['cuillere_data'], true);
-                            //METTRE UNE CUILLERE DU PLATEAU AU DECK
-                            if (!empty($cuilleres)) {
-                                $deck[] = array_shift($cuilleres);
-                            }
-                            $deck_json = json_encode($deck);
-                            $cuilleres_json = json_encode($cuilleres);
-        
-                            // Mettre à jour les détails des cuilleres
-                            $stmt_update_cuillere = $pdo->prepare("UPDATE games SET cuillere_data = :cuillere WHERE creator_id = :game_id");
-                            $stmt_update_cuillere->execute(['cuillere' => $cuilleres_json, 'game_id' => $game_id]);
-        
-                            // Mettre à jour le deck du joueur
-                            $stmt_update_deck = $pdo->prepare("UPDATE joueurs SET deck = :deck WHERE ID = :ID");
-                            $stmt_update_deck->execute(['deck' => $deck_json, 'ID' => $_SESSION['user_id']]);
-        
-                            // Récupérer les détails des decks
-                            $stmt_deck = $pdo->prepare("SELECT deck FROM joueurs WHERE game_joined = :game_id AND `ID` = :user_id");
-                            $stmt_deck->execute(['game_id' => $game_id, 'user_id' => $_SESSION['user_id']]);
-                            $row_deck = $stmt_deck->fetchAll(PDO::FETCH_ASSOC);
-                            foreach($row_deck as $row_decks){
-                                if ($row_decks) {
-                                    $decks = json_decode($row_decks['deck'], true);
-                                } else {
-                                    echo "Les decks ne sont pas encore disponibles.";
-                                }
-                            }
-                            $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET nb_action = nb_action -1 WHERE `ID` = :user_id");
-                            $stmt_update_nb_action->execute(['user_id' => $_SESSION['user_id']]);
-                        }
-                        echo json_encode(['success' => true, 'deck' =>  $deck]);
-                    } else {
-                        echo json_encode(['success' => false, 'message' => "Vous devez etre dans le réféctoire"]);
-                    }
-                } elseif ($name_action == "make" && $item_name == "Pelle") {
+                if ($name_action == "make" && $item_name == "Pelle") {
                     // SI LE JOUEUR VEUT CONSTRUIRE UNE PELLE
                     if (($localisation == 4) || ($localisation == 5) || ($localisation == 7) || ($localisation == 3 && $team == "A") || ($localisation == 1 && $team == "B")) {
                         $hasRecipient = $hasLien = false; // Initialiser les variables
