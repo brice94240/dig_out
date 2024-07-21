@@ -8,7 +8,7 @@ header('Content-Type: application/json');
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'get_deck') {
     try {
         // Récupérer le deck actuel du joueur
-        $stmt_get_deck = $pdo->prepare("SELECT deck FROM joueurs WHERE ID = :player_id");
+        $stmt_get_deck = $pdo->prepare("SELECT deck, cigarette FROM joueurs WHERE ID = :player_id");
         $stmt_get_deck->execute(['player_id' => $_SESSION['user_id']]);
         $row_deck = $stmt_get_deck->fetch(PDO::FETCH_ASSOC);
         $deck = json_decode($row_deck['deck'], true) ?: [];
@@ -112,22 +112,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     }
                 }
 
-                $deck_json = json_encode(array_values($deck)); // Re-indexer le tableau
-                $defausse_json = json_encode($defausseData);
+                if($card_id){
+                    $deck_json = json_encode(array_values($deck)); // Re-indexer le tableau
+                    $defausse_json = json_encode($defausseData);
+    
+                    // Mettre à jour le deck du joueur
+                    $stmt_update_deck = $pdo->prepare("UPDATE joueurs SET deck = :deck WHERE ID = :user_id");
+                    $stmt_update_deck->execute(['deck' => $deck_json, 'user_id' => $_SESSION['user_id']]);
+    
+                    // Mettre à jour defausse_data du jeu
+                    $stmt_update_defausse = $pdo->prepare("UPDATE games SET defausse_data = :defausse WHERE creator_id = :game_id");
+                    $stmt_update_defausse->execute(['defausse' => $defausse_json, 'game_id' => $gameId]);
+    
+                    // Récupérer le deck actuel du joueur
+                    $stmt_get_infos = $pdo->prepare("SELECT * FROM joueurs WHERE ID = :player_id");
+                    $stmt_get_infos->execute(['player_id' => $_SESSION['user_id']]);
+                    $row_get_infos = $stmt_get_infos->fetch(PDO::FETCH_ASSOC);
+    
+                    if($row_deck['cigarette'] !== $row_get_infos['cigarette']){
+                        // Réduire le nombre d'actions
+                        $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET nb_action = nb_action - 1 WHERE ID = :user_id");
+                        $stmt_update_nb_action->execute(['user_id' => $_SESSION['user_id']]);
+                        echo json_encode(['success' => true, 'message' => 'Cartes vendues avec succès.']);
+                    }
+                } else {
+                    echo json_encode(['success' => true, 'message' => 'Veuillez sélectionner des cartes.']);
+                }
 
-                // Mettre à jour le deck du joueur
-                $stmt_update_deck = $pdo->prepare("UPDATE joueurs SET deck = :deck WHERE ID = :user_id");
-                $stmt_update_deck->execute(['deck' => $deck_json, 'user_id' => $_SESSION['user_id']]);
-
-                // Mettre à jour defausse_data du jeu
-                $stmt_update_defausse = $pdo->prepare("UPDATE games SET defausse_data = :defausse WHERE creator_id = :game_id");
-                $stmt_update_defausse->execute(['defausse' => $defausse_json, 'game_id' => $gameId]);
-
-                // Réduire le nombre d'actions
-                $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET nb_action = nb_action - 1 WHERE ID = :user_id");
-                $stmt_update_nb_action->execute(['user_id' => $_SESSION['user_id']]);
-
-                echo json_encode(['success' => true, 'message' => 'Cartes vendues avec succès.'.$defausse_json]);
             } catch (PDOException $e) {
                 echo json_encode(['success' => false, 'message' => "Erreur lors de la vente des cartes : " . $e->getMessage()]);
             }

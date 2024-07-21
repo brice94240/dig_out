@@ -854,27 +854,30 @@ function chooseCardsToSell(deck) {
 }
 
 function SellCards(tab_sell) {
-    $.ajax({
-        url: 'decks_ajax.php',
-        type: 'POST',
-        data: {
-            action: 'sell_card',
-            tab_sell: tab_sell,
-            game_id: <?php echo $game_id; ?>
-        },
-        dataType: 'json',
-        success: function(response) {
-            if (response.success) {
-                showCardDecksInfo(); // Refresh the deck
-            } else {
-                console.log('Erreur : ' + response.message);
+    if(tab_sell.length > 0){
+        $.ajax({
+            url: 'decks_ajax.php',
+            type: 'POST',
+            data: {
+                action: 'sell_card',
+                tab_sell: tab_sell,
+                game_id: <?php echo $game_id; ?>
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    tab_sell = [];
+                    showCardDecksInfo(); // Refresh the deck
+                } else {
+                    console.log('Erreur : ' + response.message);
+                }
+                console.log(response);
+            },
+            error: function(xhr, status, error) {
+                console.log('Erreur AJAX : ' + error);
             }
-            console.log(response);
-        },
-        error: function(xhr, status, error) {
-            console.log('Erreur AJAX : ' + error);
-        }
-    });
+        });
+    }
 }
 
 function defausserCard(cardId) {
@@ -1159,6 +1162,7 @@ function finTurn() {
             } else {
                 console.log('Erreur : ' + response.message);
             }
+            console.log(response);
         },
         error: function(xhr, status, error) {
             console.log('Erreur AJAX : ' + error);
@@ -1247,7 +1251,7 @@ $(document).ready(function() {
                     } else {
                         $('#creuserButton').hide();
                     }
-                    if(response.localisation == 7 ) {
+                    if((response.localisation == 7) && (response.player_turn_id == response.player_id) ) {
                         $('#sellButton').show();
                     } else {
                         $('#sellButton').hide();
@@ -1307,7 +1311,7 @@ $(document).ready(function() {
                     $("#carte2")[0].style = url_surin;
                     $(".count_cigarette")[0].innerHTML = response.cigarette;
 
-                    if(response.playerData[<?php echo $_SESSION['user_id']?>].dice_data[0] > 0){
+                    if(response.playerData[<?php echo $_SESSION['user_id']?>].dice_data[0]){
                         $dice_data_player = JSON.parse(response.playerData[<?php echo $_SESSION['user_id']?>].dice_data)[0];
                         $("#dice")[0].style = 'background-image:url("./img/Dice'+$dice_data_player+'.png");background-size:contain;background-repeat:no-repeat;background-size: contain;background-repeat: no-repeat;background-position: top;';
                     }
