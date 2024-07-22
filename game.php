@@ -1182,7 +1182,6 @@ function useAction(name_action,name) {
             },
             dataType: 'json',
             success: function(response) {
-                console.log(response);
                 if (response.success) {
 
                 } else {
@@ -1191,7 +1190,7 @@ function useAction(name_action,name) {
                 if(response.sell == true){
                     showCardDecksForSellInfo(response.deck);
                 }
-                if(response.sub_type == 1){
+                if(response.sub_type == 1 || response.sub_type == 7){
                     showCardDecksInfo(response.deck);
                 }
             },
