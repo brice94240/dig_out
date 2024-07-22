@@ -717,15 +717,24 @@ function showCardDecksInfo() {
                     $('#deck-cards').empty();
                     // Montrer la modal lorsque l'utilisateur clique sur le deck
                     deck.forEach(function(card) {
-                        var card_description = card.description.replace(/\\'/g, "'");
-                        $('#deck-cards').append('<div class="card modal-content-deck" style="background-image:url(./img/'+card.img+');background-size:cover;background-repeat:no-repeat;"><div class="deck-carte_name">' + card.name + '</div><div class="deck-carte_description">' + card_description + '</div></div>');
-                        $('#deck-modal').show();
+                        if(card.type !== 2){
+                            var card_description = card.description.replace(/\\'/g, "'");
+                            $('#deck-cards').append('<div class="card modal-content-deck" style="background-image:url(./img/'+card.img+');background-size:cover;background-repeat:no-repeat;"><div class="deck-carte_name">' + card.name + '</div><div class="deck-carte_description">' + card_description + '</div></div>');
+                            $('#deck-modal').show();
+                        } else {
+                            var card_description = card.description.replace(/\\'/g, "'");
+                            $('#deck-cards').append('<div class="card card_action modal-content-deck" style="background-image:url(./img/'+card.img+');background-size:cover;background-repeat:no-repeat;"><div class="deck-carte_name">' + card.name + '</div><div class="deck-carte_description">' + card_description + '</div><button class="card-action-btn" data-card-id="'+card.ID+'">Utiliser</button></div>');
+                            $('#deck-modal').show();
+                        }
                     });
                     if(deck.length > 10) {
                         $('#defausser-deck-modal').show();
                     } else {
                         $('#defausser-deck-modal').hide();
                     }
+
+                    $('#sell-deck-modal').hide();
+                    $('#sell-deck-modal-confirm').hide();
 
                     // Close modal
                     $('#close-deck-modal').click(function() {
@@ -735,6 +744,11 @@ function showCardDecksInfo() {
                     $('#defausser-deck-modal').click(function() {
                         //CHOISIR LES CARTES A DEFAUSSER
                         chooseCardsToDefausser(deck);
+                    });
+
+                    $('.card-action-btn').click(function() {
+                        var card_action = $(this).data('card-id');
+                        useAction('card_action',card_action);
                     });
                 } else {
                     console.log('Erreur : ' + response.message);
@@ -873,7 +887,6 @@ function chooseCardsToSell(deck) {
         // Si la carte n'est pas déjà dans le tableau
         if (!tab_sell.find(element => element === cardId)) {
             tab_sell.push(cardId);
-            console.log(cardId);
             // Transformer le bouton sell-btn en unsell-btn
             $(this).text('Annuler');
         } else {
@@ -881,7 +894,6 @@ function chooseCardsToSell(deck) {
             tab_sell.splice(index, 1);
             $(this).text('Sélectionner');
         }
-        console.log(tab_sell);
     });
     
     $('#sell-deck-modal-confirm').click(function() {
@@ -1128,6 +1140,7 @@ function showDice(Turn,Dice) {
 
 function zoneClicked(zoneName) {
     var turn_dice = $('.turn_dice')[0].getAttribute('value');
+    var turn = $('.turn')[0].getAttribute('value');
     var zone = zoneName;
     var target = $(event.target);
     if(target[0].className.includes("pawn") == false){
@@ -1138,6 +1151,7 @@ function zoneClicked(zoneName) {
                     action: 'get_localisation',
                     turn_dice: turn_dice,
                     zone : zone,
+                    turn : turn,
                     game_id: <?php echo $game_id; ?>,
                 },
                 dataType: 'json',
@@ -1157,7 +1171,6 @@ function zoneClicked(zoneName) {
 }
 
 function useAction(name_action,name) {
-
     $.ajax({
             url: 'make_action_ajax.php',
             type: 'POST',
@@ -1169,14 +1182,17 @@ function useAction(name_action,name) {
             },
             dataType: 'json',
             success: function(response) {
+                console.log(response);
                 if (response.success) {
-                    // showCardDecksInfo(response.deck);
+
                 } else {
                     console.log('Erreur : ' + response.message);
                 }
                 if(response.sell == true){
                     showCardDecksForSellInfo(response.deck);
-                    // console.log(response.sell);
+                }
+                if(response.sub_type == 1){
+                    showCardDecksInfo(response.deck);
                 }
             },
             error: function(xhr, status, error) {

@@ -617,6 +617,27 @@ body, html {
     padding: 0.5vh;
 }
 
+.sell-btn:hover {
+    background: #d61010;
+}
+
+.card-action-btn {
+    color: #fff;
+    margin-top: 0.5vh;
+    font-size: 1.5vh;
+    font-weight: bold;
+    background: #e0a503;
+    cursor: pointer;
+    border-color: black;
+    border-style: double;
+    font-family: fantasy;
+    padding: 0.5vh;
+}
+
+.card-action-btn:hover {
+    background: #f9b805;
+}
+
 /* Modal Style */
 .modal-defausse {
     display: none;
