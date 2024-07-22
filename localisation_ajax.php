@@ -90,8 +90,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     echo json_encode(['success' => true, 'zone' =>  $zone, 'last_localisation' =>  $last_localisation, 'turn_dice' =>  $turn_dice[0], 'fouilles_win' =>  $fouilles_win, 'deck' =>  $deck]);
                     
                 } else {
-                    echo json_encode(['success' => false, 'message' => "Ne peux pas allez ici", 'test' => $_POST['turn_dice']]);
+                    echo json_encode(['success' => false, 'message' => "Ne peux pas allez ici"]);
                 }
+            } elseif($dice_data == "" && $localisation == $last_localisation) {
+                echo json_encode(['success' => false, 'message' => "Vous devez d'abord lancer le dé"]);
             } else {
                 echo json_encode(['success' => false, 'message' => "Vous n'avez pas d'action disponible"]);
             }

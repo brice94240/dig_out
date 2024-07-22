@@ -427,6 +427,22 @@ if($game['team_activated'] == 0){ ?>
         </div>
     </div>
 
+    <!-- Modal Structure Deck -->
+    <div id="deck-modal" class="modal-deck">
+        <div class="modal-deck-content">
+            <h4>Mon Deck :</h4>
+            <div id="deck-cards">
+                <!-- Cartes seront affichées ici -->
+            </div>
+        </div>
+        <div class="modal-deck-footer">
+            <button id="defausser-deck-modal" class="modal-deck-defausser btn">Defausser</button>
+            <button id="sell-deck-modal" class="modal-deck-sell btn">Vendre</button>
+            <button id="sell-deck-modal-confirm" class="modal-deck-sell btn">Confirmer</button>
+            <button id="close-deck-modal" class="modal-deck-close btn">Fermer</button>
+        </div>
+    </div>
+
     <!-- The Modal Dice -->
     <div id="ModalDice" class="modal">
         <div class="modal-dice-content">
@@ -504,6 +520,27 @@ else if($game['team_activated'] == 1) { ?>
             <button id="sell-deck-modal" class="modal-deck-sell btn">Vendre</button>
             <button id="sell-deck-modal-confirm" class="modal-deck-sell btn">Confirmer</button>
             <button id="close-deck-modal" class="modal-deck-close btn">Fermer</button>
+        </div>
+    </div>
+
+    <!-- Modal Structure Deck -->
+    <div id="deck-modal-target" class="modal-deck-target">
+        <div class="modal-deck-target-content">
+            <div id="pseudo-target">
+                <!-- Cartes seront affichées ici -->
+            </div>
+            <h4>Deck :</h4>
+            <div id="deck-target-cards">
+                <!-- Cartes seront affichées ici -->
+            </div>
+            <h4>Infos :</h4>
+            <div id="deck-target-infos">
+                <!-- Infos seront affichées ici -->
+            </div>
+        </div>
+        <div class="modal-deck-target-footer">
+            <button id="attackButton" class="attack-button">Racketter</button>
+            <button id="close-deck-target-modal" class="modal-deck-target-close btn">Fermer</button>
         </div>
     </div>
 
@@ -684,7 +721,7 @@ function showCardDecksInfo() {
                         $('#deck-cards').append('<div class="card modal-content-deck" style="background-image:url(./img/'+card.img+');background-size:cover;background-repeat:no-repeat;"><div class="deck-carte_name">' + card.name + '</div><div class="deck-carte_description">' + card_description + '</div></div>');
                         $('#deck-modal').show();
                     });
-                    if(response.deck.length > 10) {
+                    if(deck.length > 10) {
                         $('#defausser-deck-modal').show();
                     } else {
                         $('#defausser-deck-modal').hide();
@@ -730,7 +767,6 @@ function showCardDecksForSellInfo() {
                         $('#deck-cards').append('<div class="card modal-content-deck" style="background-image:url(./img/'+card.img+');background-size:cover;background-repeat:no-repeat;"><div class="deck-carte_name">' + card.name + '</div><div class="deck-carte_description">' + card_description + '</div></div>');
                         $('#deck-modal').show();
                     });
-                    console.log(response.localisation);
                     if(response.deck.length > 10) {
                         $('#defausser-deck-modal').show();
                     } else {
@@ -1093,29 +1129,31 @@ function showDice(Turn,Dice) {
 function zoneClicked(zoneName) {
     var turn_dice = $('.turn_dice')[0].getAttribute('value');
     var zone = zoneName;
+    var target = $(event.target);
+    if(target[0].className.includes("pawn") == false){
+        $.ajax({
+                url: 'localisation_ajax.php',
+                type: 'POST',
+                data: {
+                    action: 'get_localisation',
+                    turn_dice: turn_dice,
+                    zone : zone,
+                    game_id: <?php echo $game_id; ?>,
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        showCardDecksInfo(response.deck);
+                    } else {
+                        console.log('Erreur : ' + response.message);
+                    }
 
-    $.ajax({
-            url: 'localisation_ajax.php',
-            type: 'POST',
-            data: {
-                action: 'get_localisation',
-                turn_dice: turn_dice,
-                zone : zone,
-                game_id: <?php echo $game_id; ?>,
-            },
-            dataType: 'json',
-            success: function(response) {
-                if (response.success) {
-                    showCardDecksInfo(response.deck);
-                } else {
-                    console.log('Erreur : ' + response.message);
+                },
+                error: function(xhr, status, error) {
+                    console.log('Erreur AJAX : ' + error);
                 }
-
-            },
-            error: function(xhr, status, error) {
-                console.log('Erreur AJAX : ' + error);
-            }
-        });
+            });
+    }
 }
 
 function useAction(name_action,name) {
@@ -1169,6 +1207,10 @@ function finTurn() {
         }
     });
 }
+
+$('.close_dice').click(function() {
+    $('#ModalDice').hide();
+});
 
 $(document).ready(function() {
     function RefreshTurn() {
@@ -1324,6 +1366,103 @@ $(document).ready(function() {
             }
         });
     }
+
+    function GetInfoTarget() {
+        // GERER LE CLICK SUR UN JOUEUR
+        var tab_player = '<?php echo $game['tab_player']; ?>';
+        var tab_id_player = tab_player.split(',');
+        var turn = $('.turn')[0].getAttribute('value');
+        tab_id_player.forEach(function(id) {
+            $("#pawn" + id).click(function() {
+                if($(this)[0].className.includes("pawn")){
+                    $.ajax({
+                        url: 'get_menu_ajax.php',
+                        type: 'POST',
+                        data: {
+                            action: 'get_menu',
+                            game_id: <?php echo $game_id; ?>,
+                            id : id
+                        },
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.success) {
+                                $.ajax({
+                                    url: 'decks_target_ajax.php',
+                                    type: 'POST',
+                                    data: {
+                                        action: 'get_deck_target',
+                                        game_id: <?php echo $game_id; ?>,
+                                        response: response
+                                    },
+                                    dataType: 'json',
+                                    success: function(response) {
+                                        if (response.success) {
+                                            console.log(response);
+                                            var deck = response.target.deck_target;
+                                            var cigarette = response.target.cigarette;
+                                            var raclee = response.target.raclee;
+                                            var can_fight = response.target.can_fight;
+                                            var pseudo = response.target.pseudo;
+                                            var team = response.target.team;
+                                            var deck_target_number = response.target.deck_target_number;
+
+                                            $('#deck-target-cards').empty();
+                                            if($('#pseudo_team_target').length == 0){
+                                                $('#pseudo-target').append('<div id="pseudo_team_target"><div class="pseudo_team_target"><div class="team_target">Team : '+team+'</div><div class="pseudo_target">Pseudo : '+pseudo+'</div></div>');
+                                                $('#deck-modal-target').show();
+                                            }
+
+                                            // Montrer la modal lorsque l'utilisateur clique sur le deck
+                                            if(deck) {
+                                                deck.forEach(function(card) {
+                                                    var card_description = card.description.replace(/\\'/g, "'");
+                                                    $('#deck-target-cards').append('<div class="card modal-content-deck-target" style="background-image:url(./img/'+card.img+');background-size:cover;background-repeat:no-repeat;"><div class="deck-carte_name">' + card.name + '</div><div class="deck-carte_description">' + card_description + '</div></div>');
+                                                    $('#deck-modal-target').show();
+                                                });
+                                            } else {
+                                                for(var i=0; i< deck_target_number;i++){
+                                                    $('#deck-target-cards').append('<div class="card modal-content-deck-target" style="background-image:url(./img/verso_card.png);background-size:cover;background-repeat:no-repeat;"></div>');
+                                                    $('#deck-modal-target').show();
+                                                }
+                                            }
+                                            if(can_fight === "true") {
+                                                $('#attackButton').show();
+                                            } else {
+                                                $('#attackButton').hide();
+                                            }
+
+                                            $('#deck-target-infos').append('<div class="map-interactive-area" id="cigarette_target" style="background-image:url(./img/cigarette.png);background-size:cover;background-repeat:no-repeat;background-size: cover;background-repeat: no-repeat;background-position: top;"><div class="count_cigarette_target">'+cigarette+'</div></div>');
+                                            $('#deck-modal-target').show();
+
+                                            $('#deck-target-infos').append('<div class="map-interactive-area" id="raclee_target" style="background-image:url(./img/raclee.png);background-size:cover;background-repeat:no-repeat;background-size: cover;background-repeat: no-repeat;background-position: top;"><div class="count_raclee_target">'+raclee+'</div></div>');
+                                            $('#deck-modal-target').show();
+
+                                            // Close modal
+                                            $('#close-deck-target-modal').click(function() {
+                                                $('#deck-modal-target').hide();
+                                            });
+
+                                        } else {
+                                            console.log('Erreur : ' + response.message);
+                                        }
+
+                                    },
+                                    error: function(xhr, status, error) {
+                                        console.log('Erreur AJAX : ' + error);
+                                    }
+                                });
+                            } else {
+                                console.log('Erreur : ' + response.message);
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.log('Erreur AJAX : ' + error);
+                        }
+                    });
+                }
+            })
+        });
+    }
     // JavaScript pour gérer les interactions du jeu
     function initializeGameBoard() {
         // Initialisation du plateau de jeu si nécessaire
@@ -1332,6 +1471,12 @@ $(document).ready(function() {
     // Initialiser le plateau de jeu
     initializeGameBoard();
     RefreshTurn();
+    GetInfoTarget();
+
+    setInterval(function() {
+        GetInfoTarget(); // Recharger les parties toutes les 2 secondes (2000 ms)
+    }, 1000); // Répéter toutes les 2 secondes (2000 ms)
+
     setInterval(function() {
         RefreshTurn(); // Recharger les parties toutes les 2 secondes (2000 ms)
     }, 50); // Répéter toutes les 2 secondes (2000 ms)

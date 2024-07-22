@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
              $stmt_update_action_to_players = $pdo->prepare("UPDATE joueurs SET nb_action = :nb_action WHERE `game_joined` = :game_id");
              $stmt_update_action_to_players->execute(['nb_action' => 0, 'game_id' => $_POST['game_id']]);
 
-             if($row['turn'] >= 2) {
+            if($row['turn'] >= 2) {
                 $real_turn = $row['turn']-2;
                 if($real_turn >= $row['max_player']){
                     $real_turn = $real_turn % $row['max_player'];
