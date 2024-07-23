@@ -668,6 +668,11 @@ function showCardsPointsInfo(cardName, description, cardImage) {
         existingMakeButton.remove();
     }
 
+    var existingMakeButton = document.querySelector('.buy');
+    if (existingMakeButton) {
+        existingMakeButton.remove();
+    }
+
     var existingMakeButton = document.querySelector('.join');
     if (existingMakeButton) {
         existingMakeButton.remove();
@@ -687,8 +692,16 @@ function showCardsPointsInfo(cardName, description, cardImage) {
         makeButton.className = 'make';
         makeButton.innerText = 'Fabriquer';
         makeButton.setAttribute('onclick', 'useAction("make","'+cardName+'")');
+
+        var buyButton = document.createElement('span');
+        buyButton.className = 'buy';
+        buyButton.innerText = 'Acheter';
+        buyButton.setAttribute('onclick', 'useAction("buy","'+cardName+'")');
+
         // Append the new "Voler" button to the button card div
         buttonCardDiv.appendChild(makeButton);
+        buttonCardDiv.appendChild(buyButton);
+
     }
 }
 

@@ -216,6 +216,26 @@ body, html {
 }
 
 /* Style pour le bouton de fermeture */
+.buy {
+    color: #fff;
+    margin-top: 0.5vh;
+    font-size: 2vh;
+    font-weight: bold;
+    background: #850000;
+    cursor: pointer;
+    border-color: black;
+    border-style: double;
+    font-family: fantasy;
+    padding: 0.5vh;
+}
+
+.buy:hover,
+.buy:focus {
+    color: #333;
+    text-decoration: none;
+}
+
+/* Style pour le bouton de fermeture */
 .join {
     color: #fff;
     margin-top: 0.5vh;
@@ -886,4 +906,7 @@ body, html {
 
 .attack-button:hover {
     background-color: #cb4e0a;
+}
+.button_card {
+    display: flex;
 }

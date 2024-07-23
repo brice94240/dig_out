@@ -19,6 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $game_id = $_POST['game_id'];
         $team = $row_info_joueur['team'];
         $point_turn = $row_info_joueur['point_turn'];
+        $cigarette = $row_info_joueur['cigarette'];
 
         // Récupérer le deck actuel du joueur
         $stmt_get_deck = $pdo->prepare("SELECT deck FROM joueurs WHERE ID = :player_id");
@@ -172,6 +173,132 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     echo json_encode(['success' => true, 'deck' => $deck, 'sell' => true]);
                 } else {
                     echo json_encode(['success' => false, 'message' => "Vous devez etre dans le réféctoire"]);
+                }
+            } elseif ($name_action == "buy") {
+                if ($localisation == 7){
+                    if ($item_name == "Pelle"){
+                        $price = 8;
+                        if($cigarette >= $price){
+                            $deck = array_values($deck);
+                
+                            $stmt_pelle = $pdo->prepare("SELECT pelle_data FROM games WHERE creator_id = :game_id");
+                            $stmt_pelle->execute(['game_id' => $game_id]);
+                            $row_pelle = $stmt_pelle->fetch(PDO::FETCH_ASSOC);
+                
+                            if ($row_pelle && $row_pelle['pelle_data']) {
+                                $pelles = json_decode($row_pelle['pelle_data'], true);
+                                if (!empty($pelles)) {
+                                    $deck[] = array_shift($pelles); // Ajouter une pelle au deck
+                                }
+                                $deck_json = json_encode($deck);
+                                $pelles_json = json_encode($pelles);
+                
+                                // Mettre à jour les détails des pelles
+                                $stmt_update_pelle = $pdo->prepare("UPDATE games SET pelle_data = :pelle WHERE creator_id = :game_id");
+                                $stmt_update_pelle->execute(['pelle' => $pelles_json, 'game_id' => $game_id]);
+    
+                                // Mettre à jour le deck du joueur
+                                $stmt_update_deck = $pdo->prepare("UPDATE joueurs SET deck = :deck WHERE ID = :ID");
+                                $stmt_update_deck->execute(['deck' => $deck_json, 'ID' => $_SESSION['user_id']]);
+                
+                                // Réduire le nombre de cigarette
+                                $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET cigarette = cigarette - 8 WHERE ID = :user_id");
+                                $stmt_update_nb_action->execute(['user_id' => $_SESSION['user_id']]);
+    
+                                // Réduire le nombre d'actions
+                                $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET nb_action = nb_action - 1 WHERE ID = :user_id");
+                                $stmt_update_nb_action->execute(['user_id' => $_SESSION['user_id']]);
+                
+                                echo json_encode(['success' => true, 'message' => 'Vous avez acheté une Pelle.']);
+                            } else {
+                                echo json_encode(['success' => false, 'message' => 'Erreur de récupération des données de Pelle.']);
+                            }
+                        } else {
+                            echo json_encode(['success' => false, 'message' => 'Vous avez besoin de 8 cigarettes.']);
+                        }
+                    } elseif ($item_name == "Pioche"){
+                        $price = 6;
+                        if($cigarette >= $price){
+                            $deck = array_values($deck);
+                
+                            $stmt_pioche = $pdo->prepare("SELECT pioche_data FROM games WHERE creator_id = :game_id");
+                            $stmt_pioche->execute(['game_id' => $game_id]);
+                            $row_pioche = $stmt_pioche->fetch(PDO::FETCH_ASSOC);
+                
+                            if ($row_pioche && $row_pioche['pioche_data']) {
+                                $pioches = json_decode($row_pioche['pioche_data'], true);
+                                if (!empty($pioches)) {
+                                    $deck[] = array_shift($pioches); // Ajouter une pioche au deck
+                                }
+                                $deck_json = json_encode($deck);
+                                $pioches_json = json_encode($pioches);
+                
+                                // Mettre à jour les détails des pioches
+                                $stmt_update_pioche = $pdo->prepare("UPDATE games SET pioche_data = :pioche WHERE creator_id = :game_id");
+                                $stmt_update_pioche->execute(['pioche' => $pioches_json, 'game_id' => $game_id]);
+    
+                                // Mettre à jour le deck du joueur
+                                $stmt_update_deck = $pdo->prepare("UPDATE joueurs SET deck = :deck WHERE ID = :ID");
+                                $stmt_update_deck->execute(['deck' => $deck_json, 'ID' => $_SESSION['user_id']]);
+                
+                                // Réduire le nombre de cigarette
+                                $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET cigarette = cigarette - 6 WHERE ID = :user_id");
+                                $stmt_update_nb_action->execute(['user_id' => $_SESSION['user_id']]);
+    
+                                // Réduire le nombre d'actions
+                                $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET nb_action = nb_action - 1 WHERE ID = :user_id");
+                                $stmt_update_nb_action->execute(['user_id' => $_SESSION['user_id']]);
+                
+                                echo json_encode(['success' => true, 'message' => 'Vous avez acheté une Pioche.']);
+                            } else {
+                                echo json_encode(['success' => false, 'message' => 'Erreur de récupération des données de Pioche.']);
+                            }
+                        } else {
+                            echo json_encode(['success' => false, 'message' => 'Vous avez besoin de 6 cigarettes.']);
+                        }
+                    } elseif ($item_name == "Surin"){
+                        $price = 5;
+                        if($cigarette >= $price){
+                            $deck = array_values($deck);
+                
+                            $stmt_surin = $pdo->prepare("SELECT surin_data FROM games WHERE creator_id = :game_id");
+                            $stmt_surin->execute(['game_id' => $game_id]);
+                            $row_surin = $stmt_surin->fetch(PDO::FETCH_ASSOC);
+                
+                            if ($row_surin && $row_surin['surin_data']) {
+                                $surins = json_decode($row_surin['surin_data'], true);
+                                if (!empty($surins)) {
+                                    for($i=0;$i < 2; $i++){
+                                        $deck[] = array_shift($surins); // Ajouter deux surins au deck
+                                    }
+                                }
+                                $deck_json = json_encode($deck);
+                                $surins_json = json_encode($surins);
+                
+                                // Mettre à jour les détails des surins
+                                $stmt_update_surin = $pdo->prepare("UPDATE games SET surin_data = :surin WHERE creator_id = :game_id");
+                                $stmt_update_surin->execute(['surin' => $surins_json, 'game_id' => $game_id]);
+    
+                                // Mettre à jour le deck du joueur
+                                $stmt_update_deck = $pdo->prepare("UPDATE joueurs SET deck = :deck WHERE ID = :ID");
+                                $stmt_update_deck->execute(['deck' => $deck_json, 'ID' => $_SESSION['user_id']]);
+                
+                                // Réduire le nombre de cigarette
+                                $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET cigarette = cigarette - 5 WHERE ID = :user_id");
+                                $stmt_update_nb_action->execute(['user_id' => $_SESSION['user_id']]);
+    
+                                // Réduire le nombre d'actions
+                                $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET nb_action = nb_action - 1 WHERE ID = :user_id");
+                                $stmt_update_nb_action->execute(['user_id' => $_SESSION['user_id']]);
+                
+                                echo json_encode(['success' => true, 'message' => 'Vous avez acheté deux Surins.']);
+                            } else {
+                                echo json_encode(['success' => false, 'message' => 'Erreur de récupération des données des Surins.']);
+                            }
+                        } else {
+                            echo json_encode(['success' => false, 'message' => 'Vous avez besoin de 5 cigarettes.']);
+                        }
+                    }
                 }
             } elseif ($name_action == "card_action"){
                 $stmt_card_action = $pdo->prepare("SELECT * FROM fouilles WHERE ID = :card_action_id");
