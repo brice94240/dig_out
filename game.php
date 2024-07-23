@@ -1190,7 +1190,7 @@ function useAction(name_action,name) {
                 if(response.sell == true){
                     showCardDecksForSellInfo(response.deck);
                 }
-                if(response.sub_type == 1 || response.sub_type == 7){
+                if(response.sub_type == 1 || response.sub_type == 7 || response.sub_type == 8){
                     showCardDecksInfo(response.deck);
                 }
             },
