@@ -843,6 +843,12 @@ body, html {
     gap: 10px;
 }
 
+#pseudo-target-action {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
 .modal-content-deck-target {
     display: flex;
     flex-direction: column;
@@ -909,4 +915,143 @@ body, html {
 }
 .button_card {
     display: flex;
+}
+/* Modal Action Target */
+.modal-action-target {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: #959595;
+    border-radius: 8px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+    width: 80%;
+    max-width: 600px;
+}
+
+.modal-action-target-content {
+    padding: 1em;
+    color: #000000;
+    font-family: fantasy;
+    font-weight: bolder;
+}
+
+.modal-action-target-footer {
+    padding: 10px 20px;
+    text-align: right;
+}
+
+.modal-action-target-close {
+    color: #fff;
+    margin-top: 0.5vh;
+    font-size: 2vh;
+    font-weight: bold;
+    background: #850000;
+    cursor: pointer;
+    border-color: black;
+    border-style: double;
+    font-family: fantasy;
+    padding: 0.5vh;
+}
+
+.modal-action-target-close:hover {
+    color: #333;
+    text-decoration: none;
+}
+
+.modal-content-action-target {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5vh;
+    height: 19vh;
+    width: 13vh;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    background: url(../img/crew.png);
+    background-size: cover;
+    background-position-x: center;
+    border-color: #b0b0b0;
+    border-style: ridge;
+    border-width: 1vh;
+}
+.count_cigarette_target {
+    text-align: center;
+    font-size: 8vw;
+    font-family: cursive;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: -webkit-fill-available;
+    color: #ff7100;
+}
+#action-target-infos{
+    height: 15vh;
+}
+.count_raclee_target {
+    text-align: center;
+    font-size: 8vw;
+    font-family: cursive;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: -webkit-fill-available;
+    color: #ff7100;
+}
+#raclee_target {
+    margin-left: 20vh;
+    width: 15vh;
+}
+.pseudo_team_target {
+    width: max-content;
+}
+.player {
+    display: flow;
+}
+.player_deck {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.modal-content-deck-action {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2vh;
+    height: 8vh;
+    width: 6vh;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    background: url(../img/crew.png);
+    background-size: cover;
+    background-position-x: center;
+    border-color: #b0b0b0;
+    border-style: ridge;
+    border-width: 1vh;
+}
+.count_deck_cards {
+    font-weight: bolder;
+    font-size: 5vh;
+    color: aliceblue;
+}
+.button_player_target_action {
+    color: #fff;
+    margin-top: 0.5vh;
+    font-size: 1.5vh;
+    font-weight: bold;
+    background: #e0a503;
+    cursor: pointer;
+    border-color: black;
+    border-style: double;
+    font-family: fantasy;
+    padding: 0.5vh;
+    width: 13vh;
+}
+
+.button_player_target_action:hover {
+    background: #f9b805;
 }

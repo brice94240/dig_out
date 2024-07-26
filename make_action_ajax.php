@@ -20,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $team = $row_info_joueur['team'];
         $point_turn = $row_info_joueur['point_turn'];
         $cigarette = $row_info_joueur['cigarette'];
+        $id = $row_info_joueur['ID'];
 
         // Récupérer le deck actuel du joueur
         $stmt_get_deck = $pdo->prepare("SELECT deck FROM joueurs WHERE ID = :player_id");
@@ -38,9 +39,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
         // Récupérer defausse_data du jeu
         $stmt_game = $pdo->prepare("SELECT defausse_data FROM games WHERE creator_id = :game_id");
-        $stmt_game->execute(['game_id' => $gameId]);
+        $stmt_game->execute(['game_id' => $game_id]);
         $row_game = $stmt_game->fetch(PDO::FETCH_ASSOC);
         $defausseData = json_decode($row_game['defausse_data'], true) ?: [];
+
 
         if ($name_action == "join"){
             //VEUT REJOINDRE UN GANG
@@ -163,8 +165,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         }
                         $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET nb_action = nb_action -1 WHERE `ID` = :user_id");
                         $stmt_update_nb_action->execute(['user_id' => $_SESSION['user_id']]);
+                        echo json_encode(['success' => true, 'message' => 'Vous avez volé une Cuillere.', 'deck' =>  $deck, 'steal' => true]);
+                    } else {
+                        echo json_encode(['success' => false, 'message' => "Plus de Cuillere disponible"]);
                     }
-                    echo json_encode(['success' => true, 'deck' =>  $deck]);
                 } else {
                     echo json_encode(['success' => false, 'message' => "Vous devez etre dans le réféctoire"]);
                 }
@@ -209,7 +213,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                 $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET nb_action = nb_action - 1 WHERE ID = :user_id");
                                 $stmt_update_nb_action->execute(['user_id' => $_SESSION['user_id']]);
                 
-                                echo json_encode(['success' => true, 'message' => 'Vous avez acheté une Pelle.']);
+                                echo json_encode(['success' => true, 'message' => 'Vous avez acheté une Pelle.', 'buy' => true]);
                             } else {
                                 echo json_encode(['success' => false, 'message' => 'Erreur de récupération des données de Pelle.']);
                             }
@@ -249,7 +253,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                 $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET nb_action = nb_action - 1 WHERE ID = :user_id");
                                 $stmt_update_nb_action->execute(['user_id' => $_SESSION['user_id']]);
                 
-                                echo json_encode(['success' => true, 'message' => 'Vous avez acheté une Pioche.']);
+                                echo json_encode(['success' => true, 'message' => 'Vous avez acheté une Pioche.', 'buy' => true]);
                             } else {
                                 echo json_encode(['success' => false, 'message' => 'Erreur de récupération des données de Pioche.']);
                             }
@@ -291,7 +295,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                 $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET nb_action = nb_action - 1 WHERE ID = :user_id");
                                 $stmt_update_nb_action->execute(['user_id' => $_SESSION['user_id']]);
                 
-                                echo json_encode(['success' => true, 'message' => 'Vous avez acheté deux Surins.']);
+                                echo json_encode(['success' => true, 'message' => 'Vous avez acheté deux Surins.', 'buy' => true]);
                             } else {
                                 echo json_encode(['success' => false, 'message' => 'Erreur de récupération des données des Surins.']);
                             }
@@ -299,13 +303,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             echo json_encode(['success' => false, 'message' => 'Vous avez besoin de 5 cigarettes.']);
                         }
                     }
+                } else {
+                    echo json_encode(['success' => false, 'message' => "Vous devez etre dans la promenade"]);
                 }
             } elseif ($name_action == "card_action"){
                 $stmt_card_action = $pdo->prepare("SELECT * FROM fouilles WHERE ID = :card_action_id");
                 $stmt_card_action->execute(['card_action_id' => $item_name]);
                 $row_card_action = $stmt_card_action->fetch(PDO::FETCH_ASSOC);
                 $sub_type = $row_card_action['sub_type'];
-                if($sub_type == 1) { //VISITE D'UN PROCHE
+
+                $stmt_game_infos = $pdo->prepare("SELECT * FROM games WHERE creator_id = :game_id");
+                $stmt_game_infos->execute(['game_id' => $game_id]);
+                $row_game_infos = $stmt_game_infos->fetchAll(PDO::FETCH_ASSOC);
+                
+
+                $stmt_players_infos = $pdo->prepare("SELECT ID,pseudo,team,deck,localisation,raclee FROM joueurs WHERE game_joined = :game_id");
+                $stmt_players_infos->execute(['game_id' => $game_id]);
+                $row_players_infos = $stmt_players_infos->fetchAll(PDO::FETCH_ASSOC);
+
+                if($sub_type == 1) { //VISITE D'UN PROCHE OK
                     // Récupérer les détails des fouilles
                     $stmt_fouille = $pdo->prepare("SELECT fouille_data FROM games WHERE creator_id = :game_id");
                     $stmt_fouille->execute(['game_id' => $game_id]);
@@ -370,15 +386,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         echo json_encode(['success' => false, 'message' => "Plus de carte fouille"]);
                     }
                 } else  if($sub_type == 2) { //CLEF DU GARDIEN
-                    echo json_encode(['success' => false, 'message' => "CLEF DU GARDIEN"]);
+                    echo json_encode(['success' => false, 'message' => "Clef du gardien", 'sub_type' => $sub_type, 'item_name' => $item_name, 'player_data' => $row_players_infos ]);
                 } else  if($sub_type == 3) { //TRANSFERT DE PRISONNIERS
-                    echo json_encode(['success' => false, 'message' => "CLEF DU GARDIEN"]);
+                    echo json_encode(['success' => false, 'message' => "Transfert de prisonniers", 'sub_type' => $sub_type, 'item_name' => $item_name, 'player_data' => $row_players_infos ]);
                 } else  if($sub_type == 4) { //FOUILLE AU CORPS
-                    echo json_encode(['success' => false, 'message' => "CLEF DU GARDIEN"]);
+                    echo json_encode(['success' => false, 'message' => "Fouille au corps", 'sub_type' => $sub_type, 'item_name' => $item_name, 'player_data' => $row_players_infos ]);
                 } else  if($sub_type == 5) { //ISOLEMENT
-                    echo json_encode(['success' => false, 'message' => "CLEF DU GARDIEN"]);
+                    echo json_encode(['success' => false, 'message' => "Isolement", 'sub_type' => $sub_type, 'item_name' => $item_name, 'player_data' => $row_players_infos ]);
                 } else  if($sub_type == 6) { //SAVONETTE
-                    echo json_encode(['success' => false, 'message' => "CLEF DU GARDIEN"]);
+                    echo json_encode(['success' => false, 'message' => "Savonette", 'sub_type' => $sub_type, 'item_name' => $item_name, 'player_data' => $row_players_infos ]);
                 } else  if($sub_type == 7) { //CLEF DES CELLULES OK
                     if(($team == "A" && $localisation !== 1) || ($team == "B" && $localisation !== 3)) {
                         // Récupérer les détails des fouilles
@@ -757,13 +773,100 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     } else {
                         echo json_encode(['success' => false, 'message' => "Vous etes deja dans la promenade"]);
                     }
-                } else  if($sub_type == 12) { //EMEUTE
+                } else  if($sub_type == 12) { //EMEUTE OK
+
                     //DEFAUSSER EMEUTE
-                    //PARCOURIR LES CARTE DE TOUT LES JOUEURS
-                    //METTEZ TOUTES LES CARTE DANS UN TABLEAU
-                    //DISTRIBUER TOUTES LES CARTE DU TABLEAU UNE PAR UNE EN COMMENCANT POUR LE JOUEUR QUI A EMEUTE
-                    //ENLEVER UNE ACTION AU JOUEUR
-                    echo json_encode(['success' => false, 'message' => "EMEUTE"]);
+                    $deck_json = json_encode($deck);
+
+
+                    foreach ($deck as $index => $card) {
+                        if (intval($card['ID']) == intval($item_name)) {
+                            array_unshift($defausseData, $card); // Ajouter la carte au début de defausse_data
+                            unset($deck[$index]); // Enlever la carte
+                        }
+                    }
+
+                    $deck = json_encode(array_values($deck)); // Re-indexer le tableau
+                    $defausse_json = json_encode($defausseData);
+
+                    $stmt_update_deck_after_defausse = $pdo->prepare("UPDATE joueurs SET deck = :deck WHERE ID = :player_id");
+                    $stmt_update_deck_after_defausse->execute(['deck' => $deck, 'player_id' =>  $_SESSION['user_id']]);
+
+                    // Tableau pour stocker les decks de tous les joueurs
+                    $all_cards = [];
+                    
+                    foreach($row_game_infos as $value){
+                        // Récupérer les joueurs du jeu
+                        $tab_player = json_decode($value["turn_data"]);
+
+                        foreach($tab_player as $id_player){
+                            // Récupérer le deck actuel du joueur
+                            $stmt_get_deck_players = $pdo->prepare("SELECT deck FROM joueurs WHERE ID = :player_id");
+                            $stmt_get_deck_players->execute(['player_id' => $id_player]);
+                            $row_get_deck_players = $stmt_get_deck_players->fetch(PDO::FETCH_ASSOC);
+
+                            // Vérification du résultat de la requête
+                            if ($row_get_deck_players && $row_get_deck_players['deck']) {
+                                // Convertir le deck en tableau
+                                $deck_players = json_decode($row_get_deck_players['deck'], true) ?: [];
+                                // Fusionner les cartes du deck actuel dans le tableau commun
+                                $all_cards = array_merge($all_cards, $deck_players);
+                            }
+                        }
+                    }
+
+                    shuffle($all_cards);
+
+                    // Trouver l'index de votre ID dans le tableau
+                    $index = array_search($id, $tab_player);
+
+                    if ($index !== false) {
+                        // Réorganiser le tableau
+                        $ordered_players = array_merge(array_slice($tab_player, $index), array_slice($tab_player, 0, $index));
+                    }
+
+                    // Tableau pour stocker les decks de tous les joueurs
+                    $all_decks = [];
+
+                    // Initialiser les decks de chaque joueur
+                    foreach ($ordered_players as $player_id) {
+                        $all_decks[$player_id] = [];
+                    }
+
+                    // Distribuer les cartes
+                    $card_count = count($all_cards);
+                    $player_count = count($ordered_players);
+
+                    for ($i = 0; $i < $card_count; $i++) {
+                        // Trouver le joueur actuel
+                        $current_player = $ordered_players[$i % $player_count];
+                        
+                        // Ajouter la carte au deck du joueur actuel
+                        $all_decks[$current_player][] = $all_cards[$i];
+                    }
+
+                    // Mettre à jour les decks des joueurs dans la base de données
+                    foreach ($all_decks as $player_id => $deck) {
+                        $deck_json = json_encode($deck);
+
+                        $stmt_update_deck = $pdo->prepare("UPDATE joueurs SET deck = :deck WHERE ID = :player_id");
+                        $stmt_update_deck->execute(['deck' => $deck_json, 'player_id' => $player_id]);
+                    }
+
+                    // Récupérer les détails des decks
+                    $stmt_deck = $pdo->prepare("SELECT deck FROM joueurs WHERE game_joined = :game_id AND `ID` = :user_id");
+                    $stmt_deck->execute(['game_id' => $game_id, 'user_id' => $_SESSION['user_id']]);
+                    $row_deck = $stmt_deck->fetchAll(PDO::FETCH_ASSOC);
+
+                    // Mettre à jour defausse_data du jeu
+                    $stmt_update_defausse = $pdo->prepare("UPDATE games SET defausse_data = :defausse WHERE creator_id = :game_id");
+                    $stmt_update_defausse->execute(['defausse' => $defausse_json, 'game_id' => $game_id]);
+
+                    // Réduire le nombre d'actions
+                    $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET nb_action = nb_action - 1 WHERE ID = :user_id");
+                    $stmt_update_nb_action->execute(['user_id' => $_SESSION['user_id']]);
+
+                    echo json_encode(['success' => true, 'tab_player' => $tab_player, 'all_cards' => $all_cards, 'result' => $result, 'deck' =>  $deck, 'sub_type' => $sub_type, 'defausse' => $defausse_json]);
                 }
             } else if($raclee == 0){
                 if ($name_action == "make" && $item_name == "Pelle") {
@@ -816,7 +919,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                 $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET nb_action = nb_action - 1 WHERE ID = :user_id");
                                 $stmt_update_nb_action->execute(['user_id' => $_SESSION['user_id']]);
                 
-                                echo json_encode(['success' => true, 'message' => 'Vous avez fabriqué une Pelle.']);
+                                echo json_encode(['success' => true, 'message' => 'Vous avez fabriqué une Pelle.', 'make' => true]);
                             } else {
                                 echo json_encode(['success' => false, 'message' => 'Erreur de récupération des données de Pelle.']);
                             }
@@ -882,6 +985,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                 }
                                 $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET nb_action = nb_action -1 WHERE `ID` = :user_id");
                                 $stmt_update_nb_action->execute(['user_id' => $_SESSION['user_id']]);
+                                echo json_encode(['success' => true, 'message' => 'Vous avez fabriqué une Pioche.', 'make' => true]);
                             }
                             echo json_encode(['success' => true, 'message' => 'Vous avez les deux objets nécessaires.']);
                         } else {
@@ -942,7 +1046,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                 $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET nb_action = nb_action - 1 WHERE ID = :user_id");
                                 $stmt_update_nb_action->execute(['user_id' => $_SESSION['user_id']]);
                 
-                                echo json_encode(['success' => true, 'message' => 'Vous avez fabriqué deux Surins.']);
+                                echo json_encode(['success' => true, 'message' => 'Vous avez fabriqué deux Surins.', 'make' => true]);
                             } else {
                                 echo json_encode(['success' => false, 'message' => 'Erreur de récupération des données de Surin.']);
                             }

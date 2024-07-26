@@ -544,6 +544,18 @@ else if($game['team_activated'] == 1) { ?>
         </div>
     </div>
 
+    <!-- Modal Structure Deck -->
+    <div id="action-modal-target" class="modal-action-target" style="display:none;">
+        <div class="modal-action-target-content">
+            <div id="pseudo-target-action">
+                <!-- Cartes seront affichées ici -->
+            </div>
+        </div>
+        <div class="modal-deck-target-footer">
+            <button id="close-deck-target-action-modal" class="modal-deck-target-close btn">Fermer</button>
+        </div>
+    </div>
+
     <!-- Modal Structure Defausse -->
     <div id="defausse-modal" class="modal-defausse">
         <div class="modal-defausse-content">
@@ -932,7 +944,6 @@ function SellCards(tab_sell) {
                 } else {
                     console.log('Erreur : ' + response.message);
                 }
-                console.log(response);
             },
             error: function(xhr, status, error) {
                 console.log('Erreur AJAX : ' + error);
@@ -1196,6 +1207,7 @@ function useAction(name_action,name) {
             dataType: 'json',
             success: function(response) {
                 if (response.success) {
+                    console.log(response);
 
                 } else {
                     console.log('Erreur : ' + response.message);
@@ -1203,8 +1215,15 @@ function useAction(name_action,name) {
                 if(response.sell == true){
                     showCardDecksForSellInfo(response.deck);
                 }
-                if(response.sub_type == 1 || response.sub_type == 7 || response.sub_type == 8){
+                if(response.make == true || response.buy == true || response.steal == true){
                     showCardDecksInfo(response.deck);
+                }
+                if(response.sub_type == 1 || response.sub_type == 7 || response.sub_type == 8 || response.sub_type == 9 || response.sub_type == 10 || response.sub_type == 11 || response.sub_type == 12){
+                    showCardDecksInfo(response.deck);
+                }
+                if(response.sub_type == 2 || response.sub_type == 3 || response.sub_type == 4 || response.sub_type == 5 || response.sub_type == 6){
+                    console.log(response);
+                    SelectTarget(response.sub_type,response.player_data,response.item_name);
                 }
             },
             error: function(xhr, status, error) {
@@ -1224,11 +1243,12 @@ function finTurn() {
         dataType: 'json',
         success: function(response) {
             if (response.success) {
-                
             } else {
                 console.log('Erreur : ' + response.message);
             }
-            console.log(response);
+            if(response.need_defause == true) {
+                showCardDecksInfo(response.deck);
+            }
         },
         error: function(xhr, status, error) {
             console.log('Erreur AJAX : ' + error);
@@ -1236,11 +1256,142 @@ function finTurn() {
     });
 }
 
+function CardOnTarget(sub_type,player_id,item_name){
+    if(sub_type && player_id && item_name){
+        $.ajax({
+            url: 'make_action_target_ajax.php',
+            type: 'POST',
+            data: {
+                action: 'make_action_target',
+                sub_type: sub_type,
+                player_id : player_id,
+                item_name : item_name,
+                game_id: <?php echo $game_id; ?>,
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    $('#action-modal-target').hide();
+                    showCardDecksInfo(response.deck);
+                } else {
+                    console.log('Erreur : ' + response.message);
+                }
+
+            },
+            error: function(xhr, status, error) {
+                console.log('Erreur AJAX : ' + error);
+            }
+        });
+    }
+
+}
+
+function SelectTarget(sub_type, player_data, item_name) {
+
+    if (sub_type == 4 || sub_type == 5 || sub_type == 6) {
+        var modal = $('#action-modal-target');
+        var playerList = $('#pseudo-target-action');
+
+        // Clear previous content
+        playerList.empty();
+
+        // Iterate over player_data and add each player's info to the modal
+        player_data.forEach(function(players) {
+            var playerDiv = $('<div class="player"></div>')
+            .append('<div class="player_team">Team: ' + players.team + '</div>')
+            .append('<div class="player_name">Pseudo: ' + players.pseudo + '</div>')
+
+            // Create a div to hold the deck
+            var deckDiv = $('<div class="player_deck"></div>');
+
+            // Parse the deck and append each card to the deckDiv
+            var deck = JSON.parse(players.deck);
+            var count_deck = deck.length;
+
+            // deck.forEach(function(card) {
+                deckDiv.append('<div class="card modal-content-deck" style="background-image:url(./img/' + deck[0].verso_card + '); background-size:contain; background-repeat:no-repeat;"><div class="count_deck_cards">'+count_deck+'</div></div>');
+            // });
+
+            // Append the deckDiv to the playerDiv
+            playerDiv.append(deckDiv);
+
+            // Create a button and append it to the playerDiv
+            var buttonTargetActionDiv = $('<button class="button_player_target_action" onclick="CardOnTarget('+sub_type+','+players.ID+','+item_name+')" value='+players.ID+'>Choisir</button>');
+            playerDiv.append(buttonTargetActionDiv);
+
+            // Add the playerDiv to the playerList
+            playerList.append(playerDiv);
+        });
+
+        // Show the modal
+        modal.show();
+    } else if (sub_type == 3) {
+        var modal = $('#action-modal-target');
+        var playerList = $('#pseudo-target-action');
+
+        // Clear previous content
+        playerList.empty();
+
+        // Iterate over player_data and add each player's info to the modal
+        player_data.forEach(function(players) {
+            var playerDiv = $('<div class="player"></div>')
+            .append('<div class="player_team">Team: ' + players.team + '</div>')
+            .append('<div class="player_name">Pseudo: ' + players.pseudo + '</div>')
+
+            // Create a div to hold the deck
+            var deckDiv = $('<div class="player_deck"></div>');
+
+            // Parse the deck and append each card to the deckDiv
+            var deck = JSON.parse(players.deck);
+            var count_deck = deck.length;
+
+            // deck.forEach(function(card) {
+                deckDiv.append('<div class="card modal-content-deck" style="background-image:url(./img/' + deck[0].verso_card + '); background-size:contain; background-repeat:no-repeat;"><div class="count_deck_cards">'+count_deck+'</div></div>');
+            // });
+
+            // Append the deckDiv to the playerDiv
+            playerDiv.append(deckDiv);
+
+            // Create a button and append it to the playerDiv
+            var buttonTargetActionDiv = $('<button class="button_player_target_action" onclick="CardOnTarget('+sub_type+','+players.ID+')" value='+players.ID+'>Choisir</button>');
+            playerDiv.append(buttonTargetActionDiv);
+
+            // Add the playerDiv to the playerList
+            playerList.append(playerDiv);
+        });
+
+        // Show the modal
+        modal.show();
+    }
+}
+
+$(document).ready(function() {
+    // Close the modal when the user clicks on the close button
+    $('#close-deck-target-action-modal').click(function() {
+        $('#action-modal-target').hide();
+    });
+    
+    // Close the modal when the user clicks on the close button
+    $('#close-deck-target-modal').click(function() {
+        $('#action-modal-target').hide();
+    });
+
+    // Close the modal when the user clicks anywhere outside of the modal
+    $(window).click(function(event) {
+        if (event.target.id === 'action-modal-target') {
+            $('#action-modal-target').hide();
+        }
+    });
+});
+
+
 $('.close_dice').click(function() {
     $('#ModalDice').hide();
 });
 
+
 $(document).ready(function() {
+
     function RefreshTurn() {
         var globalDeck = <?php echo json_encode($decks); ?>;
         var turn = $('.turn')[0].getAttribute('value');
@@ -1425,7 +1576,6 @@ $(document).ready(function() {
                                     dataType: 'json',
                                     success: function(response) {
                                         if (response.success) {
-                                            console.log(response);
                                             var deck = response.target.deck_target;
                                             var cigarette = response.target.cigarette;
                                             var raclee = response.target.raclee;

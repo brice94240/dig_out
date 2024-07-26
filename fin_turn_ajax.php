@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 echo json_encode(['success' => false, 'message' => "Veuillez finir votre déplacement, sélectionner la zone souhaitée!"]);
             }
         } else {
-            echo json_encode(['success' => false, 'message' => "Vous devez avoir moins de 10 cartes"]);
+            echo json_encode(['success' => false, 'message' => "Vous devez avoir moins de 10 cartes", 'need_defause' => true, 'deck' => $deck]);
         }
     } catch (PDOException $e) {
         echo json_encode(['success' => false, 'message' => "Erreur lors de la récupération des parties : " . $e->getMessage()]);
