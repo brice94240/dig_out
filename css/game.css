@@ -1055,3 +1055,71 @@ body, html {
 .button_player_target_action:hover {
     background: #f9b805;
 }
+
+/* Modal Action Target */
+.modal-action-localisation {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: #959595;
+    border-radius: 8px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+    width: 80%;
+    max-width: 600px;
+}
+
+.modal-action-localisation-content {
+    padding: 1em;
+    color: #000000;
+    font-family: fantasy;
+    font-weight: bolder;
+}
+.button_localisation_target_action {
+    color: #fff;
+    margin-top: 0.5vh;
+    font-size: 1.5vh;
+    font-weight: bold;
+    background: #e0a503;
+    cursor: pointer;
+    border-color: black;
+    border-style: double;
+    font-family: fantasy;
+    padding: 0.5vh;
+    width: 13vh;
+}
+
+.button_localisation_target_action:hover {
+    background: #f9b805;
+}
+
+.localisation {
+    width: auto;
+    text-align: center;
+}
+
+.modal-deck-localisation-close{
+    color: #fff;
+    margin-top: 0.5vh;
+    font-size: 2vh;
+    font-weight: bold;
+    background: #850000;
+    cursor: pointer;
+    border-color: black;
+    border-style: double;
+    font-family: fantasy;
+    padding: 0.5vh;
+}
+
+.modal-deck-localisation-footer {
+    padding: 10px 20px;
+    text-align: right;
+}
+
+.choose_desination {
+    text-align: center;
+    font-weight: 900;
+    font-size: 3vh;
+}

@@ -548,11 +548,24 @@ else if($game['team_activated'] == 1) { ?>
     <div id="action-modal-target" class="modal-action-target" style="display:none;">
         <div class="modal-action-target-content">
             <div id="pseudo-target-action">
-                <!-- Cartes seront affichées ici -->
+                <!-- Pseusos seront affichées ici -->
             </div>
         </div>
         <div class="modal-deck-target-footer">
             <button id="close-deck-target-action-modal" class="modal-deck-target-close btn">Fermer</button>
+        </div>
+    </div>
+
+    <!-- Modal Structure Deck -->
+    <div id="action-modal-localisation" class="modal-action-localisation" style="display:none;">
+        <div class="modal-action-localisation-content">
+            <div id="name-localisation-action">
+                <div class="choose_desination">Ou voulez-vous vous rendre ? :</div>
+                <!-- Localisations seront affichées ici -->
+            </div>
+        </div>
+        <div class="modal-deck-localisation-footer">
+            <button id="close-deck-localisation-action-modal" class="modal-deck-localisation-close btn">Fermer</button>
         </div>
     </div>
 
@@ -1276,6 +1289,37 @@ function CardOnTarget(sub_type,player_id,item_name){
                 } else {
                     console.log('Erreur : ' + response.message);
                 }
+                console.log(response);
+
+            },
+            error: function(xhr, status, error) {
+                console.log('Erreur AJAX : ' + error);
+            }
+        });
+    }
+
+}
+
+function ChooseLocation(sub_type,localisation_id,item_name){
+    if(sub_type && localisation_id && item_name){
+        $.ajax({
+            url: 'make_action_target_ajax.php',
+            type: 'POST',
+            data: {
+                action: 'make_action_target',
+                sub_type: sub_type,
+                localisation_id : localisation_id,
+                item_name : item_name,
+                game_id: <?php echo $game_id; ?>,
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    $('#action-modal-localisation').hide();
+                } else {
+                    console.log('Erreur : ' + response.message);
+                }
+                console.log(response);
 
             },
             error: function(xhr, status, error) {
@@ -1325,39 +1369,34 @@ function SelectTarget(sub_type, player_data, item_name) {
 
         // Show the modal
         modal.show();
-    } else if (sub_type == 3) {
-        var modal = $('#action-modal-target');
-        var playerList = $('#pseudo-target-action');
+    } else if (sub_type == 2) {
+        var modal = $('#action-modal-localisation');
+        var LocalisationList = $('#name-localisation-action');
 
         // Clear previous content
-        playerList.empty();
+        LocalisationList.empty();
 
-        // Iterate over player_data and add each player's info to the modal
-        player_data.forEach(function(players) {
-            var playerDiv = $('<div class="player"></div>')
-            .append('<div class="player_team">Team: ' + players.team + '</div>')
-            .append('<div class="player_name">Pseudo: ' + players.pseudo + '</div>')
+        // List of localisations
+        var localisations = [
+            { id: 1, name: "Cellule A" },
+            { id: 2, name: "Douche" },
+            { id: 3, name: "Cellule B" },
+            { id: 4, name: "Infirmerie" },
+            { id: 5, name: "Réfèctoire" },
+            { id: 8, name: "Promenade" }
+        ];
 
-            // Create a div to hold the deck
-            var deckDiv = $('<div class="player_deck"></div>');
+        localisations.forEach(function(localisation) {
 
-            // Parse the deck and append each card to the deckDiv
-            var deck = JSON.parse(players.deck);
-            var count_deck = deck.length;
+            var localisationDiv = $('<div class="localisation"></div>')
+                .append('<div class="localisation_name" value='+localisation.id+'>'+ localisation.name + '</div>');
 
-            // deck.forEach(function(card) {
-                deckDiv.append('<div class="card modal-content-deck" style="background-image:url(./img/' + deck[0].verso_card + '); background-size:contain; background-repeat:no-repeat;"><div class="count_deck_cards">'+count_deck+'</div></div>');
-            // });
+            // Create a button and append it to the localisationDiv
+            var buttonTargetActionDiv = $('<button class="button_localisation_target_action" onclick="ChooseLocation('+ sub_type +',' + localisation.id + ',' + item_name + ')" value="' + localisation.id + '">Choisir</button>');
+            localisationDiv.append(buttonTargetActionDiv);
 
-            // Append the deckDiv to the playerDiv
-            playerDiv.append(deckDiv);
-
-            // Create a button and append it to the playerDiv
-            var buttonTargetActionDiv = $('<button class="button_player_target_action" onclick="CardOnTarget('+sub_type+','+players.ID+')" value='+players.ID+'>Choisir</button>');
-            playerDiv.append(buttonTargetActionDiv);
-
-            // Add the playerDiv to the playerList
-            playerList.append(playerDiv);
+            // Add the localisationDiv to the playerList
+            LocalisationList.append(localisationDiv);
         });
 
         // Show the modal
@@ -1380,6 +1419,13 @@ $(document).ready(function() {
     $(window).click(function(event) {
         if (event.target.id === 'action-modal-target') {
             $('#action-modal-target').hide();
+        }
+    });
+
+    // Close the modal when the user clicks anywhere outside of the modal
+    $(window).click(function(event) {
+        if (event.target.id === 'close-deck-localisation-action-modal') {
+            $('#action-modal-localisation').hide();
         }
     });
 });

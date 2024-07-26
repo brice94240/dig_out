@@ -317,8 +317,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $row_game_infos = $stmt_game_infos->fetchAll(PDO::FETCH_ASSOC);
                 
 
-                $stmt_players_infos = $pdo->prepare("SELECT ID,pseudo,team,deck,localisation,raclee FROM joueurs WHERE game_joined = :game_id");
-                $stmt_players_infos->execute(['game_id' => $game_id]);
+                $stmt_players_infos = $pdo->prepare("SELECT ID,pseudo,team,deck,localisation,raclee FROM joueurs WHERE game_joined = :game_id AND team != :team");
+                $stmt_players_infos->execute(['game_id' => $game_id, 'team' => $team]);
                 $row_players_infos = $stmt_players_infos->fetchAll(PDO::FETCH_ASSOC);
 
                 if($sub_type == 1) { //VISITE D'UN PROCHE OK
@@ -385,15 +385,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     } else {
                         echo json_encode(['success' => false, 'message' => "Plus de carte fouille"]);
                     }
-                } else  if($sub_type == 2) { //CLEF DU GARDIEN
+                } else  if($sub_type == 2) { //CLEF DU GARDIEN OK
                     echo json_encode(['success' => false, 'message' => "Clef du gardien", 'sub_type' => $sub_type, 'item_name' => $item_name, 'player_data' => $row_players_infos ]);
                 } else  if($sub_type == 3) { //TRANSFERT DE PRISONNIERS
                     echo json_encode(['success' => false, 'message' => "Transfert de prisonniers", 'sub_type' => $sub_type, 'item_name' => $item_name, 'player_data' => $row_players_infos ]);
-                } else  if($sub_type == 4) { //FOUILLE AU CORPS
+                } else  if($sub_type == 4) { //FOUILLE AU CORPS OK
                     echo json_encode(['success' => false, 'message' => "Fouille au corps", 'sub_type' => $sub_type, 'item_name' => $item_name, 'player_data' => $row_players_infos ]);
-                } else  if($sub_type == 5) { //ISOLEMENT
+                } else  if($sub_type == 5) { //ISOLEMENT OK
                     echo json_encode(['success' => false, 'message' => "Isolement", 'sub_type' => $sub_type, 'item_name' => $item_name, 'player_data' => $row_players_infos ]);
-                } else  if($sub_type == 6) { //SAVONETTE
+                } else  if($sub_type == 6) { //SAVONETTE OK
                     echo json_encode(['success' => false, 'message' => "Savonette", 'sub_type' => $sub_type, 'item_name' => $item_name, 'player_data' => $row_players_infos ]);
                 } else  if($sub_type == 7) { //CLEF DES CELLULES OK
                     if(($team == "A" && $localisation !== 1) || ($team == "B" && $localisation !== 3)) {
