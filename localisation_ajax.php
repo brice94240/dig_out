@@ -55,39 +55,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         $stmt_fouille->execute(['game_id' => $game_id]);
                         $row_fouille = $stmt_fouille->fetch(PDO::FETCH_ASSOC);
         
-                        if ($row_fouille && $row_fouille['fouille_data']) {
-                            $fouilles = json_decode($row_fouille['fouille_data'], true);
-                            //PRENDRE A CHAQUE FOIS LES PREMIERES CARTES DU TABLEAU FOUILLES ET LES METTRE DANS CHAQUE DECK
-                            $fouilles_win = $diceMapping['fouilles'][$zone];
-                            for ($i = 0; $i < $fouilles_win[0]; $i++) {
-                                if (!empty($fouilles)) {
-                                    $deck[] = array_shift($fouilles);
+                        if($localisation !== 6){
+                            if ($row_fouille && $row_fouille['fouille_data']) {
+                                $fouilles = json_decode($row_fouille['fouille_data'], true);
+                                //PRENDRE A CHAQUE FOIS LES PREMIERES CARTES DU TABLEAU FOUILLES ET LES METTRE DANS CHAQUE DECK
+                                $fouilles_win = $diceMapping['fouilles'][$zone];
+                                for ($i = 0; $i < $fouilles_win[0]; $i++) {
+                                    if (!empty($fouilles)) {
+                                        $deck[] = array_shift($fouilles);
+                                    }
                                 }
-                            }
-                            $deck_json = json_encode($deck);
-                            $fouilles_json = json_encode($fouilles);
-        
-                            // Mettre à jour les détails des fouilles
-                            $stmt_update_fouille = $pdo->prepare("UPDATE games SET fouille_data = :fouille WHERE creator_id = :game_id");
-                            $stmt_update_fouille->execute(['fouille' => $fouilles_json, 'game_id' => $game_id]);
-        
-                            // Mettre à jour le deck du joueur
-                            $stmt_update_deck = $pdo->prepare("UPDATE joueurs SET deck = :deck WHERE ID = :ID");
-                            $stmt_update_deck->execute(['deck' => $deck_json, 'ID' => $_SESSION['user_id']]);
-        
-                            // Récupérer les détails des decks
-                            $stmt_deck = $pdo->prepare("SELECT deck FROM joueurs WHERE game_joined = :game_id AND `ID` = :user_id");
-                            $stmt_deck->execute(['game_id' => $game_id, 'user_id' => $_SESSION['user_id']]);
-                            $row_deck = $stmt_deck->fetchAll(PDO::FETCH_ASSOC);
-                            foreach($row_deck as $row_decks){
-                                if ($row_decks) {
-                                    $decks = json_decode($row_decks['deck'], true);
-                                } else {
-                                    echo "Les decks ne sont pas encore disponibles.";
+                                $deck_json = json_encode($deck);
+                                $fouilles_json = json_encode($fouilles);
+            
+                                // Mettre à jour les détails des fouilles
+                                $stmt_update_fouille = $pdo->prepare("UPDATE games SET fouille_data = :fouille WHERE creator_id = :game_id");
+                                $stmt_update_fouille->execute(['fouille' => $fouilles_json, 'game_id' => $game_id]);
+            
+                                // Mettre à jour le deck du joueur
+                                $stmt_update_deck = $pdo->prepare("UPDATE joueurs SET deck = :deck WHERE ID = :ID");
+                                $stmt_update_deck->execute(['deck' => $deck_json, 'ID' => $_SESSION['user_id']]);
+            
+                                // Récupérer les détails des decks
+                                $stmt_deck = $pdo->prepare("SELECT deck FROM joueurs WHERE game_joined = :game_id AND `ID` = :user_id");
+                                $stmt_deck->execute(['game_id' => $game_id, 'user_id' => $_SESSION['user_id']]);
+                                $row_deck = $stmt_deck->fetchAll(PDO::FETCH_ASSOC);
+                                foreach($row_deck as $row_decks){
+                                    if ($row_decks) {
+                                        $decks = json_decode($row_decks['deck'], true);
+                                    } else {
+                                        echo "Les decks ne sont pas encore disponibles.";
+                                    }
                                 }
                             }
                         }
-        
                         echo json_encode(['success' => true, 'zone' =>  $zone, 'last_localisation' =>  $last_localisation, 'turn_dice' =>  $turn_dice[0], 'fouilles_win' =>  $fouilles_win, 'deck' =>  $deck]);
                         
                     } else {

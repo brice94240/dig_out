@@ -31,9 +31,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $player_turn_id = $player_tab[$real_turn];
             }
 
-            // Update the action to players playing
-            $stmt_update_action_to_player_playing = $pdo->prepare("UPDATE joueurs SET nb_action = :nb_action WHERE `game_joined` = :game_id AND ID = :player_id");
-            $stmt_update_action_to_player_playing->execute(['nb_action' => 2, 'game_id' => $_POST['game_id'], 'player_id' => $player_turn_id]);
+            $stmt_info_joueur = $pdo->prepare("SELECT * FROM joueurs WHERE ID = :player_id");
+            $stmt_info_joueur->execute(['player_id' => $player_turn_id]);
+            $row_info_joueur = $stmt_info_joueur->fetch(PDO::FETCH_ASSOC);
+
+            $localisation = $row_info_joueur['localisation'];
+            $nb_action = $row_info_joueur['nb_action'];
+            $raclee = $row_info_joueur['raclee'];
+            $game_id = $_POST['game_id'];
+            $team = $row_info_joueur['team'];
+            $point_turn = $row_info_joueur['point_turn'];
+            $cigarette = $row_info_joueur['cigarette'];
+            $id = $row_info_joueur['ID'];
+
+            if($localisation !== 6){
+                // Update the action to players playing
+                $stmt_update_action_to_player_playing = $pdo->prepare("UPDATE joueurs SET nb_action = :nb_action WHERE `game_joined` = :game_id AND ID = :player_id");
+                $stmt_update_action_to_player_playing->execute(['nb_action' => 2, 'game_id' => $_POST['game_id'], 'player_id' => $player_turn_id]);
+            } else {
+                // Update the action to players playing
+                $stmt_update_action_to_player_playing = $pdo->prepare("UPDATE joueurs SET nb_action = :nb_action WHERE `game_joined` = :game_id AND ID = :player_id");
+                $stmt_update_action_to_player_playing->execute(['nb_action' => 1, 'game_id' => $_POST['game_id'], 'player_id' => $player_turn_id]);
+            }
 
         }
         $turn = $row['turn'];
@@ -71,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $stmt_info_joueur->execute(['player_id' => $playerID]);
             $row_info_joueur = $stmt_info_joueur->fetch(PDO::FETCH_ASSOC);
 
-            if($row_info_joueur['nb_action'] == 2){
+            if(($row_info_joueur['nb_action'] == 2) || ($row_info_joueur['localisation'] == 6 && $row_info_joueur['nb_action'] == 1)){
                 // Update localisation
                 $stmt_update_last_localisation_to_players = $pdo->prepare("UPDATE joueurs SET last_localisation = :last_localisation WHERE `game_joined` = :game_id");
                 $stmt_update_last_localisation_to_players->execute(['last_localisation' => $row_info_joueur['localisation'], 'game_id' => $_POST['game_id']]);
