@@ -552,6 +552,7 @@ else if($game['team_activated'] == 1) { ?>
             </div>
         </div>
         <div class="modal-deck-target-footer">
+            <button id="target-action-modal-confirm" class="modal-target-action btn">Confirmer</button>
             <button id="close-deck-target-action-modal" class="modal-deck-target-close btn">Fermer</button>
         </div>
     </div>
@@ -1401,6 +1402,70 @@ function SelectTarget(sub_type, player_data, item_name) {
 
         // Show the modal
         modal.show();
+    } else if (sub_type == 3) {
+        var modal = $('#action-modal-target');
+        var playerList = $('#pseudo-target-action');
+
+        // Clear previous content
+        playerList.empty();
+
+        // Iterate over player_data and add each player's info to the modal
+        player_data.forEach(function(players) {
+            var playerDiv = $('<div class="player"></div>')
+            .append('<div class="player_team">Team: ' + players.team + '</div>')
+            .append('<div class="player_name">Pseudo: ' + players.pseudo + '</div>')
+
+            // Create a div to hold the deck
+            var deckDiv = $('<div class="player_deck"></div>');
+
+            // Parse the deck and append each card to the deckDiv
+            var deck = JSON.parse(players.deck);
+            var count_deck = deck.length;
+
+            deckDiv.append('<div class="card modal-content-deck" style="background-image:url(./img/' + deck[0].verso_card + '); background-size:contain; background-repeat:no-repeat;"><div class="count_deck_cards">'+count_deck+'</div></div>');
+
+            // Append the deckDiv to the playerDiv
+            playerDiv.append(deckDiv);
+
+            // Create a button and append it to the playerDiv
+            var buttonTargetActionDiv = $('<button class="button_player_target_action" data-player-id='+players.ID+'>Choisir</button>');
+            playerDiv.append(buttonTargetActionDiv);
+
+            // Add the playerDiv to the playerList
+            playerList.append(playerDiv);
+        });
+
+        // Show the modal
+        modal.show();
+        var tab_target = [];
+        $('.button_player_target_action').click(function(){
+            var playerId = $(this).data('player-id');
+            // Si le joueur n'est pas déjà dans le tableau
+            if (!tab_target.find(element => element === playerId)) {
+                if(tab_target.length < 2) {
+                    tab_target.push(playerId);
+                    console.log(tab_target.length);
+                    // Transformer le bouton sell-btn en unsell-btn
+                    $(this).text('Annuler');
+                }
+            } else {
+                var index = tab_target.findIndex(element => element === playerId);
+                tab_target.splice(index, 1);
+                $(this).text('Sélectionner');
+            }
+            if(tab_target.length == 2) {
+                $("#target-action-modal-confirm").show();
+            } else {
+                $("#target-action-modal-confirm").hide();
+            }
+        });
+
+        $("#target-action-modal-confirm").click(function(){
+            console.log(sub_type);
+            console.log(tab_target);
+            console.log(item_name);
+            CardOnTarget(sub_type, tab_target, item_name);
+        });
     }
 }
 

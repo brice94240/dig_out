@@ -624,6 +624,25 @@ body, html {
     text-decoration: none;
 }
 
+.modal-target-action {
+    color: #fff;
+    margin-top: 0.5vh;
+    font-size: 2vh;
+    font-weight: bold;
+    background: #850000;
+    cursor: pointer;
+    border-color: black;
+    border-style: double;
+    font-family: fantasy;
+    padding: 0.5vh;
+    display: none;
+}
+
+.modal-target-action:hover {
+    color: #333;
+    text-decoration: none;
+}
+
 .sell-btn {
     color: #fff;
     margin-top: 0.5vh;

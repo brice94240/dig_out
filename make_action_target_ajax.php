@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $game_id = $_POST['game_id'];
         $deck = json_decode($row_info_joueur['deck'], true) ?: [];
         if($nb_action > 0){
-            if ($sub_type == 2) {
+            if ($sub_type == 2) { //CLEF DU GARDIEN
                 if($localisation !== $localisation_choose) {
                     // Mettre à jour la localisation
                     $stmt_update_localisation = $pdo->prepare("UPDATE joueurs SET localisation = :localisation_choose WHERE game_joined = :game_id AND ID = :user_id");
@@ -80,6 +80,72 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     echo json_encode(['success' => true, 'deck' =>  $deck, 'defausse' => $defausse_json]);
                 } else {
                     echo json_encode(['success' => false, 'message' => "Vous etes deja dans cette piece !"]);
+                }
+            } else if ($sub_type == 3) { //TRANSFERT DE PRISONNIERS
+                $target_1 = $id_target[0];
+                $target_2 = $id_target[1];
+
+                $stmt_target_1 = $pdo->prepare("SELECT * FROM joueurs WHERE game_joined = :game_id AND `ID` = :id_target");
+                $stmt_target_1->execute(['game_id' => $game_id, 'id_target' => $target_1]);
+                $row_target_1 = $stmt_target_1->fetchAll(PDO::FETCH_ASSOC);
+
+                $stmt_target_2 = $pdo->prepare("SELECT * FROM joueurs WHERE game_joined = :game_id AND `ID` = :id_target");
+                $stmt_target_2->execute(['game_id' => $game_id, 'id_target' => $target_2]);
+                $row_target_2 = $stmt_target_2->fetchAll(PDO::FETCH_ASSOC);
+
+                if($row_target_1[0]['localisation'] !== $row_target_2[0]['localisation']){
+                    // Mettre à jour la position de target1
+                    $stmt_update_localisation_target_1 = $pdo->prepare("UPDATE joueurs SET localisation = :localisation WHERE ID = :ID");
+                    $stmt_update_localisation_target_1->execute(['localisation' => $row_target_2[0]['localisation'], 'ID' => $target_1]);
+
+                    // Mettre à jour la position de target2
+                    $stmt_update_localisation_target_2 = $pdo->prepare("UPDATE joueurs SET localisation = :localisation WHERE ID = :ID");
+                    $stmt_update_localisation_target_2->execute(['localisation' => $row_target_1[0]['localisation'], 'ID' => $target_2]);
+
+                    foreach ($deck as $index => $card) {
+                        if (intval($card['ID']) == intval($item_name)) {
+                            array_unshift($defausseData, $card); // Ajouter la carte au début de defausse_data
+                            unset($deck[$index]); // Enlever la carte
+                        }
+                    }
+    
+                    $deck = json_encode(array_values($deck)); // Re-indexer le tableau
+                    $defausse_json = json_encode($defausseData);
+    
+                    // Mettre à jour le deck du joueur
+                    $stmt_update_deck = $pdo->prepare("UPDATE joueurs SET deck = :deck WHERE ID = :ID");
+                    $stmt_update_deck->execute(['deck' => $deck, 'ID' => $_SESSION['user_id']]);
+    
+                    // Récupérer les détails des decks
+                    $stmt_deck = $pdo->prepare("SELECT deck FROM joueurs WHERE game_joined = :game_id AND `ID` = :user_id");
+                    $stmt_deck->execute(['game_id' => $game_id, 'user_id' => $_SESSION['user_id']]);
+                    $row_deck = $stmt_deck->fetchAll(PDO::FETCH_ASSOC);
+    
+                    // Mettre à jour defausse_data du jeu
+                    $stmt_update_defausse = $pdo->prepare("UPDATE games SET defausse_data = :defausse WHERE creator_id = :game_id");
+                    $stmt_update_defausse->execute(['defausse' => $defausse_json, 'game_id' => $game_id]);
+    
+                    foreach($row_deck as $row_decks){
+                        if ($row_decks) {
+                            $decks = json_decode($row_decks['deck'], true);
+                        } else {
+                            echo "Les decks ne sont pas encore disponibles.";
+                        }
+                    }
+    
+                    // Récupérer les détails des decks
+                    $stmt_deck = $pdo->prepare("SELECT deck FROM joueurs WHERE game_joined = :game_id AND `ID` = :user_id");
+                    $stmt_deck->execute(['game_id' => $game_id, 'user_id' => $_SESSION['user_id']]);
+                    $row_deck = $stmt_deck->fetchAll(PDO::FETCH_ASSOC);
+
+                    // Réduire le nombre d'actions
+                    $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET nb_action = nb_action - 1 WHERE ID = :user_id");
+                    $stmt_update_nb_action->execute(['user_id' => $_SESSION['user_id']]);
+
+                    echo json_encode(['success' => true, 'deck' =>  $deck, 'deck_target' =>  $deck_target, 'defausse' => $defausse_json]);
+
+                } else {
+                    echo json_encode(['success' => false, 'message' => "Les joueurs sont dans la meme piece", "row_target_1" => $row_target_1, "row_target_2" => $row_target_2]);
                 }
             } else if($sub_type == 4){ //FOUILLE AU CORPS
                 // Récupérer les détails de la target
