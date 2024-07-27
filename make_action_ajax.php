@@ -112,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET nb_action = nb_action -1 WHERE `ID` = :user_id");
                             $stmt_update_nb_action->execute(['user_id' => $_SESSION['user_id']]);
             
-                            echo json_encode(['success' => false, 'message' => "Vous avez creuser pour ".$points." points"]);
+                            echo json_encode(['success' => false, 'creuser' => true  , 'message' => "Vous avez creuser pour ".$points." points"]);
                         } else {
                             echo json_encode(['success' => false, 'message' => "Vous n'avez aucun point en main."]);
                         }
@@ -451,6 +451,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             $stmt_update_localisation = $pdo->prepare("UPDATE joueurs SET localisation = :localisation WHERE ID = :user_id");
                             $stmt_update_localisation->execute(['localisation' => $localisation_player, 'user_id' => $_SESSION['user_id']]);
 
+                            // Mettre à jour la localisation du joueur
+                            $stmt_update_localisation = $pdo->prepare("UPDATE joueurs SET last_localisation = :last_localisation WHERE ID = :user_id");
+                            $stmt_update_localisation->execute(['last_localisation' => $localisation_player, 'user_id' => $_SESSION['user_id']]);
+
+
                             // Mettre à jour le dice_data
                             $stmt_update_deck = $pdo->prepare("UPDATE joueurs SET dice_data = :dice_data WHERE ID = :ID");
                             $stmt_update_deck->execute(['dice_data' => "", 'ID' => $_SESSION['user_id']]);
@@ -535,6 +540,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             $stmt_update_localisation = $pdo->prepare("UPDATE joueurs SET localisation = :localisation WHERE ID = :user_id");
                             $stmt_update_localisation->execute(['localisation' => $localisation_player, 'user_id' => $_SESSION['user_id']]);
 
+                            // Mettre à jour la localisation du joueur
+                            $stmt_update_localisation = $pdo->prepare("UPDATE joueurs SET last_localisation = :last_localisation WHERE ID = :user_id");
+                            $stmt_update_localisation->execute(['last_localisation' => $localisation_player, 'user_id' => $_SESSION['user_id']]);
+
+
                             // Mettre à jour defausse_data du jeu
                             $stmt_update_defausse = $pdo->prepare("UPDATE games SET defausse_data = :defausse WHERE creator_id = :game_id");
                             $stmt_update_defausse->execute(['defausse' => $defausse_json, 'game_id' => $game_id]);
@@ -608,6 +618,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             // Mettre à jour la localisation du joueur
                             $stmt_update_localisation = $pdo->prepare("UPDATE joueurs SET localisation = :localisation WHERE ID = :user_id");
                             $stmt_update_localisation->execute(['localisation' => $localisation_player, 'user_id' => $_SESSION['user_id']]);
+
+                            // Mettre à jour la localisation du joueur
+                            $stmt_update_localisation = $pdo->prepare("UPDATE joueurs SET last_localisation = :last_localisation WHERE ID = :user_id");
+                            $stmt_update_localisation->execute(['last_localisation' => $localisation_player, 'user_id' => $_SESSION['user_id']]);
+
 
                             // Mettre à jour le dice_data
                             $stmt_update_deck = $pdo->prepare("UPDATE joueurs SET dice_data = :dice_data WHERE ID = :ID");
@@ -687,6 +702,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             $stmt_update_localisation = $pdo->prepare("UPDATE joueurs SET localisation = :localisation WHERE ID = :user_id");
                             $stmt_update_localisation->execute(['localisation' => $localisation_player, 'user_id' => $_SESSION['user_id']]);
 
+                            // Mettre à jour la localisation du joueur
+                            $stmt_update_localisation = $pdo->prepare("UPDATE joueurs SET last_localisation = :last_localisation WHERE ID = :user_id");
+                            $stmt_update_localisation->execute(['last_localisation' => $localisation_player, 'user_id' => $_SESSION['user_id']]);
+
+
                             // Mettre à jour le dice_data
                             $stmt_update_deck = $pdo->prepare("UPDATE joueurs SET dice_data = :dice_data WHERE ID = :ID");
                             $stmt_update_deck->execute(['dice_data' => "", 'ID' => $_SESSION['user_id']]);
@@ -745,6 +765,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             // Mettre à jour la localisation du joueur
                             $stmt_update_localisation = $pdo->prepare("UPDATE joueurs SET localisation = :localisation WHERE ID = :user_id");
                             $stmt_update_localisation->execute(['localisation' => $localisation_player, 'user_id' => $_SESSION['user_id']]);
+
+                            // Mettre à jour la localisation du joueur
+                            $stmt_update_localisation = $pdo->prepare("UPDATE joueurs SET last_localisation = :last_localisation WHERE ID = :user_id");
+                            $stmt_update_localisation->execute(['last_localisation' => $localisation_player, 'user_id' => $_SESSION['user_id']]);
+
 
                             // Mettre à jour le dice_data
                             $stmt_update_deck = $pdo->prepare("UPDATE joueurs SET dice_data = :dice_data WHERE ID = :ID");
@@ -990,9 +1015,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                 }
                                 $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET nb_action = nb_action -1 WHERE `ID` = :user_id");
                                 $stmt_update_nb_action->execute(['user_id' => $_SESSION['user_id']]);
+
                                 echo json_encode(['success' => true, 'message' => 'Vous avez fabriqué une Pioche.', 'make' => true]);
                             }
-                            echo json_encode(['success' => true, 'message' => 'Vous avez les deux objets nécessaires.']);
                         } else {
                             echo json_encode(['success' => false, 'message' => 'Vous n\'avez pas les objets nécessaires.']);
                         }

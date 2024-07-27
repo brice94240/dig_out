@@ -38,6 +38,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     $stmt_update_localisation = $pdo->prepare("UPDATE joueurs SET localisation = :localisation_choose WHERE game_joined = :game_id AND ID = :user_id");
                     $stmt_update_localisation->execute(['localisation_choose' => $localisation_choose, 'game_id' => $game_id, 'user_id' => $_SESSION['user_id']]);
     
+                    // Mettre à jour la localisation
+                    $stmt_update_localisation = $pdo->prepare("UPDATE joueurs SET last_localisation = :localisation_choose WHERE game_joined = :game_id AND ID = :user_id");
+                    $stmt_update_localisation->execute(['localisation_choose' => $localisation_choose, 'game_id' => $game_id, 'user_id' => $_SESSION['user_id']]);
+                        
+
                     foreach ($deck as $index => $card) {
                         if (intval($card['ID']) == intval($item_name)) {
                             array_unshift($defausseData, $card); // Ajouter la carte au début de defausse_data
@@ -102,6 +107,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     $stmt_update_localisation_target_2 = $pdo->prepare("UPDATE joueurs SET localisation = :localisation WHERE ID = :ID");
                     $stmt_update_localisation_target_2->execute(['localisation' => $row_target_1[0]['localisation'], 'ID' => $target_2]);
 
+                    // Mettre à jour la position de target1
+                    $stmt_update_localisation_target_1 = $pdo->prepare("UPDATE joueurs SET last_localisation = :last_localisation WHERE ID = :ID");
+                    $stmt_update_localisation_target_1->execute(['last_localisation' => $row_target_2[0]['localisation'], 'ID' => $target_1]);
+
+                    // Mettre à jour la position de target2
+                    $stmt_update_localisation_target_2 = $pdo->prepare("UPDATE joueurs SET last_localisation = :last_localisation WHERE ID = :ID");
+                    $stmt_update_localisation_target_2->execute(['last_localisation' => $row_target_1[0]['localisation'], 'ID' => $target_2]);
+
+
+                    
                     foreach ($deck as $index => $card) {
                         if (intval($card['ID']) == intval($item_name)) {
                             array_unshift($defausseData, $card); // Ajouter la carte au début de defausse_data

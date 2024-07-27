@@ -490,6 +490,7 @@ else if($game['team_activated'] == 1) { ?>
         <div class="map-interactive-area" id="defausse" onclick="showCardDefausseInfo()" style="background-image:url('./img/<?php echo $defausses[0]['img'] ?>');background-size:cover;background-repeat:no-repeat;transform: rotate(90deg);"></div>
         <div class="map-interactive-area" id="dice" onclick="showDice('<?php echo $row_turn['turn']; ?>', '<?php echo $dices[0]; ?>')" style="background-image:url('./img/Dice6.png');background-size:contain;background-repeat:no-repeat;background-size: contain;background-repeat: no-repeat;background-position: top;"></div>
         <div class="map-interactive-area" id="cigarette" style="background-image:url('./img/cigarette.png');background-size:cover;background-repeat:no-repeat;background-size: cover;background-repeat: no-repeat;background-position: top;"><div class="count_cigarette"><?php echo $verify_info_player['cigarette'] ?></div></div>
+        <div class="map-interactive-area" id="raclee" style="background-image:url('./img/raclee.png');background-size:cover;background-repeat:no-repeat;background-size: cover;background-repeat: no-repeat;background-position: top;"><div class="count_raclee"><?php echo $verify_info_player['cigarette'] ?></div></div> <div class="map-interactive-area" id="nb_action" style="background-image:url('./img/action.png');background-size:cover;background-repeat:no-repeat;background-size: contain;background-repeat: no-repeat;background-position: top;"><div class="count_nb_action"><?php echo $verify_info_player['cigarette'] ?></div></div>
         <input type="hidden" class="turn" value=<?php echo $row_turn['turn'] ?>/>
         <input type="hidden" class="turn_id"/>
         <input type="hidden" class="turn_action"/>
@@ -1221,7 +1222,6 @@ function useAction(name_action,name) {
             dataType: 'json',
             success: function(response) {
                 if (response.success) {
-                    console.log(response);
 
                 } else {
                     console.log('Erreur : ' + response.message);
@@ -1229,14 +1229,13 @@ function useAction(name_action,name) {
                 if(response.sell == true){
                     showCardDecksForSellInfo(response.deck);
                 }
-                if(response.make == true || response.buy == true || response.steal == true){
+                if(response.make == true || response.buy == true || response.steal == true || response.creuser == true){
                     showCardDecksInfo(response.deck);
                 }
                 if(response.sub_type == 1 || response.sub_type == 7 || response.sub_type == 8 || response.sub_type == 9 || response.sub_type == 10 || response.sub_type == 11 || response.sub_type == 12){
                     showCardDecksInfo(response.deck);
                 }
                 if(response.sub_type == 2 || response.sub_type == 3 || response.sub_type == 4 || response.sub_type == 5 || response.sub_type == 6){
-                    console.log(response);
                     SelectTarget(response.sub_type,response.player_data,response.item_name);
                 }
             },
@@ -1467,6 +1466,7 @@ function SelectTarget(sub_type, player_data, item_name) {
             CardOnTarget(sub_type, tab_target, item_name);
         });
     }
+    showCardDecksInfo(response.deck);
 }
 
 $(document).ready(function() {
@@ -1642,6 +1642,9 @@ $(document).ready(function() {
                     var url_surin = 'background-image:url("./img/'+globalSurin+'");background-size:cover;background-repeat:no-repeat;';
                     $("#carte2")[0].style = url_surin;
                     $(".count_cigarette")[0].innerHTML = response.cigarette;
+                    $(".count_raclee")[0].innerHTML = response.raclee;
+                    $(".count_nb_action")[0].innerHTML = response.nb_action;
+                    //ICI
 
                     if(response.playerData[<?php echo $_SESSION['user_id']?>].dice_data[0]){
                         $dice_data_player = JSON.parse(response.playerData[<?php echo $_SESSION['user_id']?>].dice_data)[0];

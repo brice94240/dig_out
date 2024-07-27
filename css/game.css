@@ -35,7 +35,7 @@ body, html {
 
 .map-container {
     position: relative;
-    width: 100%;
+    width: 40%;
     max-width: 1000px;
     margin: auto;
 }
@@ -80,6 +80,8 @@ body, html {
 #dice { top: 102%; left: 50%; width: 10%; height: 20%; } /* Deck */
 #defausse { top: 97%; left: 28%; width: 12%; height: 19%; } /* Defausse */
 #cigarette { top: 100%; left: 65%; width: 12%; height: 19%; } /* Defausse */
+#raclee { top: 100%; left: 76%; width: 12%; height: 19%; } /* Defausse */
+#nb_action { top: 100%; left: 90%; width: 10%; height: 19%; } /* Defausse */
 
 /* Style global pour le modal */
 .modal {
@@ -790,6 +792,28 @@ body, html {
 }
 
 .count_cigarette {
+    text-align: center;
+    font-size: 3vw;
+    font-family: cursive;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: -webkit-fill-available;
+    color: #ff7100;
+}
+
+.count_raclee {
+    text-align: center;
+    font-size: 3vw;
+    font-family: cursive;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: -webkit-fill-available;
+    color: #ff7100;
+}
+
+.count_nb_action {
     text-align: center;
     font-size: 3vw;
     font-family: cursive;
