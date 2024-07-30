@@ -1704,7 +1704,8 @@ $(document).ready(function() {
                         logs.forEach(function(log) {
                             if (!existingLogIds.has(log.log_id)) {
                                 // Créez un élément div pour chaque log
-                                var logEntry = $("<div class='content_logs'></div>").html("<div class='pseudo_logs'>" + log.pseudo + "</div><div class='message_logs'>" + log.message + "</div>");
+                                var correctedText = log.message.replace(/\\'/g, "'");
+                                var logEntry = $("<div class='content_logs'></div>").html("<div class='pseudo_logs'>" + log.pseudo + "</div><div class='message_logs'>" + correctedText + "</div>");
                                 logsContainer.append(logEntry);
                                 // Ajouter l'ID du log au Set
                                 existingLogIds.add(log.log_id);
@@ -1724,10 +1725,8 @@ $(document).ready(function() {
                         appendLogs([]);
                     }
 
-                    // Fonction pour ajouter les logs à l'élément avec l'ID "logs"
+                    // Fonction pour ajouter les points à l'élément avec l'ID "points"
                     function appendPoints(team_a,team_b) {
-                        // console.log(team_a);
-                        // console.log(team_b);
                         var team_a_div = $("#team_a");
                         var team_b_div = $("#team_b");
                         team_a_div[0].innerHTML= "<div class='team_title'>TEAM A</div><div class='team_points'>"+team_a+" Points</div>";
