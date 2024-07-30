@@ -132,7 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                 'message' => $message
                             ]);
 
-                            echo json_encode(['success' => false, 'creuser' => true  , 'message' => "Vous avez creuser pour ".$points." points"]);
+                            echo json_encode(['success' => true, 'creuser' => true  , 'message' => "Vous avez creuser pour ".$points." points"]);
                         } else {
                             echo json_encode(['success' => false, 'message' => "Vous n'avez aucun point en main."]);
                         }
@@ -453,7 +453,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             'message' => $message
                         ]);
 
-                        echo json_encode(['success' => false, 'sub_type' => $sub_type, 'deck' =>  $deck, 'item_name' => $item_name, 'defausse' => $defausse_json]);
+                        echo json_encode(['success' => true, 'sub_type' => $sub_type, 'deck' =>  $deck, 'item_name' => $item_name, 'defausse' => $defausse_json]);
                     } else {
                         echo json_encode(['success' => false, 'message' => "Plus de carte fouille"]);
                     }
@@ -557,7 +557,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                 'message' => $message
                             ]);
 
-                            echo json_encode(['success' => false, 'sub_type' => $sub_type, 'deck' =>  $deck, 'item_name' => $item_name, 'defausse' => $defausse_json]);
+                            echo json_encode(['success' => true, 'sub_type' => $sub_type, 'deck' =>  $deck, 'item_name' => $item_name, 'defausse' => $defausse_json]);
                         } else {
                             echo json_encode(['success' => false, 'message' => "Plus de carte fouille"]);
                         }
@@ -652,7 +652,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                 'message' => $message
                             ]);
 
-                            echo json_encode(['success' => false, 'sub_type' => $sub_type, 'deck' =>  $deck, 'item_name' => $item_name, 'defausse' => $defausse_json]);
+                            echo json_encode(['success' => true, 'sub_type' => $sub_type, 'deck' =>  $deck, 'item_name' => $item_name, 'defausse' => $defausse_json]);
                         } else {
                             echo json_encode(['success' => false, 'message' => "Plus de carte fouille"]);
                         }
@@ -745,7 +745,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                 'message' => $message
                             ]);
 
-                            echo json_encode(['success' => false, 'sub_type' => $sub_type, 'deck' =>  $deck, 'item_name' => $item_name, 'defausse' => $defausse_json]);
+                            echo json_encode(['success' => true, 'sub_type' => $sub_type, 'deck' =>  $deck, 'item_name' => $item_name, 'defausse' => $defausse_json]);
                         } else {
                             echo json_encode(['success' => false, 'message' => "Plus de carte cuillere"]);
                         }
@@ -838,7 +838,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                 'message' => $message
                             ]);
 
-                            echo json_encode(['success' => false, 'sub_type' => $sub_type, 'deck' =>  $deck, 'item_name' => $item_name, 'defausse' => $defausse_json]);
+                            echo json_encode(['success' => true, 'sub_type' => $sub_type, 'deck' =>  $deck, 'item_name' => $item_name, 'defausse' => $defausse_json]);
                         } else {
                             echo json_encode(['success' => false, 'message' => "Plus de carte surin"]);
                         }
@@ -916,7 +916,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                 'message' => $message
                             ]); 
 
-                            echo json_encode(['success' => false, 'sub_type' => $sub_type, 'deck' =>  $deck, 'item_name' => $item_name, 'defausse' => $defausse_json]);
+                            echo json_encode(['success' => true, 'sub_type' => $sub_type, 'deck' =>  $deck, 'item_name' => $item_name, 'defausse' => $defausse_json]);
                     } else {
                         echo json_encode(['success' => false, 'message' => "Vous etes deja dans la promenade"]);
                     }
