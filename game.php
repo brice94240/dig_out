@@ -492,6 +492,10 @@ else if($game['team_activated'] == 1) { ?>
         <div class="map-interactive-area" id="cigarette" style="background-image:url('./img/cigarette.png');background-size:cover;background-repeat:no-repeat;background-size: cover;background-repeat: no-repeat;background-position: top;"><div class="count_cigarette"><?php echo $verify_info_player['cigarette'] ?></div></div>
         <div class="map-interactive-area" id="raclee" style="background-image:url('./img/raclee.png');background-size:cover;background-repeat:no-repeat;background-size: cover;background-repeat: no-repeat;background-position: top;"><div class="count_raclee"><?php echo $verify_info_player['cigarette'] ?></div></div> <div class="map-interactive-area" id="nb_action" style="background-image:url('./img/action.png');background-size:cover;background-repeat:no-repeat;background-size: contain;background-repeat: no-repeat;background-position: top;"><div class="count_nb_action"><?php echo $verify_info_player['cigarette'] ?></div></div>
         <div class="map-interactive-area" id="logs"></div>
+        <div class="map-interactive-area" id="points">
+            <div id="team_a"></div>
+            <div id="team_b"></div>
+        </div>
         <input type="hidden" class="turn" value=<?php echo $row_turn['turn'] ?>/>
         <input type="hidden" class="turn_id"/>
         <input type="hidden" class="turn_action"/>
@@ -1719,6 +1723,19 @@ $(document).ready(function() {
                         console.log(response);
                         appendLogs([]);
                     }
+
+                    // Fonction pour ajouter les logs à l'élément avec l'ID "logs"
+                    function appendPoints(team_a,team_b) {
+                        // console.log(team_a);
+                        // console.log(team_b);
+                        var team_a_div = $("#team_a");
+                        var team_b_div = $("#team_b");
+                        team_a_div[0].innerHTML= "<div class='team_title'>TEAM A</div><div class='team_points'>"+team_a+" Points</div>";
+                        team_b_div[0].innerHTML= "<div class='team_title'>TEAM B</div><div class='team_points'>"+team_b+" Points</div>";
+
+                        
+                    }
+                    appendPoints(response.team_a, response.team_b);
                 } else {
                     console.log('Erreur : ' + response.message);
                 }

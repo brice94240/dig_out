@@ -83,6 +83,7 @@ body, html {
 #raclee { top: 100%; left: 76%; width: 12%; height: 19%; } /* Defausse */
 #nb_action { top: 100%; left: 90%; width: 10%; height: 19%; } /* Defausse */
 #logs { top: 0%; left: -73%; width: 70%; height: 70%; } /* Defausse */
+#points { top: 0%; left: 110%; width: 50%; height: 23%; } /* Defausse */
 
 /* Style global pour le modal */
 .modal {
@@ -1199,4 +1200,18 @@ body, html {
 }
 .message_logs {
     padding-left: 1vh;
+}
+
+#points {
+    font-family:fantasy;
+    border: black;
+    border-width: thick;
+    border-style: groove;
+    font-size: 1.5vw;
+    text-align: center;
+}
+
+.team_title {
+    color:rgb(247, 161, 3);
+    font-weight: 900;
 }

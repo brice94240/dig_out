@@ -138,7 +138,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         }
         $logs_data_reverse = array_reverse($row_logs_data);
 
-        echo json_encode(['success' => true, 'turn' => $turn, 'new_turn' => '1', 'last_turn' => $_POST['turn'], 'real_turn' => $real_turn, 'player_turn_id' => $player_turn_id, 'player_turn_name' => $player_turn_name, 'player_tab' => $player_tab, 'playerData' => $playerData, 'nb_action' => $row_player_data['nb_action'], 'player_id' => $row_player_data['ID'], 'localisation' => $row_player_data['localisation'], 'team' => $row_player_data['team'], 'defausse_data' => $row['defausse_data'], 'pelle_data' => $pelle_data, 'pioche_data' => $pioche_data, 'cuillere_data' => $cuillere_data, 'surin_data' => $surin_data, 'cigarette' => $cigarette, 'raclee' => $raclee, 'logs_data' => $logs_data_reverse]);
+
+        $stmt_points_data = $pdo->prepare("SELECT * FROM joueurs WHERE game_joined = :game_id");
+        $stmt_points_data->execute(['game_id' => $_POST['game_id']]);
+        $row_points_data = $stmt_points_data->fetchAll(PDO::FETCH_ASSOC);
+        $team_a = 0;
+        $team_b = 0;
+        foreach($row_points_data as $value_points){
+            if($value_points['team'] == "A"){
+                $team_a += $value_points['nb_point'];
+            } else if($value_points['team'] == "B") {
+                $team_b += $value_points['nb_point'];
+            }
+        }
+
+        echo json_encode(['success' => true, 'turn' => $turn, 'new_turn' => '1', 'last_turn' => $_POST['turn'], 'real_turn' => $real_turn, 'player_turn_id' => $player_turn_id, 'player_turn_name' => $player_turn_name, 'player_tab' => $player_tab, 'playerData' => $playerData, 'nb_action' => $row_player_data['nb_action'], 'player_id' => $row_player_data['ID'], 'localisation' => $row_player_data['localisation'], 'team' => $row_player_data['team'], 'defausse_data' => $row['defausse_data'], 'pelle_data' => $pelle_data, 'pioche_data' => $pioche_data, 'cuillere_data' => $cuillere_data, 'surin_data' => $surin_data, 'cigarette' => $cigarette, 'raclee' => $raclee, 'logs_data' => $logs_data_reverse, 'team_a' => $team_a, 'team_b' => $team_b]);
 
     } catch (PDOException $e) {
         echo json_encode(['success' => false, 'message' => "Erreur lors de la récupération des parties : " . $e->getMessage()]);
