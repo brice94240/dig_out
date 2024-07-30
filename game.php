@@ -491,6 +491,7 @@ else if($game['team_activated'] == 1) { ?>
         <div class="map-interactive-area" id="dice" onclick="showDice('<?php echo $row_turn['turn']; ?>', '<?php echo $dices[0]; ?>')" style="background-image:url('./img/Dice6.png');background-size:contain;background-repeat:no-repeat;background-size: contain;background-repeat: no-repeat;background-position: top;"></div>
         <div class="map-interactive-area" id="cigarette" style="background-image:url('./img/cigarette.png');background-size:cover;background-repeat:no-repeat;background-size: cover;background-repeat: no-repeat;background-position: top;"><div class="count_cigarette"><?php echo $verify_info_player['cigarette'] ?></div></div>
         <div class="map-interactive-area" id="raclee" style="background-image:url('./img/raclee.png');background-size:cover;background-repeat:no-repeat;background-size: cover;background-repeat: no-repeat;background-position: top;"><div class="count_raclee"><?php echo $verify_info_player['cigarette'] ?></div></div> <div class="map-interactive-area" id="nb_action" style="background-image:url('./img/action.png');background-size:cover;background-repeat:no-repeat;background-size: contain;background-repeat: no-repeat;background-position: top;"><div class="count_nb_action"><?php echo $verify_info_player['cigarette'] ?></div></div>
+        <div class="map-interactive-area" id="logs"></div>
         <input type="hidden" class="turn" value=<?php echo $row_turn['turn'] ?>/>
         <input type="hidden" class="turn_id"/>
         <input type="hidden" class="turn_action"/>
@@ -568,6 +569,21 @@ else if($game['team_activated'] == 1) { ?>
         </div>
         <div class="modal-deck-localisation-footer">
             <button id="close-deck-localisation-action-modal" class="modal-deck-localisation-close btn">Fermer</button>
+        </div>
+    </div>
+
+    <!-- Modal Structure Racket -->
+    <div id="racketModal" class="modal-action-target">
+        <div class="modal-action-target-content">
+            <h2>Choisissez un objet à racketter</h2>
+            <div class="racket-items">
+                <div class="racket-item" data-item="Pelle" style="background-image:url(./img/Pelle.png);background-size:cover;background-repeat:no-repeat;"></div>
+                <div class="racket-item" data-item="Pioche" style="background-image:url(./img/Pioche.png);background-size:cover;background-repeat:no-repeat;"></div>
+                <div class="racket-item" data-item="Cuillere" style="background-image:url(./img/Cuillere.png);background-size:cover;background-repeat:no-repeat;"></div>
+            </div>
+        </div>
+        <div class="modal-deck-target-footer">
+            <button id="close-racket-modal" class="close-button-racket modal-deck-target-close btn">Fermer</button>
         </div>
     </div>
 
@@ -1222,21 +1238,20 @@ function useAction(name_action,name) {
             dataType: 'json',
             success: function(response) {
                 if (response.success) {
-
+                    if(response.sell == true){
+                        showCardDecksForSellInfo(response.deck);
+                    }
+                    if(response.make == true || response.buy == true || response.steal == true || response.creuser == true){
+                        showCardDecksInfo(response.deck);
+                    }
+                    if(response.sub_type == 1 || response.sub_type == 7 || response.sub_type == 8 || response.sub_type == 9 || response.sub_type == 10 || response.sub_type == 11 || response.sub_type == 12){
+                        showCardDecksInfo(response.deck);
+                    }
+                    if(response.sub_type == 2 || response.sub_type == 3 || response.sub_type == 4 || response.sub_type == 5 || response.sub_type == 6){
+                        SelectTarget(response.sub_type,response.player_data,response.item_name);
+                    }
                 } else {
                     console.log('Erreur : ' + response.message);
-                }
-                if(response.sell == true){
-                    showCardDecksForSellInfo(response.deck);
-                }
-                if(response.make == true || response.buy == true || response.steal == true || response.creuser == true){
-                    showCardDecksInfo(response.deck);
-                }
-                if(response.sub_type == 1 || response.sub_type == 7 || response.sub_type == 8 || response.sub_type == 9 || response.sub_type == 10 || response.sub_type == 11 || response.sub_type == 12){
-                    showCardDecksInfo(response.deck);
-                }
-                if(response.sub_type == 2 || response.sub_type == 3 || response.sub_type == 4 || response.sub_type == 5 || response.sub_type == 6){
-                    SelectTarget(response.sub_type,response.player_data,response.item_name);
                 }
             },
             error: function(xhr, status, error) {
@@ -1353,7 +1368,7 @@ function SelectTarget(sub_type, player_data, item_name) {
             var count_deck = deck.length;
 
             // deck.forEach(function(card) {
-                deckDiv.append('<div class="card modal-content-deck" style="background-image:url(./img/' + deck[0].verso_card + '); background-size:contain; background-repeat:no-repeat;"><div class="count_deck_cards">'+count_deck+'</div></div>');
+                deckDiv.append('<div class="card modal-content-deck" style="background-image:url(./img/verso_card.png); background-size:contain; background-repeat:no-repeat;"><div class="count_deck_cards">'+count_deck+'</div></div>');
             // });
 
             // Append the deckDiv to the playerDiv
@@ -1466,7 +1481,6 @@ function SelectTarget(sub_type, player_data, item_name) {
             CardOnTarget(sub_type, tab_target, item_name);
         });
     }
-    showCardDecksInfo(response.deck);
 }
 
 $(document).ready(function() {
@@ -1499,6 +1513,34 @@ $(document).ready(function() {
 $('.close_dice').click(function() {
     $('#ModalDice').hide();
 });
+
+    $('#attackButton').click(function() {
+        const modal = document.getElementById("racketModal");
+        const attackButton = document.getElementById("attackButton");
+        const closeButton = document.querySelector(".close-button-racket");
+        const racketItems = document.querySelectorAll(".racket-item");
+
+        attackButton.onclick = function() {
+            modal.style.display = "block";
+        }
+
+        closeButton.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        racketItems.forEach(button => {
+            button.onclick = function() {
+                const item = this.getAttribute("data-item");
+                racketItem(item);
+            }
+        });
+    });
 
 
 $(document).ready(function() {
@@ -1650,6 +1692,33 @@ $(document).ready(function() {
                         $dice_data_player = JSON.parse(response.playerData[<?php echo $_SESSION['user_id']?>].dice_data)[0];
                         $("#dice")[0].style = 'background-image:url("./img/Dice'+$dice_data_player+'.png");background-size:contain;background-repeat:no-repeat;background-size: contain;background-repeat: no-repeat;background-position: top;';
                     }
+                    // Fonction pour ajouter les logs à l'élément avec l'ID "logs"
+                    function appendLogs(logs) {
+                        var logsContainer = $("#logs");
+                        var existingLogIds = new Set(logsContainer.data('log-ids') || []);
+
+                        logs.forEach(function(log) {
+                            if (!existingLogIds.has(log.log_id)) {
+                                // Créez un élément div pour chaque log
+                                var logEntry = $("<div class='content_logs'></div>").html("<div class='pseudo_logs'>" + log.pseudo + "</div><div class='message_logs'>" + log.message + "</div>");
+                                logsContainer.append(logEntry);
+                                // Ajouter l'ID du log au Set
+                                existingLogIds.add(log.log_id);
+                            }
+                        });
+                        // Mettez à jour les log-ids dans les données de logsContainer
+                        logsContainer.data('log-ids', Array.from(existingLogIds));
+                    }
+                    if($(".content_logs").length > 5){
+                        $(".content_logs")[0].remove();
+                    }
+
+                    if (response.logs_data) {
+                        appendLogs(response.logs_data);
+                    } else {
+                        console.log(response);
+                        appendLogs([]);
+                    }
                 } else {
                     console.log('Erreur : ' + response.message);
                 }
@@ -1755,6 +1824,25 @@ $(document).ready(function() {
             })
         });
     }
+
+    function racketItem(item) {
+        // Send AJAX request to the server
+        fetch('racket.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ item: item })
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            document.getElementById("racketModal").style.display = "none";
+            // You can add code to notify the other player here
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
     // JavaScript pour gérer les interactions du jeu
     function initializeGameBoard() {
         // Initialisation du plateau de jeu si nécessaire

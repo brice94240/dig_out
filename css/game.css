@@ -82,6 +82,7 @@ body, html {
 #cigarette { top: 100%; left: 65%; width: 12%; height: 19%; } /* Defausse */
 #raclee { top: 100%; left: 76%; width: 12%; height: 19%; } /* Defausse */
 #nb_action { top: 100%; left: 90%; width: 10%; height: 19%; } /* Defausse */
+#logs { top: 0%; left: -73%; width: 70%; height: 70%; } /* Defausse */
 
 /* Style global pour le modal */
 .modal {
@@ -918,6 +919,7 @@ body, html {
     justify-content: center;
     height: -webkit-fill-available;
     color: #ff7100;
+    width: 10vh;
 }
 #deck-target-infos{
     height: 15vh;
@@ -1165,4 +1167,36 @@ body, html {
     text-align: center;
     font-weight: 900;
     font-size: 3vh;
+}
+
+.racket-item {
+    width: 13vh;
+    height: 20vh;
+    margin-right: 5vh;
+    margin-left: 5vh;
+}
+
+.racket-items {
+    display: flex;
+}
+
+.pseudo_logs {
+    color:rgb(247, 161, 3);
+    font-weight: 900;
+}
+#logs {
+    font-family:fantasy;
+    border: black;
+    border-width: thick;
+    border-style: groove;
+    width: auto;
+    height: auto;
+    font-size: 1.5vw;
+}
+.content_logs {
+    display: flex;
+    padding: 1vh;
+}
+.message_logs {
+    padding-left: 1vh;
 }

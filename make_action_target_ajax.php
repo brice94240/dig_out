@@ -82,6 +82,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     // Réduire le nombre d'actions
                     $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET nb_action = nb_action - 1 WHERE ID = :user_id");
                     $stmt_update_nb_action->execute(['user_id' => $_SESSION['user_id']]);
+
+                    $message = "à utilisé Clef du gardien.";
+
+                    $stmt_logs = $pdo->prepare("INSERT INTO logs (game_id, user_id, message) VALUES (:game_id, :user_id, :message)");
+                    $stmt_logs->execute([
+                        'game_id' => $game_id,
+                        'user_id' => $_SESSION['user_id'],
+                        'message' => $message
+                    ]);
+
                     echo json_encode(['success' => true, 'deck' =>  $deck, 'defausse' => $defausse_json]);
                 } else {
                     echo json_encode(['success' => false, 'message' => "Vous etes deja dans cette piece !"]);
@@ -156,6 +166,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     // Réduire le nombre d'actions
                     $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET nb_action = nb_action - 1 WHERE ID = :user_id");
                     $stmt_update_nb_action->execute(['user_id' => $_SESSION['user_id']]);
+
+                    $message = "à utilisé Transfert de prisonniers.";
+
+                    $stmt_logs = $pdo->prepare("INSERT INTO logs (game_id, user_id, message) VALUES (:game_id, :user_id, :message)");
+                    $stmt_logs->execute([
+                        'game_id' => $game_id,
+                        'user_id' => $_SESSION['user_id'],
+                        'message' => $message
+                    ]);
 
                     echo json_encode(['success' => true, 'deck' =>  $deck, 'deck_target' =>  $deck_target, 'defausse' => $defausse_json]);
 
@@ -233,6 +252,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     // Réduire le nombre d'actions
                     $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET nb_action = nb_action - 1 WHERE ID = :user_id");
                     $stmt_update_nb_action->execute(['user_id' => $_SESSION['user_id']]);
+
+                    $message = "à utilisé Fouille au corps";
+
+                    $stmt_logs = $pdo->prepare("INSERT INTO logs (game_id, user_id, message, target_id) VALUES (:game_id, :user_id, :message, :target_id)");
+                    $stmt_logs->execute([
+                        'game_id' => $game_id,
+                        'user_id' => $_SESSION['user_id'],
+                        'message' => $message,
+                        'target_id' => $id_target
+                    ]);
+
                     echo json_encode(['success' => true, 'deck' =>  $deck, 'deck_target' =>  $deck_target, 'defausse' => $defausse_json]);
                 } else {
                     echo json_encode(['success' => false, 'message' => "La cible n'a pas assez de carte", 'deck_target' => $deck_target]);
@@ -287,6 +317,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     // Réduire le nombre d'actions
                     $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET nb_action = nb_action - 1 WHERE ID = :user_id");
                     $stmt_update_nb_action->execute(['user_id' => $_SESSION['user_id']]);
+
+                    $message = "à utilisé Isolement";
+
+                    $stmt_logs = $pdo->prepare("INSERT INTO logs (game_id, user_id, message, target_id) VALUES (:game_id, :user_id, :message, :target_id)");
+                    $stmt_logs->execute([
+                        'game_id' => $game_id,
+                        'user_id' => $_SESSION['user_id'],
+                        'message' => $message,
+                        'target_id' => $id_target
+                    ]);
+
                     echo json_encode(['success' => true, 'deck' =>  $deck, 'defausse' => $defausse_json]);
                 } else {
                     echo json_encode(['success' => false, 'message' => "La cible est déja a l'isolement"]);
@@ -342,6 +383,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         // Réduire le nombre d'actions
                         $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET nb_action = nb_action - 1 WHERE ID = :user_id");
                         $stmt_update_nb_action->execute(['user_id' => $_SESSION['user_id']]);
+
+                        $message = "à utilisé Savonette";
+
+                        $stmt_logs = $pdo->prepare("INSERT INTO logs (game_id, user_id, message, target_id) VALUES (:game_id, :user_id, :message, :target_id)");
+                        $stmt_logs->execute([
+                            'game_id' => $game_id,
+                            'user_id' => $_SESSION['user_id'],
+                            'message' => $message,
+                            'target_id' => $id_target
+                        ]);
+
                         echo json_encode(['success' => true, 'deck' =>  $deck, 'defausse' => $defausse_json]);
                     } else {
                         echo json_encode(['success' => false, 'message' => "Le joueur a deja deux raclées"]);

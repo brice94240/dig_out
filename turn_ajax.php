@@ -120,8 +120,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $surin_data = $row['surin_data'];
         $cigarette = $row_player_data['cigarette'];
         $raclee = $row_player_data['raclee'];
+        
+        $stmt_logs_data = $pdo->prepare("SELECT *,logs.id AS log_id FROM logs INNER JOIN joueurs ON joueurs.ID = logs.user_id WHERE game_id = :game_id ORDER BY timestamp DESC LIMIT 5");
+        $stmt_logs_data->execute(['game_id' => $_POST['game_id']]);
+        $row_logs_data = $stmt_logs_data->fetchAll(PDO::FETCH_ASSOC);
+        foreach($row_logs_data as $key => $value_log){
+            if($value_log['target_id'] !== NULL){
+                $stmt_player_logs_target_id = $pdo->prepare("SELECT * FROM joueurs WHERE ID = :player_id");
+                $stmt_player_logs_target_id->execute(['player_id' => $value_log['target_id']]);
+                $row_logs_pseudo_target_id = $stmt_player_logs_target_id->fetch(PDO::FETCH_ASSOC);
+                $pseudo_target_id = $row_logs_pseudo_target_id['pseudo'];
+                $value_log['message'] .= " sur " . $pseudo_target_id; // Ajouter le pseudonyme à chaque message
+                //Je veux que $row_logs_data soit bien a la fin de ma boucle foreach
+                // Mettre à jour le message dans le tableau original
+                $row_logs_data[$key]['message'] .= " sur " . $pseudo_target_id . ".";
+            }
+        }
+        $logs_data_reverse = array_reverse($row_logs_data);
 
-        echo json_encode(['success' => true, 'turn' => $turn, 'new_turn' => '1', 'last_turn' => $_POST['turn'], 'real_turn' => $real_turn, 'player_turn_id' => $player_turn_id, 'player_turn_name' => $player_turn_name, 'player_tab' => $player_tab, 'playerData' => $playerData, 'nb_action' => $row_player_data['nb_action'], 'player_id' => $row_player_data['ID'], 'localisation' => $row_player_data['localisation'], 'team' => $row_player_data['team'], 'defausse_data' => $row['defausse_data'], 'pelle_data' => $pelle_data, 'pioche_data' => $pioche_data, 'cuillere_data' => $cuillere_data, 'surin_data' => $surin_data, 'cigarette' => $cigarette, 'raclee' => $raclee]);
+        echo json_encode(['success' => true, 'turn' => $turn, 'new_turn' => '1', 'last_turn' => $_POST['turn'], 'real_turn' => $real_turn, 'player_turn_id' => $player_turn_id, 'player_turn_name' => $player_turn_name, 'player_tab' => $player_tab, 'playerData' => $playerData, 'nb_action' => $row_player_data['nb_action'], 'player_id' => $row_player_data['ID'], 'localisation' => $row_player_data['localisation'], 'team' => $row_player_data['team'], 'defausse_data' => $row['defausse_data'], 'pelle_data' => $pelle_data, 'pioche_data' => $pioche_data, 'cuillere_data' => $cuillere_data, 'surin_data' => $surin_data, 'cigarette' => $cigarette, 'raclee' => $raclee, 'logs_data' => $logs_data_reverse]);
 
     } catch (PDOException $e) {
         echo json_encode(['success' => false, 'message' => "Erreur lors de la récupération des parties : " . $e->getMessage()]);

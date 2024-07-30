@@ -92,9 +92,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $stmt_game->execute(['game_id' => $gameId]);
                 $row_game = $stmt_game->fetch(PDO::FETCH_ASSOC);
                 $defausseData = json_decode($row_game['defausse_data'], true) ?: [];
+                $all_cigarette = 0;
 
                 foreach ($deck as $index => $card) {
                     if (in_array($card['ID'], $tab_sell)) {
+                        $all_cigarette += $row['val_cigarette'];
                         $card_id = $card['ID'];
                         array_unshift($defausseData, $card); // Ajouter la carte au début de defausse_data
 
@@ -133,6 +135,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         // Réduire le nombre d'actions
                         $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET nb_action = nb_action - 1 WHERE ID = :user_id");
                         $stmt_update_nb_action->execute(['user_id' => $_SESSION['user_id']]);
+
+                        $message = "à vendu pour ".$all_cigarette." Cigarettes.";
+
+                        $stmt_logs = $pdo->prepare("INSERT INTO logs (game_id, user_id, message) VALUES (:game_id, :user_id, :message)");
+                        $stmt_logs->execute([
+                            'game_id' => $gameId,
+                            'user_id' => $_SESSION['user_id'],
+                            'message' => $message
+                        ]);
+
                         echo json_encode(['success' => true, 'message' => 'Cartes vendues avec succès.']);
                     }
                 } else {
