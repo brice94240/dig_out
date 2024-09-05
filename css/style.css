@@ -6,15 +6,34 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: #000;
+    background-image: url(../img/accueil_background.jpg);
+    background-size: cover;
+    background-repeat: no-repeat;
     color: #fff;
     font-family: Arial, sans-serif;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+.container_accueil {
+    border-color: black;
+    border-width: 1vw;
+    padding: 1vw;
+    border-style: double;
+    background: grey;
+    font-family:'Impact', 'Arial Narrow', Arial, sans-serif;
+    width: 60vh;
+}
+form.form_container {
+    width: min-content;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
 }
 h1 {
     margin-bottom: 20px;
 }
 .button-container {
-    display: flex;
     gap: 20px;
 }
 .button {
@@ -28,4 +47,14 @@ h1 {
 }
 .button:hover {
     background-color: #666;
+}
+.button-submit {
+    background-color: #d17b12;
+    color: white;
+    border: none;
+    padding: 1vh;
+    font-size: 2vh;
+    margin-top: 1vh;
+    border-radius: 5px;
+    cursor: pointer;
 }

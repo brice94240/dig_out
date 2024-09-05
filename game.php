@@ -383,7 +383,7 @@ if($game['team_activated'] == 0){ ?>
         <div class="map-interactive-area" id="piece6" onclick="zoneClicked(6)"></div>
 
         <!-- Zones des cartes -->
-        <div class="map-interactive-area" id="carte1" onclick="showCardsFouillesInfo('<?php echo $fouilles[0]['name']; ?>', '<?php echo $fouilles[0]['description']; ?>', '<?php echo $fouilles[0]['img']; ?>', '<?php echo $fouilles[0]['verso_card']; ?>')" style="background-image:url('./img/<?php echo $fouilles[0]['verso_card'] ?>');background-size:cover;transform: rotate(90deg);background-repeat:no-repeat;"></div>
+        <div class="map-interactive-area" id="carte1" style="background-image:url('./img/<?php echo $fouilles[0]['verso_card'] ?>');background-size:cover;transform: rotate(90deg);background-repeat:no-repeat;"></div>
         <div class="map-interactive-area" id="carte2" onclick="showCardsPointsInfo('<?php echo $surins[0]['name']; ?>', '<?php echo $surins[0]['description']; ?>', '<?php echo $surins[0]['img']; ?>')" style="background-image:url('./img/<?php echo $surins[0]['img'] ?>');background-size:cover;background-repeat:no-repeat;"></div>
         <div class="map-interactive-area" id="carte3" onclick="showCardsPointsInfo('<?php echo $pioches[0]['name']; ?>', '<?php echo $pioches[0]['description']; ?>', '<?php echo $pioches[0]['img']; ?>')" style="background-image:url('./img/<?php echo $pioches[0]['img'] ?>');background-size:cover;transform: rotate(90deg);background-repeat:no-repeat;"></div>
         <div class="map-interactive-area" id="carte4" onclick="showCardsPointsInfo('<?php echo $pelles[0]['name']; ?>', '<?php echo $pelles[0]['description']; ?>', '<?php echo $pelles[0]['img']; ?>')" style="background-image:url('./img/<?php echo $pelles[0]['img'] ?>');background-size:cover;transform: rotate(90deg);background-repeat:no-repeat;"></div>
@@ -479,7 +479,7 @@ else if($game['team_activated'] == 1) { ?>
         <div class="map-interactive-area" id="piece6" onclick="zoneClicked(7)"></div>
 
         <!-- Zones des cartes -->
-        <div class="map-interactive-area" id="carte1" onclick="showCardsFouillesInfo('<?php echo $fouilles[0]['name']; ?>', '<?php echo $fouilles[0]['description']; ?>', '<?php echo $fouilles[0]['img']; ?>', '<?php echo $fouilles[0]['verso_card']; ?>')" style="background-image:url('./img/<?php echo $fouilles[0]['verso_card'] ?>');background-size:cover;transform: rotate(90deg);background-repeat:no-repeat;"></div>
+        <div class="map-interactive-area" id="carte1" style="background-image:url('./img/<?php echo $fouilles[0]['verso_card'] ?>');background-size:cover;transform: rotate(90deg);background-repeat:no-repeat;"></div>
         <div class="map-interactive-area" id="carte2" onclick="showCardsPointsInfo('<?php echo $surins[0]['name']; ?>', '<?php echo $surins[0]['description']; ?>', '<?php echo $surins[0]['img']; ?>')" style="background-image:url('./img/<?php echo $surins[0]['img'] ?>');background-size:cover;background-repeat:no-repeat;"></div>
         <div class="map-interactive-area" id="carte3" onclick="showCardsPointsInfo('<?php echo $pioches[0]['name']; ?>', '<?php echo $pioches[0]['description']; ?>', '<?php echo $pioches[0]['img']; ?>')" style="background-image:url('./img/<?php echo $pioches[0]['img'] ?>');background-size:cover;background-repeat:no-repeat;"></div>
         <div class="map-interactive-area" id="carte4" onclick="showCardsPointsInfo('<?php echo $pelles[0]['name']; ?>', '<?php echo $pelles[0]['description']; ?>', '<?php echo $pelles[0]['img']; ?>')" style="background-image:url('./img/<?php echo $pelles[0]['img'] ?>');background-size:cover;background-repeat:no-repeat;"></div>
@@ -1509,6 +1509,7 @@ $(document).ready(function() {
     $(window).click(function(event) {
         if (event.target.id === 'close-deck-localisation-action-modal') {
             $('#action-modal-localisation').hide();
+            $('#deck-modal').hide();
         }
     });
 });
@@ -1518,33 +1519,51 @@ $('.close_dice').click(function() {
     $('#ModalDice').hide();
 });
 
-    $('#attackButton').click(function() {
-        const modal = document.getElementById("racketModal");
-        const attackButton = document.getElementById("attackButton");
-        const closeButton = document.querySelector(".close-button-racket");
-        const racketItems = document.querySelectorAll(".racket-item");
+$('#attackButton').click(function() {
+    const modal = $('#racketModal');
+    const closeButton = $('.close-button-racket');
+    const racketItems = $('.racket-item');
+    const target_id = this.value;
 
-        attackButton.onclick = function() {
-            modal.style.display = "block";
-        }
+    // Ouvrir la modal
+    modal.show();
 
-        closeButton.onclick = function() {
-            modal.style.display = "none";
-        }
-
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
-            }
-        }
-
-        racketItems.forEach(button => {
-            button.onclick = function() {
-                const item = this.getAttribute("data-item");
-                racketItem(item);
-            }
-        });
+    // Fermer la modal lorsqu'on clique sur le bouton "Fermer"
+    closeButton.click(function() {
+        modal.hide();
     });
+
+    // Fermer la modal si on clique en dehors de celle-ci
+    $(window).click(function(event) {
+        if (event.target == modal[0]) {
+            modal.hide();
+        }
+    });
+
+    // Gérer la sélection d'un objet à racketter
+    racketItems.click(function() {
+        const item = $(this).data('item');
+        racketItem(item,target_id);
+    });
+});
+
+function racketItem(item, target_id) {
+    // Vérification si le joueur peut racketter (possède un surin ou une lame)
+    $.ajax({
+        url: 'check_racket_eligibility_ajax.php',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+            action: 'check_racket_eligibility',
+            target_id: target_id,
+            item_requested: item,
+            game_id: <?php echo $game_id; ?>,
+        },
+        success: function(response) {
+            console.log(response);
+        }
+    });
+}
 
 
 $(document).ready(function() {
@@ -1559,7 +1578,7 @@ $(document).ready(function() {
                 action: 'get_turn',
                 turn: turn,
                 game_id: <?php echo $game_id; ?>,
-             },
+            },
             dataType: 'json',
             success: function(response) {
                 if (response.success) {
@@ -1639,7 +1658,6 @@ $(document).ready(function() {
                     } else {
                         $('#FinTurnButton').hide();
                     }
-
 
                     if(response.defausse_data !== "") {
                         var tab_defausse = JSON.parse(response.defausse_data);
@@ -1731,10 +1749,31 @@ $(document).ready(function() {
                         var team_b_div = $("#team_b");
                         team_a_div[0].innerHTML= "<div class='team_title'>TEAM A</div><div class='team_points'>"+team_a+" Points</div>";
                         team_b_div[0].innerHTML= "<div class='team_title'>TEAM B</div><div class='team_points'>"+team_b+" Points</div>";
-
-                        
+                        if(team_a >= 20 || team_b >= 20){
+                            if(team_a >= 20){
+                                alert("VICTOIRE TEAM A");
+                                return window.location.href = "./room.php";
+                            } else {
+                                alert("VICTOIRE TEAM B");
+                                return window.location.href = "./room.php";
+                            }
+                        }
                     }
                     appendPoints(response.team_a, response.team_b);
+
+                    if(response.on_fight == "trrue"){
+                        console.log("Joueur en combat");
+                        if(response.fight_id_turn == <?php echo $_SESSION['user_id']; ?>) {
+                            // Ouvrir une modal de combat
+                            console.log(response.fight_id_turn);
+                            console.log(response.fight_details);
+
+                            // openCombatModal(response.fight_id_turn, response.fight_details);
+                        } else {
+                            // console.log(response);
+                            // alert("Attendez votre tour pour agir dans le combat.");
+                        }
+                    }
                 } else {
                     console.log('Erreur : ' + response.message);
                 }
@@ -1743,6 +1782,23 @@ $(document).ready(function() {
                 console.log('Erreur AJAX : ' + error);
             }
         });
+    }
+    
+    function openCombatModal(fightIdTurn, fightDetails) {
+        // Créez ou montrez une modal spécifique pour le combat
+        // fightDetails peut contenir des informations spécifiques sur l'état du combat
+        $('#combatModal').show();
+        
+        // Vous pouvez afficher des informations spécifiques du combat ici
+        $('#combatDetails').text(`C'est le tour du joueur avec l'ID ${fightIdTurn}. Détails: ${fightDetails}`);
+        
+        // Préparez les actions possibles pour le joueur en combat
+        // Par exemple, afficher des boutons d'attaque, de défense, etc.
+    }
+
+    // Pour fermer la modal de combat
+    function closeCombatModal() {
+        $('#combatModal').hide();
     }
 
     function GetInfoTarget() {
@@ -1814,6 +1870,9 @@ $(document).ready(function() {
                                             $('#deck-target-infos').append('<div class="map-interactive-area" id="raclee_target" style="background-image:url(./img/raclee.png);background-size:cover;background-repeat:no-repeat;background-size: cover;background-repeat: no-repeat;background-position: top;"><div class="count_raclee_target">'+raclee+'</div></div>');
                                             $('#deck-modal-target').show();
 
+                                            
+                                            $('#attackButton')[0].value=id;
+
                                             // Close modal
                                             $('#close-deck-target-modal').click(function() {
                                                 $('#deck-modal-target').hide();
@@ -1839,24 +1898,6 @@ $(document).ready(function() {
                 }
             })
         });
-    }
-
-    function racketItem(item) {
-        // Send AJAX request to the server
-        fetch('racket.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ item: item })
-        })
-        .then(response => response.json())
-        .then(data => {
-            alert(data.message);
-            document.getElementById("racketModal").style.display = "none";
-            // You can add code to notify the other player here
-        })
-        .catch(error => console.error('Error:', error));
     }
 
     // JavaScript pour gérer les interactions du jeu

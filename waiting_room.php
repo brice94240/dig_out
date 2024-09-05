@@ -269,7 +269,7 @@ $players_no_team = array_filter($players, function($player) {
     <div class="back-button">
         <form method="post" action="">
             <input type="hidden" name="leave_game" value="1">
-            <button id="back_button" type="submit" name="back_button">Retour à la liste des parties</button>
+            <button id="back_button" type="submit" name="back_button">Retour</button>
         </form>
     </div>
 

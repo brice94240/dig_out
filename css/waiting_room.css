@@ -101,6 +101,7 @@ button[type="submit"] {
     color: black;
     border-radius: 5px;
     cursor: pointer;
+    width: 15vh;
 }
 
 button[type="submit"]:hover {
@@ -231,10 +232,11 @@ form.form_launch_game_desactivate {
     border: 1px solid #ccc;
     padding: 20px;
     border-radius: 5px;
-    background-color: #f9f9f9;
+    background-color: grey;
     color:black;
     position: relative;
     padding-bottom: 3em;
+    width: 20vw;
 }
 
 .team-no-team-column {

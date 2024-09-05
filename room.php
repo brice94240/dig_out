@@ -193,7 +193,7 @@ try {
             <label>Équipe activée:</label>
             <button type="button" id="yesButton" class="toggle-button" onclick="activateButton('yes')">OUI</button>
             <button type="button" id="noButton" class="toggle-button" onclick="activateButton('no')">NON</button>
-            <input type="hidden" id="team_activated" name="team_activated" value="0"> <!-- Champ caché pour la valeur -->
+            <input type="hidden" id="team_activated" name="team_activated" value="1">
         </div>
         <div>
             <label for="max_player">Joueurs:</label>

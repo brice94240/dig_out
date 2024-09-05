@@ -1,5 +1,11 @@
 <?php
+session_start();
 require_once 'config.php';
+if (isset($_SESSION['user_id'])) {
+    // Rediriger vers la page de connexion si l'utilisateur n'est pas connecté
+    header("Location: ./room.php");
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -10,11 +16,12 @@ require_once 'config.php';
     <link href="./css/style.css" rel="stylesheet" />
 </head>
 <body>
+<div class="container_accueil">
 <?php
 if(!isset($_GET['login']) && !isset($_GET['signin'])){
 ?>
-    <h1>DIG YOUR WAY OUT ONLINE</h1>
-    <h1>Bienvenue Accueil</h1>
+    <h1>DIG OUT ONLINE</h1>
+    <h1>Accueil</h1>
     <div class="button-container">
         <a href="./?login"><button class="button">Connexion</button></a>
         <a href="./?signin"><button class="button">Inscription</button></a>
@@ -22,13 +29,13 @@ if(!isset($_GET['login']) && !isset($_GET['signin'])){
 <?php
 } elseif(isset($_GET['login']) && !isset($_GET['signin'])){
 ?>
-    <h1>DIG YOUR WAY OUT ONLINE</h1>
-    <h1>Bienvenue Connexion</h1>
+    <h1>DIG OUT ONLINE</h1>
+    <h1>Connexion</h1>
     <div class="button-container">
         <a href="./?login"><button class="button">Connexion</button></a>
         <a href="./?signin"><button class="button">Inscription</button></a>
     </div>
-    <form action="login_process.php" method="post">
+    <form class="form_container" action="login_process.php" method="post">
         <div>
             <label for="pseudo">Nom d'utilisateur:</label>
             <input type="text" id="pseudo" name="pseudo" required>
@@ -38,19 +45,19 @@ if(!isset($_GET['login']) && !isset($_GET['signin'])){
             <input type="password" id="password" name="password" required>
         </div>
         <div>
-            <button type="submit">Se connecter</button>
+            <button type="submit" class="button-submit">Se connecter</button>
         </div>
     </form>
 <?php
 } elseif(isset($_GET['signin']) && !isset($_GET['login'])){
 ?>
-    <h1>DIG YOUR WAY OUT ONLINE</h1>
-    <h1>Bienvenue Inscription</h1>
+    <h1>DIG OUT ONLINE</h1>
+    <h1>Inscription</h1>
     <div class="button-container">
         <a href="./?login"><button class="button">Connexion</button></a>
         <a href="./?signin"><button class="button">Inscription</button></a>
     </div>
-    <form action="signin_process.php" method="post">
+    <form class="form_container" action="signin_process.php" method="post">
         <div>
             <label for="pseudo">Nom d'utilisateur:</label>
             <input type="text" id="pseudo" name="pseudo" required>
@@ -64,11 +71,12 @@ if(!isset($_GET['login']) && !isset($_GET['signin'])){
             <input type="password" id="password" name="password" required>
         </div>
         <div>
-            <button type="submit">S'inscrire</button>
+            <button type="submit" class="button-submit">S'inscrire</button>
         </div>
     </form>
 <?php
 }
 ?>
+</div>
 </body>
 </html>

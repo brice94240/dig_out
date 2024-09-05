@@ -152,7 +152,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             }
         }
 
-        echo json_encode(['success' => true, 'turn' => $turn, 'new_turn' => '1', 'last_turn' => $_POST['turn'], 'real_turn' => $real_turn, 'player_turn_id' => $player_turn_id, 'player_turn_name' => $player_turn_name, 'player_tab' => $player_tab, 'playerData' => $playerData, 'nb_action' => $row_player_data['nb_action'], 'player_id' => $row_player_data['ID'], 'localisation' => $row_player_data['localisation'], 'team' => $row_player_data['team'], 'defausse_data' => $row['defausse_data'], 'pelle_data' => $pelle_data, 'pioche_data' => $pioche_data, 'cuillere_data' => $cuillere_data, 'surin_data' => $surin_data, 'cigarette' => $cigarette, 'raclee' => $raclee, 'logs_data' => $logs_data_reverse, 'team_a' => $team_a, 'team_b' => $team_b]);
+        $stmt_verif_card_on_fouille = $pdo->prepare("SELECT * FROM games WHERE creator_id = :game_id");
+        $stmt_verif_card_on_fouille->execute(['game_id' => $_POST['game_id']]);
+        $row_verif_card_on_fouille = $stmt_verif_card_on_fouille->fetch(PDO::FETCH_ASSOC);
+        $fouilles = json_decode($row_verif_card_on_fouille['fouille_data']);
+        $count_fouilles = count($fouilles);
+
+        if($count_fouilles <= 5){
+            $new_fouille = "test";
+            $stmt_recup_defausse = $pdo->prepare("SELECT * FROM games WHERE creator_id = :game_id");
+            $stmt_recup_defausse->execute(['game_id' => $_POST['game_id']]);
+            $row_recup_defausse = $stmt_recup_defausse->fetch(PDO::FETCH_ASSOC);
+            $defausse = json_decode($row_verif_card_on_fouille['defausse_data']);
+            
+            shuffle($defausse);
+            $new_fouille = $defausse;
+            foreach($fouilles as $value){
+                $new_fouille[] = $value;
+            }
+            $new_fouille = json_encode($new_fouille);
+
+            $stmt_update_defausse = $pdo->prepare("UPDATE games SET defausse_data = '' WHERE creator_id = :game_id");
+            $stmt_update_defausse->execute(['game_id' => $_POST['game_id']]);
+
+            $stmt_update_fouille = $pdo->prepare("UPDATE games SET fouille_data = :new_fouille WHERE creator_id = :game_id");
+            $stmt_update_fouille->execute(['new_fouille' => $new_fouille, 'game_id' => $_POST['game_id']]);           
+
+        }
+
+        // Vérifier si le joueur est deja en combat
+        $stmt_attacker_on_fight = $pdo->prepare("SELECT * FROM fights WHERE (attacker_id = :attacker_id OR defender_id = :defender_id) AND status = :status");
+        $stmt_attacker_on_fight->execute(['attacker_id' => $player_turn_id, 'defender_id' => $player_turn_id, 'status' => 'procedeed']);
+        $row_attacker_on_fight = $stmt_attacker_on_fight->fetchAll(PDO::FETCH_ASSOC);
+        if(count($row_attacker_on_fight) >= 1) {
+            $on_fight = true;
+            $fight_id_turn = $row_attacker_on_fight[0]['fight_id_turn'];
+        } else {
+            $on_fight = false;
+        }
+
+        echo json_encode(['success' => true, 'turn' => $turn, 'new_turn' => '1', 'last_turn' => $_POST['turn'], 'real_turn' => $real_turn, 'player_turn_id' => $player_turn_id, 'player_turn_name' => $player_turn_name, 'player_tab' => $player_tab, 'playerData' => $playerData, 'nb_action' => $row_player_data['nb_action'], 'player_id' => $row_player_data['ID'], 'localisation' => $row_player_data['localisation'], 'team' => $row_player_data['team'], 'defausse_data' => $row['defausse_data'], 'pelle_data' => $pelle_data, 'pioche_data' => $pioche_data, 'cuillere_data' => $cuillere_data, 'surin_data' => $surin_data, 'cigarette' => $cigarette, 'raclee' => $raclee, 'logs_data' => $logs_data_reverse, 'team_a' => $team_a, 'team_b' => $team_b, 'new_fouille' => $new_fouille, 'on_fight' => $on_fight, 'fight_id_turn' => $fight_id_turn]);
 
     } catch (PDOException $e) {
         echo json_encode(['success' => false, 'message' => "Erreur lors de la récupération des parties : " . $e->getMessage()]);
