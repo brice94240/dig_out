@@ -6,11 +6,14 @@ require_once 'config.php';
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'check_racket_eligibility') {
-    $game_id = intval($_POST['game_id']);
-    $attacker_id = intval($_SESSION['user_id']);
-    $target_id = intval($_POST['target_id']);
+    try{
 
-    try {
+        $game_id = intval($_POST['game_id']);
+        $attacker_id = intval($_SESSION['user_id']);
+
+        $item_requested = $_POST['item_requested'];
+        $target_id = intval($_POST['target_id']);
+
         // Vérifier si le joueur est deja en combat
         $stmt_attacker_on_fight = $pdo->prepare("SELECT * FROM fights WHERE (attacker_id = :attacker_id OR defender_id = :defender_id) AND status = :status");
         $stmt_attacker_on_fight->execute(['attacker_id' => $attacker_id, 'defender_id' => $attacker_id, 'status' => 'procedeed']);
@@ -33,6 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             foreach ($attacker_deck as $card) {
                 if ($card['name'] === 'Surin' || $card['name'] === 'Lame') {
                     $can_attack = true;
+                    $weapons_used[] = $card;
                     break;
                 }
             }
@@ -46,20 +50,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 }
             }
 
-            // Vérifier si le joueur cible a des objets racketables
+            // Vérifier si le joueur cible a l'objet demandé
             $items_available = [];
             foreach ($target_deck as $card) {
-                if (in_array($card['name'], ['Pelle', 'Pioche', 'Cuillère'])) {
+                if (in_array($card['name'], [$item_requested])) {
                     $items_available[] = $card;
                 }
             }
 
             if ($can_attack) {
                 // Mettre à jour le fight dans la BDD
-                $stmt_fight = $pdo->prepare("INSERT INTO fights (game_id, item, attacker_id, defender_id, status, fight_turn) VALUES (:game_id, :item, :attacker_id, :defender_id, :status, :fight_turn)");
+                $stmt_fight = $pdo->prepare("INSERT INTO fights (game_id, item_ask, weapons_used, attacker_id, defender_id, status, fight_id_turn) VALUES (:game_id, :item_ask, :weapons_used, :attacker_id, :defender_id, :status, :fight_id_turn)");
                 $stmt_fight->execute([
                     'game_id' => $game_id,
-                    'item' => json_encode($items_available),
+                    'item_ask' => json_encode($items_available),
+                    'weapons_used' => json_encode($weapons_used),
                     'attacker_id' => $attacker_id,
                     'defender_id' => $target_id,
                     'status' => 'procedeed',
@@ -74,8 +79,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             echo json_encode(['success' => false , 'message' => "Vous etes deja en combat."]);
         }
     } catch (PDOException $e) {
-        echo json_encode(['success' => false, 'message' => 'Erreur de base de données : ' . $e->getMessage()]);
+        echo json_encode(['success' => false, 'message' => "Erreur lors de la récupération des parties : " . $e->getMessage()]);
     }
+
 } else {
     echo json_encode(['success' => false, 'message' => "Action non valide"]);
 }

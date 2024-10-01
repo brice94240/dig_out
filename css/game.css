@@ -5,6 +5,7 @@ body, html {
     padding: 0;
     height: 100%;
     background: grey;
+    background-image:url('../img/prison_background.jpg');
 }
 
 .game-container {
@@ -82,7 +83,7 @@ body, html {
 #cigarette { top: 100%; left: 65%; width: 12%; height: 19%; } /* Defausse */
 #raclee { top: 100%; left: 76%; width: 12%; height: 19%; } /* Defausse */
 #nb_action { top: 100%; left: 90%; width: 10%; height: 19%; } /* Defausse */
-#logs { top: 0%; left: -73%; width: 70%; height: 70%; } /* Defausse */
+#logs { top: 0%; left: -74%; width: 70%; height: 70%; } /* Defausse */
 #points { top: 0%; left: 110%; width: 50%; height: 23%; } /* Defausse */
 
 /* Style global pour le modal */
@@ -1175,6 +1176,12 @@ body, html {
     height: 20vh;
     margin-right: 5vh;
     margin-left: 5vh;
+    opacity: 80%;
+}
+
+.racket-item:hover{
+    opacity: 100%;
+    cursor: pointer;
 }
 
 .racket-items {
@@ -1187,16 +1194,19 @@ body, html {
 }
 #logs {
     font-family:fantasy;
-    border: black;
-    border-width: thick;
-    border-style: groove;
     width: auto;
     height: auto;
-    font-size: 1.5vw;
+    font-size: 1.4vw;
+    background-image: url(../img/tache.png);
+    background-size: 70vh;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 .content_logs {
     display: flex;
+    color:#efff0d;
     padding: 1vh;
+    font-family: cursive;
 }
 .message_logs {
     padding-left: 1vh;
@@ -1209,9 +1219,109 @@ body, html {
     border-style: groove;
     font-size: 1.5vw;
     text-align: center;
+    color:#efff0d;
 }
 
 .team_title {
     color:rgb(247, 161, 3);
     font-weight: 900;
+}
+
+.number_card {
+    color:white;
+    font-size: 22px;
+}
+
+#combat-table {
+    min-height: 25vh;
+}
+.title_fight {
+    font-size: 5vh;
+    color:rgb(247, 161, 3);
+    text-align: center;
+}
+#combatDetails {
+    text-align: center;
+    color: #efff0d;
+}
+#deck-cards-fight {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1px;
+}
+
+#deck-cards-fight>* {
+    margin-left: auto;
+    margin-right: auto;
+}
+#combatModal {
+    height: 90vh;
+    max-width: 900px;
+}
+#combat-table {
+    display: inline-flex;
+    margin-left: auto;
+    margin-right: auto;
+    width : 100%;
+    justify-content: center;
+    gap:1em;
+    padding: 1vh;
+}
+
+#cooperate {
+    color: #fff;
+    margin-top: 8.5vh;
+    font-size: 2vh;
+    font-weight: bold;
+    background: #04b224;
+    cursor: pointer;
+    border-color: black;
+    border-style: double;
+    font-family: fantasy;
+    padding: 0.5vh;
+    height: 5vh;
+}
+
+#giveup {
+    color: #fff;
+    margin-top: 8.5vh;
+    font-size: 2vh;
+    font-weight: bold;
+    background: #850000;
+    cursor: pointer;
+    border-color: black;
+    border-style: double;
+    font-family: fantasy;
+    padding: 0.5vh;
+    height: 5vh;
+}
+
+#dontcooperate {
+    color: #fff;
+    margin-top: 8.5vh;
+    font-size: 2vh;
+    font-weight: bold;
+    background: #03ab2288;
+    cursor: pointer;
+    border-color: black;
+    border-style: double;
+    font-family: fantasy;
+    padding: 0.5vh;
+    height: 5vh;
+    cursor: no-drop;
+}
+
+#dontgiveup {
+    color: #fff;
+    margin-top: 8.5vh;
+    font-size: 2vh;
+    font-weight: bold;
+    background: #85000072;
+    cursor: pointer;
+    border-color: black;
+    border-style: double;
+    font-family: fantasy;
+    padding: 0.5vh;
+    height: 5vh;
+    cursor: no-drop;
 }

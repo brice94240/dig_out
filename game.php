@@ -591,6 +591,24 @@ else if($game['team_activated'] == 1) { ?>
         </div>
     </div>
 
+    <!-- Modal Structure Racket -->
+    <div id="combatModal" class="modal-action-target">
+        <div class="modal-action-target-content">
+            <div class="title_fight">Combat en cours !</div>
+            <div id="combatDetails"></div>
+            <div id="ennemy-deck-fight"></div>
+            <div id="combat-table">
+                <button id="cooperate">Coopérer</button>
+                <button id="dontcooperate">Coopérer</button>
+                <div id="item_ask"></div>
+                <div id="weapons_used"></div>
+                <button id="giveup">Abandonner</button>
+                <button id="dontgiveup">Abandonner</button>
+            </div>
+            <div id="my-deck-fight"></div>
+        </div>
+    </div>
+
     <!-- Modal Structure Defausse -->
     <div id="defausse-modal" class="modal-defausse">
         <div class="modal-defausse-content">
@@ -1543,6 +1561,7 @@ $('#attackButton').click(function() {
     // Gérer la sélection d'un objet à racketter
     racketItems.click(function() {
         const item = $(this).data('item');
+        console.log(target_id);
         racketItem(item,target_id);
     });
 });
@@ -1761,18 +1780,8 @@ $(document).ready(function() {
                     }
                     appendPoints(response.team_a, response.team_b);
 
-                    if(response.on_fight == "trrue"){
-                        console.log("Joueur en combat");
-                        if(response.fight_id_turn == <?php echo $_SESSION['user_id']; ?>) {
-                            // Ouvrir une modal de combat
-                            console.log(response.fight_id_turn);
-                            console.log(response.fight_details);
-
-                            // openCombatModal(response.fight_id_turn, response.fight_details);
-                        } else {
-                            // console.log(response);
-                            // alert("Attendez votre tour pour agir dans le combat.");
-                        }
+                    if(response.on_fight == true){
+                        openCombatModal(response.fight_id_turn, response.player_turn_name, response.fight_details, response.attacker_weapon, response.defender_weapon, response.attacker_deck, response.defender_deck, response.attacker_id, response.defender_id, response.item_ask, response.weapons_used, response.turn);
                     }
                 } else {
                     console.log('Erreur : ' + response.message);
@@ -1783,17 +1792,185 @@ $(document).ready(function() {
             }
         });
     }
-    
-    function openCombatModal(fightIdTurn, fightDetails) {
-        // Créez ou montrez une modal spécifique pour le combat
-        // fightDetails peut contenir des informations spécifiques sur l'état du combat
+
+    function openCombatModal(fightIdTurn, playerTurnName, fightDetails, attackerWeapon, defenderWeapon, attackerDeck, defenderDeck, attackerID, defenderID, ItemAsk, WeaponsUsed, Turn) {
         $('#combatModal').show();
-        
-        // Vous pouvez afficher des informations spécifiques du combat ici
-        $('#combatDetails').text(`C'est le tour du joueur avec l'ID ${fightIdTurn}. Détails: ${fightDetails}`);
-        
-        // Préparez les actions possibles pour le joueur en combat
-        // Par exemple, afficher des boutons d'attaque, de défense, etc.
+        if(fightIdTurn  ==  '<?php echo $_SESSION['user_id']; ?>') {
+            $('#combatDetails').text(`C'est a votre tour de faire un choix.`);
+        } else {
+            $('#combatDetails').text(`C'est au tour de ${playerTurnName} de faire un choix.`);
+        }
+
+        // Fonction pour vérifier si une chaîne est un JSON valide
+        function isValidJson(str) {
+            if (typeof str !== 'string') {
+                return false;
+            }
+            try {
+                JSON.parse(str);
+            } catch (e) {
+                return false;
+            }
+            return true;
+        }
+
+        // Transformer les variables en tableaux si elles sont valides
+        attackerDeck = Array.isArray(attackerDeck) ? attackerDeck : (isValidJson(attackerDeck) ? JSON.parse(attackerDeck) : []);
+        defenderDeck = Array.isArray(defenderDeck) ? defenderDeck : (isValidJson(defenderDeck) ? JSON.parse(defenderDeck) : []);
+        attackerWeapon = Array.isArray(attackerWeapon) ? attackerWeapon : (isValidJson(attackerWeapon) ? JSON.parse(attackerWeapon) : []);
+        defenderWeapon = Array.isArray(defenderWeapon) ? defenderWeapon : (isValidJson(defenderWeapon) ? JSON.parse(defenderWeapon) : []);
+        ItemAsk = Array.isArray(ItemAsk) ? ItemAsk : (isValidJson(ItemAsk) ? JSON.parse(ItemAsk) : []);
+        WeaponsUsed = Array.isArray(WeaponsUsed) ? WeaponsUsed : (isValidJson(WeaponsUsed) ? JSON.parse(WeaponsUsed) : []);
+
+        console.log(ItemAsk);
+        console.log(WeaponsUsed);
+
+        // Générer le HTML pour chaque carte du deck de l'attaquant si le deck n'est pas vide
+        if(attackerID == '<?php echo $_SESSION['user_id']; ?>'){
+            let attackerDeckHtml = '';
+            if (attackerDeck.length > 0) {
+                attackerDeckHtml = attackerDeck.map(card => {
+                    return `
+                        <div class="card modal-content-deck" style="background-image:url('./img/${card.img}');background-size:cover;background-repeat:no-repeat;">
+                            <div class="deck-carte_name">${card.name}</div>
+                            <div class="deck-carte_description">${card.description}</div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                attackerDeckHtml = '<p>Aucune carte dans le deck de l\'attaquant.</p>';
+            }
+            $('#my-deck-fight').html(`<div id="deck-cards-fight">${attackerDeckHtml}</div>`);
+
+        } else {
+            let attackerDeckHtml = '';
+            let number_cards = attackerDeck.length;
+            if (attackerDeck.length > 0) {
+                attackerDeckHtml = `<div class="card modal-content-deck" style="background-image:url('./img/verso_card.png');background-size:cover;background-repeat:no-repeat;"><div class='number_card' style="color:white;font-size:2em;">`+number_cards+`</div></div>`;
+            } else {
+                attackerDeckHtml = '<p>Aucune carte dans le deck de l\'attaquant.</p>';
+            }
+            $('#ennemy-deck-fight').html(`<div id="deck-cards-fight">${attackerDeckHtml}</div>`);
+        }
+
+        // Générer le HTML pour chaque arme de l'attaquant si le deck d'armes n'est pas vide
+        let attackerWeaponHtml = '';
+        if (attackerWeapon.length > 0) {
+            attackerWeaponHtml = attackerWeapon.map(weapon => {
+                return `
+                    <div class="card modal-content-deck" style="background-image:url(./img/${weapon.img});background-size:cover;background-repeat:no-repeat;">
+                        <div class="deck-carte_name">${weapon.name}</div>
+                        <div class="deck-carte_description">${weapon.description}</div>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            attackerWeaponHtml = '<p>Aucune arme disponible pour l\'attaquant.</p>';
+        }
+
+        if(defenderID == '<?php echo $_SESSION['user_id']; ?>'){
+            // Générer le HTML pour chaque carte du deck du défenseur si le deck n'est pas vide
+            let defenderDeckHtml = '';
+            if (defenderDeck.length > 0) {
+                defenderDeckHtml = defenderDeck.map(card => {
+                    return `
+                        <div class="card modal-content-deck" style="background-image:url(./img/${card.img});background-size:cover;background-repeat:no-repeat;">
+                            <div class="deck-carte_name">${card.name}</div>
+                            <div class="deck-carte_description">${card.description}</div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                defenderDeckHtml = '<p>Aucune carte dans le deck du défenseur.</p>';
+            }
+            $('#my-deck-fight').html(`<div id="deck-cards-fight">${defenderDeckHtml}</div>`);
+        } else {
+            // Générer le HTML pour chaque carte du deck du défenseur si le deck n'est pas vide
+            let defenderDeckHtml = '';
+
+            let number_cards = defenderDeck.length;
+            if (defenderDeck.length > 0) {
+                defenderDeckHtml = `<div class="card modal-content-deck" style="background-image:url('./img/verso_card.png');background-size:cover;background-repeat:no-repeat;"><div class='number_card' style="color:white;font-size:2em;">`+number_cards+`</div></div>`;
+            } else {
+                defenderDeckHtml = '<p>Aucune carte dans le deck du défenseur.</p>';
+            }
+            
+            $('#ennemy-deck-fight').html(`<div id="deck-cards-fight">${defenderDeckHtml}</div>`);
+        }
+        // Générer le HTML pour chaque arme du défenseur si le deck d'armes n'est pas vide
+        let defenderWeaponHtml = '';
+        if (defenderWeapon.length > 0) {
+            defenderWeaponHtml = defenderWeapon.map(weapon => {
+                return `
+                    <div class="card modal-content-deck" style="background-image:url(./img/${weapon.img});background-size:cover;background-repeat:no-repeat;">
+                        <div class="deck-carte_name">${weapon.name}</div>
+                        <div class="deck-carte_description">${weapon.description}</div>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            defenderWeaponHtml = '<p>Aucune arme disponible pour le défenseur.</p>';
+        }
+
+
+
+        if (ItemAsk.length > 0) {
+            ItemAskHtml = ItemAsk.map(card => {
+                return `
+                    <div class="card modal-content-deck" style="background-image:url('./img/${card.img}');background-size:cover;background-repeat:no-repeat;">
+                        <div class="deck-carte_name">${card.name}</div>
+                        <div class="deck-carte_description">${card.description}</div>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            ItemAskHtml = '<p>Aucun item demandé.</p>';
+        }
+        $('#item_ask').html(`<div id="deck-cards-fight">${ItemAskHtml}</div>`);
+
+        if (WeaponsUsed.length > 0) {
+            WeaponsUsedHtml = WeaponsUsed.map(card => {
+                return `
+                    <div class="card modal-content-deck" style="background-image:url('./img/${card.img}');background-size:cover;background-repeat:no-repeat;">
+                        <div class="deck-carte_name">${card.name}</div>
+                        <div class="deck-carte_description">${card.description}</div>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            WeaponsUsedHtml = '<p>Aucun item demandé.</p>';
+        }
+        $('#weapons_used').html(`<div id="deck-cards-fight">${WeaponsUsedHtml}</div>`);
+
+
+        //DESIGN DE DUEL
+        if(fightIdTurn  ==  '<?php echo $_SESSION['user_id']; ?>') {
+            if(defenderID == '<?php echo $_SESSION['user_id']; ?>' && Turn == 1){
+                $('#cooperate').show();
+                $('#giveup').hide();
+                $('#dontgiveup').show();
+                $('#dontcooperate').hide();
+            } else if(attackerID == '<?php echo $_SESSION['user_id']; ?>' && Turn % 2 == 0){
+                $('#cooperate').hide();
+                $('#giveup').hide();
+                $('#dontgiveup').show();
+                $('#dontcooperate').show();
+            } else if(defenderID == '<?php echo $_SESSION['user_id']; ?>' && Turn % 2 == 0){
+                if(Turn == 2) {
+                    $('#cooperate').show();
+                    $('#dontcooperate').hide();
+                } else {
+                    $('#cooperate').hide();
+                    $('#dontcooperate').show();
+                }
+                $('#giveup').show();
+                $('#dontgiveup').hide();
+                $('#dontcooperate').hide();
+            }
+        } else {
+            $('#cooperate').hide();
+            $('#giveup').hide();
+        }
     }
 
     // Pour fermer la modal de combat
