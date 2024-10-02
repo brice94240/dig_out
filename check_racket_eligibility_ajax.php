@@ -50,17 +50,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 }
             }
 
-            // Vérifier si le joueur cible a l'objet demandé
+            // Récupérer l'objet demandé
             $items_available = [];
-            foreach ($target_deck as $card) {
+            $stmt_item_requested = $pdo->prepare("SELECT * FROM games");
+            $stmt_item_requested->execute();
+            $row_item_requested = $stmt_item_requested->fetch(PDO::FETCH_ASSOC);
+
+            if($item_requested == "Pelle") {
+                $item_deck = json_decode($row_item_requested['pelle_data'], true);
+            } else if($item_requested == "Pioche") {
+                $item_deck = json_decode($row_item_requested['pioche_data'], true);
+            } else if($item_requested == "Cuillere") {
+                $item_deck = json_decode($row_item_requested['cuillere_data'], true);
+            }
+            foreach ($item_deck as $card) {
                 if (in_array($card['name'], [$item_requested])) {
                     $items_available[] = $card;
+                    break;
+                }
+            }
+
+            //Verifie si le joueur a l'objet demandé
+            $have_item = "false";
+            foreach ($target_deck as $card) {
+                if (in_array($card['name'], [$item_requested])) {
+                    $have_item = "true";
+                    break;
                 }
             }
 
             if ($can_attack) {
                 // Mettre à jour le fight dans la BDD
-                $stmt_fight = $pdo->prepare("INSERT INTO fights (game_id, item_ask, weapons_used, attacker_id, defender_id, status, fight_id_turn) VALUES (:game_id, :item_ask, :weapons_used, :attacker_id, :defender_id, :status, :fight_id_turn)");
+                $stmt_fight = $pdo->prepare("INSERT INTO fights (game_id, item_ask, weapons_used, attacker_id, defender_id, status, fight_id_turn, have_item) VALUES (:game_id, :item_ask, :weapons_used, :attacker_id, :defender_id, :status, :fight_id_turn, :have_item)");
                 $stmt_fight->execute([
                     'game_id' => $game_id,
                     'item_ask' => json_encode($items_available),
@@ -69,9 +90,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     'defender_id' => $target_id,
                     'status' => 'procedeed',
                     'fight_id_turn' => $target_id,
+                    'have_item' => $have_item
                 ]);
 
-                echo json_encode(['success' => true, 'message' => 'Vous pouvez initier un racket.', 'canRacket' => true , 'can_defend' => $can_defend, 'items' => $items_available]);
+                //METTRE A JOUR LE DECK
+
+                echo json_encode(['success' => true, 'message' => 'Vous pouvez initier un racket.', 'canRacket' => true , 'can_defend' => $can_defend, 'items' => $items_available, 'have_item' => $have_item]);
             } else {
                 echo json_encode(['success' => false , 'message' => "Vous ne pouvez pas racketter, vous n'avez pas de surin ou de lame."]);
             }

@@ -1497,9 +1497,6 @@ function SelectTarget(sub_type, player_data, item_name) {
         });
 
         $("#target-action-modal-confirm").click(function(){
-            console.log(sub_type);
-            console.log(tab_target);
-            console.log(item_name);
             CardOnTarget(sub_type, tab_target, item_name);
         });
     }
@@ -1561,7 +1558,6 @@ $('#attackButton').click(function() {
     // Gérer la sélection d'un objet à racketter
     racketItems.click(function() {
         const item = $(this).data('item');
-        console.log(target_id);
         racketItem(item,target_id);
     });
 });
@@ -1583,6 +1579,7 @@ function racketItem(item, target_id) {
         }
     });
 }
+
 
 
 $(document).ready(function() {
@@ -1822,9 +1819,6 @@ $(document).ready(function() {
         ItemAsk = Array.isArray(ItemAsk) ? ItemAsk : (isValidJson(ItemAsk) ? JSON.parse(ItemAsk) : []);
         WeaponsUsed = Array.isArray(WeaponsUsed) ? WeaponsUsed : (isValidJson(WeaponsUsed) ? JSON.parse(WeaponsUsed) : []);
 
-        console.log(ItemAsk);
-        console.log(WeaponsUsed);
-
         // Générer le HTML pour chaque carte du deck de l'attaquant si le deck n'est pas vide
         if(attackerID == '<?php echo $_SESSION['user_id']; ?>'){
             let attackerDeckHtml = '';
@@ -1971,6 +1965,54 @@ $(document).ready(function() {
             $('#cooperate').hide();
             $('#giveup').hide();
         }
+
+        var ClickOnCooperate = false;
+        var ClickOnGiveUp = false;
+        $('#cooperate').click(function() {
+            ClickOnCooperate = true;
+            if(ClickOnCooperate == 1){
+                $.ajax({
+                    url: 'cooperate_giveup_ajax.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'cooperate',
+                        user_id: <?php echo isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 'null'; ?>,
+                        game_id: <?php echo isset($game_id) ? $game_id : 'null'; ?>,
+                    },
+                    success: function(response) {
+                        console.log(response);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Erreur:', status, error);
+                    }
+                });
+                ClickOnCooperate = false;
+            }
+        });
+
+        $('#giveup').click(function() {
+            ClickOnGiveUp = true;
+            if(ClickOnGiveUp == true){
+                $.ajax({
+                    url: 'cooperate_give_ajax.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'giveup',
+                        user_id: <?php echo isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 'null'; ?>,
+                        game_id: <?php echo isset($game_id) ? $game_id : 'null'; ?>,
+                    },
+                    success: function(response) {
+                        console.log(response);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Erreur:', status, error);
+                    }
+                });
+                ClickOnGiveUp = false;
+            }
+        });
     }
 
     // Pour fermer la modal de combat
