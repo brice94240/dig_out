@@ -583,7 +583,7 @@ else if($game['team_activated'] == 1) { ?>
             <div class="racket-items">
                 <div class="racket-item" data-item="Pelle" style="background-image:url(./img/Pelle.png);background-size:cover;background-repeat:no-repeat;"></div>
                 <div class="racket-item" data-item="Pioche" style="background-image:url(./img/Pioche.png);background-size:cover;background-repeat:no-repeat;"></div>
-                <div class="racket-item" data-item="Cuillere" style="background-image:url(./img/Cuillere.png);background-size:cover;background-repeat:no-repeat;"></div>
+                <div class="racket-item" data-item="Cuillère" style="background-image:url(./img/Cuillere.png);background-size:cover;background-repeat:no-repeat;"></div>
             </div>
         </div>
         <div class="modal-deck-target-footer">
@@ -1779,6 +1779,8 @@ $(document).ready(function() {
 
                     if(response.on_fight == true){
                         openCombatModal(response.fight_id_turn, response.player_turn_name, response.fight_details, response.attacker_weapon, response.defender_weapon, response.attacker_deck, response.defender_deck, response.attacker_id, response.defender_id, response.item_ask, response.weapons_used, response.turn, response.have_item);
+                    } else {
+                        $('#combatModal').hide();
                     }
                 } else {
                     console.log('Erreur : ' + response.message);

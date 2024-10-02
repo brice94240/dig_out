@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $item_deck = json_decode($row_item_requested['pelle_data'], true);
             } else if($item_requested == "Pioche") {
                 $item_deck = json_decode($row_item_requested['pioche_data'], true);
-            } else if($item_requested == "Cuillere") {
+            } else if($item_requested == "Cuillère") {
                 $item_deck = json_decode($row_item_requested['cuillere_data'], true);
             }
             foreach ($item_deck as $card) {
