@@ -149,6 +149,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && ($_POST[
                         $stmt_update_heal= $pdo->prepare("UPDATE joueurs SET raclee = raclee -1 WHERE `ID` = :defender_id");
                         $stmt_update_heal->execute(['defender_id' => $defender_id]);
                     }
+
+                    $message = "à volé un(e) ".$requested_item['name'];
+
+                    $stmt_logs = $pdo->prepare("INSERT INTO logs (game_id, user_id, message, target_id) VALUES (:game_id, :user_id, :message, :target_id)");
+                    $stmt_logs->execute([
+                        'game_id' => $game_id,
+                        'user_id' => $attacker_id,
+                        'message' => $message,
+                        'target_id' => $defender_id
+                    ]);
             
                     echo json_encode(['success' => true, 'message' => "L'objet " . $requested_item['name'] . " a été transféré avec succès."]);
                 } else {
