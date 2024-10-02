@@ -1778,7 +1778,7 @@ $(document).ready(function() {
                     appendPoints(response.team_a, response.team_b);
 
                     if(response.on_fight == true){
-                        openCombatModal(response.fight_id_turn, response.player_turn_name, response.fight_details, response.attacker_weapon, response.defender_weapon, response.attacker_deck, response.defender_deck, response.attacker_id, response.defender_id, response.item_ask, response.weapons_used, response.turn);
+                        openCombatModal(response.fight_id_turn, response.player_turn_name, response.fight_details, response.attacker_weapon, response.defender_weapon, response.attacker_deck, response.defender_deck, response.attacker_id, response.defender_id, response.item_ask, response.weapons_used, response.turn, response.have_item);
                     }
                 } else {
                     console.log('Erreur : ' + response.message);
@@ -1790,7 +1790,7 @@ $(document).ready(function() {
         });
     }
 
-    function openCombatModal(fightIdTurn, playerTurnName, fightDetails, attackerWeapon, defenderWeapon, attackerDeck, defenderDeck, attackerID, defenderID, ItemAsk, WeaponsUsed, Turn) {
+    function openCombatModal(fightIdTurn, playerTurnName, fightDetails, attackerWeapon, defenderWeapon, attackerDeck, defenderDeck, attackerID, defenderID, ItemAsk, WeaponsUsed, Turn, HaveItem) {
         $('#combatModal').show();
         if(fightIdTurn  ==  '<?php echo $_SESSION['user_id']; ?>') {
             $('#combatDetails').text(`C'est a votre tour de faire un choix.`);
@@ -1940,10 +1940,15 @@ $(document).ready(function() {
         //DESIGN DE DUEL
         if(fightIdTurn  ==  '<?php echo $_SESSION['user_id']; ?>') {
             if(defenderID == '<?php echo $_SESSION['user_id']; ?>' && Turn == 1){
-                $('#cooperate').show();
+                if(HaveItem == "true"){
+                    $('#cooperate').show();
+                    $('#dontcooperate').hide();
+                } else {
+                    $('#cooperate').hide();
+                    $('#dontcooperate').show();
+                }
                 $('#giveup').hide();
                 $('#dontgiveup').show();
-                $('#dontcooperate').hide();
             } else if(attackerID == '<?php echo $_SESSION['user_id']; ?>' && Turn % 2 == 0){
                 $('#cooperate').hide();
                 $('#giveup').hide();

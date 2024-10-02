@@ -214,12 +214,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $item_ask = $row_attacker_on_fight['item_ask'];
             $weapons_used = $row_attacker_on_fight['weapons_used'];
             $turn = $row_attacker_on_fight['turn'];
+            $have_item = $row_attacker_on_fight['have_item'];
             
         } else {
             $on_fight = false;
         }
 
-        echo json_encode(['success' => true, 'turn' => $turn, 'new_turn' => '1', 'last_turn' => $_POST['turn'], 'real_turn' => $real_turn, 'player_turn_id' => $player_turn_id, 'player_turn_name' => $player_turn_name, 'player_tab' => $player_tab, 'playerData' => $playerData, 'nb_action' => $row_player_data['nb_action'], 'player_id' => $row_player_data['ID'], 'localisation' => $row_player_data['localisation'], 'team' => $row_player_data['team'], 'defausse_data' => $row['defausse_data'], 'pelle_data' => $pelle_data, 'pioche_data' => $pioche_data, 'cuillere_data' => $cuillere_data, 'surin_data' => $surin_data, 'cigarette' => $cigarette, 'raclee' => $raclee, 'logs_data' => $logs_data_reverse, 'team_a' => $team_a, 'team_b' => $team_b, 'new_fouille' => $new_fouille, 'on_fight' => $on_fight, 'fight_id_turn' => $fight_id_turn, 'attacker_weapon' => $attacker_weapon, 'defender_weapon' => $defender_weapon, 'player_turn_name' => $player_turn_name, 'attacker_deck' => $attacker_deck, 'defender_deck' => $defender_deck, 'attacker_id' => $attacker_id, 'defender_id' => $defender_id, 'item_ask' => $item_ask, 'weapons_used' => $weapons_used, 'turn' => $turn]);
+        echo json_encode(['success' => true, 'turn' => $turn, 'new_turn' => '1', 'last_turn' => $_POST['turn'], 'real_turn' => $real_turn, 'player_turn_id' => $player_turn_id, 'player_turn_name' => $player_turn_name, 'player_tab' => $player_tab, 'playerData' => $playerData, 'nb_action' => $row_player_data['nb_action'], 'player_id' => $row_player_data['ID'], 'localisation' => $row_player_data['localisation'], 'team' => $row_player_data['team'], 'defausse_data' => $row['defausse_data'], 'pelle_data' => $pelle_data, 'pioche_data' => $pioche_data, 'cuillere_data' => $cuillere_data, 'surin_data' => $surin_data, 'cigarette' => $cigarette, 'raclee' => $raclee, 'logs_data' => $logs_data_reverse, 'team_a' => $team_a, 'team_b' => $team_b, 'new_fouille' => $new_fouille, 'on_fight' => $on_fight, 'fight_id_turn' => $fight_id_turn, 'attacker_weapon' => $attacker_weapon, 'defender_weapon' => $defender_weapon, 'player_turn_name' => $player_turn_name, 'attacker_deck' => $attacker_deck, 'defender_deck' => $defender_deck, 'attacker_id' => $attacker_id, 'defender_id' => $defender_id, 'item_ask' => $item_ask, 'weapons_used' => $weapons_used, 'turn' => $turn, 'have_item' => $have_item]);
 
     } catch (PDOException $e) {
         echo json_encode(['success' => false, 'message' => "Erreur lors de la récupération des parties : " . $e->getMessage()]);
