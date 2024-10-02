@@ -1971,52 +1971,42 @@ $(document).ready(function() {
             $('#giveup').hide();
         }
 
-        var ClickOnCooperate = false;
-        var ClickOnGiveUp = false;
-        $('#cooperate').click(function() {
-            ClickOnCooperate = true;
-            if(ClickOnCooperate == 1){
-                $.ajax({
-                    url: 'cooperate_giveup_ajax.php',
-                    type: 'POST',
-                    dataType: 'json',
-                    data: {
-                        action: 'cooperate',
-                        user_id: <?php echo isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 'null'; ?>,
-                        game_id: <?php echo isset($game_id) ? $game_id : 'null'; ?>,
-                    },
-                    success: function(response) {
-                        console.log(response);
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Erreur:', status, error);
-                    }
-                });
-                ClickOnCooperate = false;
-            }
+        $('#cooperate').off('click').click(function() {
+            $.ajax({
+                url: 'cooperate_giveup_ajax.php',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    action: 'cooperate',
+                    user_id: <?php echo isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 'null'; ?>,
+                    game_id: <?php echo isset($game_id) ? $game_id : 'null'; ?>,
+                },
+                success: function(response) {
+                    console.log(response);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Erreur:', status, error);
+                }
+            });
         });
 
-        $('#giveup').click(function() {
-            ClickOnGiveUp = true;
-            if(ClickOnGiveUp == true){
-                $.ajax({
-                    url: 'cooperate_give_ajax.php',
-                    type: 'POST',
-                    dataType: 'json',
-                    data: {
-                        action: 'giveup',
-                        user_id: <?php echo isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 'null'; ?>,
-                        game_id: <?php echo isset($game_id) ? $game_id : 'null'; ?>,
-                    },
-                    success: function(response) {
-                        console.log(response);
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Erreur:', status, error);
-                    }
-                });
-                ClickOnGiveUp = false;
-            }
+        $('#giveup').off('click').click(function() {
+            $.ajax({
+                url: 'cooperate_give_ajax.php',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    action: 'giveup',
+                    user_id: <?php echo isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 'null'; ?>,
+                    game_id: <?php echo isset($game_id) ? $game_id : 'null'; ?>,
+                },
+                success: function(response) {
+                    console.log(response);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Erreur:', status, error);
+                }
+            });
         });
     }
 
