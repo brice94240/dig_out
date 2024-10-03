@@ -195,12 +195,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && ($_POST[
                 $fight_data = $stmt_fight->fetch(PDO::FETCH_ASSOC);
         
                 // Enlever l'arme du deck de l'attaquant
+                $weapon_used = $user_deck[$weapon_index];
                 unset($user_deck[$weapon_index]);
                 // Réindexer le tableau
                 $user_deck = array_values($user_deck);
         
                 // Incrémenter le tour de fight
-                if($user_id == $attacker_id){
+                if($user_id == $fight_data['attacker_id']){
                     $figt_id_turn = $fight_data['defender_id'];
                 } else {
                     $figt_id_turn = $fight_data['attacker_id'];
@@ -213,6 +214,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && ($_POST[
                     'game_id' => $game_id
                 ]);
         
+                // Gérer l'ajout de l'arme utilisée dans la bonne collection
+                if ($weapon_used['name'] === 'Surin') {
+                    // Récupérer les données surin_data actuelles
+                    $stmt_surin_data = $pdo->prepare("SELECT surin_data FROM games WHERE creator_id = :game_id");
+                    $stmt_surin_data->execute(['game_id' => $game_id]);
+                    $surin_data = json_decode($stmt_surin_data->fetch(PDO::FETCH_ASSOC)['surin_data'], true);
+
+                    // Ajouter l'arme "Surin" au début de surin_data
+                    array_unshift($surin_data, $weapon_used);
+                    $surin_data_json = json_encode($surin_data);
+
+                    // Mettre à jour surin_data dans la table games
+                    $stmt_update_surin = $pdo->prepare("UPDATE games SET surin_data = :surin_data WHERE creator_id = :game_id");
+                    $stmt_update_surin->execute(['surin_data' => $surin_data_json, 'game_id' => $game_id]);
+                } else if ($weapon_used['name'] === 'Lame') {
+                    // Ajouter la carte "Lame" à la défausse
+                    $stmt_defausse_data = $pdo->prepare("SELECT defausse_data FROM games WHERE creator_id = :game_id");
+                    $stmt_defausse_data->execute(['game_id' => $game_id]);
+                    $defausse_data = json_decode($stmt_defausse_data->fetch(PDO::FETCH_ASSOC)['defausse_data'], true);
+
+                    // Ajouter l'arme "Lame" au début de la défausse
+                    array_unshift($defausse_data, $weapon_used);
+                    $defausse_json = json_encode($defausse_data);
+
+                    // Mettre à jour la défausse dans la table games
+                    $stmt_update_defausse = $pdo->prepare("UPDATE games SET defausse_data = :defausse_data WHERE creator_id = :game_id");
+                    $stmt_update_defausse->execute(['defausse_data' => $defausse_json, 'game_id' => $game_id]);
+                }
+
                 // Mettre à jour le deck de l'attaquant dans la base de données
                 $stmt_update_user = $pdo->prepare("UPDATE joueurs SET deck = :deck WHERE ID = :user_id");
                 $stmt_update_user->execute(['deck' => json_encode($user_deck), 'user_id' => $user_id]);

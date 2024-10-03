@@ -1929,14 +1929,25 @@ $(document).ready(function() {
         $('#item_ask').html(`<div id="deck-cards-fight">${ItemAskHtml}</div>`);
 
         if (WeaponsUsed.length > 0) {
-            WeaponsUsedHtml = WeaponsUsed.map(card => {
-                return `
-                    <div class="card modal-content-deck" style="background-image:url('./img/${card.img}');background-size:cover;background-repeat:no-repeat;">
-                        <div class="deck-carte_name">${card.name}</div>
-                        <div class="deck-carte_description">${card.description}</div>
-                    </div>
-                `;
-            }).join('');
+            if(Turn % 2 == 0){
+                WeaponsUsedHtml = WeaponsUsed.map(card => {
+                    return `
+                        <div class="card modal-content-deck" style="box-shadow: 5px 5px 5px green;;background-image:url('./img/${card.img}');background-size:cover;background-repeat:no-repeat;">
+                            <div class="deck-carte_name">${card.name}</div>
+                            <div class="deck-carte_description">${card.description}</div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                WeaponsUsedHtml = WeaponsUsed.map(card => {
+                    return `
+                        <div class="card modal-content-deck" style="box-shadow: 5px 5px 5px red;;background-image:url('./img/${card.img}');background-size:cover;background-repeat:no-repeat;">
+                            <div class="deck-carte_name">${card.name}</div>
+                            <div class="deck-carte_description">${card.description}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
         } else {
             WeaponsUsedHtml = '<p>Aucun item demandé.</p>';
         }
@@ -1973,7 +1984,17 @@ $(document).ready(function() {
                 $('#giveup').show();
                 $('#dontgiveup').hide();
                 $('#dontcooperate').hide();
-            }
+            } else if(attackerID == '<?php echo $_SESSION['user_id']; ?>' && Turn % 2 !== 0){
+                $('#cooperate').hide();
+                $('#dontcooperate').show();
+                $('#giveup').hide();
+                $('#dontgiveup').show();
+            } else if(defenderID == '<?php echo $_SESSION['user_id']; ?>' && Turn % 2 !== 0){
+                $('#cooperate').hide();
+                $('#dontcooperate').show();
+                $('#giveup').show();
+                $('#dontgiveup').hide();
+            } 
         } else {
             $('#riposter').hide();
             $('#dontriposter').show();
