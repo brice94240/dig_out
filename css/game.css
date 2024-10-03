@@ -598,7 +598,39 @@ body, html {
     text-decoration: none;
 }
 
+.modal-deck-attacker {
+    color: #fff;
+    margin-top: 0.5vh;
+    font-size: 2vh;
+    font-weight: bold;
+    background: #850000;
+    cursor: pointer;
+    border-color: black;
+    border-style: double;
+    font-family: fantasy;
+    padding: 0.5vh;
+}
+
+.modal-deck-attacker:hover {
+    color: #333;
+    text-decoration: none;
+}
+
+
 .defausser-btn {
+    color: #fff;
+    margin-top: 0.5vh;
+    font-size: 1.5vh;
+    font-weight: bold;
+    background: #850000;
+    cursor: pointer;
+    border-color: black;
+    border-style: double;
+    font-family: fantasy;
+    padding: 0.5vh;
+}
+
+.attacker-btn {
     color: #fff;
     margin-top: 0.5vh;
     font-size: 1.5vh;
@@ -1270,7 +1302,6 @@ body, html {
 
 #cooperate {
     color: #fff;
-    margin-top: 8.5vh;
     font-size: 2vh;
     font-weight: bold;
     background: #04b224;
@@ -1280,6 +1311,59 @@ body, html {
     font-family: fantasy;
     padding: 0.5vh;
     height: 5vh;
+}
+
+#cooperate:hover {
+    background: #78b204;
+}
+
+#riposter {
+    color: #fff;
+    font-size: 2vh;
+    font-weight: bold;
+    background: #e46c03;
+    cursor: pointer;
+    border-color: black;
+    border-style: double;
+    font-family: fantasy;
+    padding: 0.5vh;
+    height: 5vh;
+}
+
+#riposter:hover {
+    background: #b75703;
+}
+
+#dontriposter {
+    color: #fff;
+    font-size: 2vh;
+    font-weight: bold;
+    background: #03ab2288;
+    cursor: pointer;
+    border-color: black;
+    border-style: double;
+    font-family: fantasy;
+    padding: 0.5vh;
+    height: 5vh;
+    cursor: no-drop;
+}
+
+#dontcooperate {
+    color: #fff;
+    font-size: 2vh;
+    font-weight: bold;
+    background: #03ab2288;
+    cursor: pointer;
+    border-color: black;
+    border-style: double;
+    font-family: fantasy;
+    padding: 0.5vh;
+    height: 5vh;
+    cursor: no-drop;
+}
+
+.cooperate_riposter {
+    display: grid;
 }
 
 #giveup {
@@ -1296,19 +1380,8 @@ body, html {
     height: 5vh;
 }
 
-#dontcooperate {
-    color: #fff;
-    margin-top: 8.5vh;
-    font-size: 2vh;
-    font-weight: bold;
-    background: #03ab2288;
-    cursor: pointer;
-    border-color: black;
-    border-style: double;
-    font-family: fantasy;
-    padding: 0.5vh;
-    height: 5vh;
-    cursor: no-drop;
+#giveup:hover {
+    background: #650101;
 }
 
 #dontgiveup {

@@ -5,7 +5,7 @@ require_once 'config.php';
 
 header('Content-Type: application/json');
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && ($_POST['action'] === 'cooperate' || $_POST['action'] === 'giveup')) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && ($_POST['action'] === 'cooperate' || $_POST['action'] === 'giveup' || $_POST['action'] === 'riposter')) {
     try {
         $button = $_POST['action'];
         $game_id = intval($_POST['game_id']);
@@ -167,8 +167,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && ($_POST[
             } else {
                 echo json_encode(['success' => false, 'message' => "L'objet demandé n'est pas disponible."]);
             }
+        } elseif ($button === 'riposter') {
+            // Récupérer le deck de l'attaquant
+            $stmt_user = $pdo->prepare("SELECT deck FROM joueurs WHERE ID = :user_id");
+            $stmt_user->execute(['user_id' => $user_id]);
+            $user_data = $stmt_user->fetch(PDO::FETCH_ASSOC);
+            $user_deck = json_decode($user_data['deck'], true);
+            
+            // Vérifier si le joueur a une arme
+            $weapon_found = false;
+            $weapon_index = null;
+            
+            foreach ($user_deck as $index => $card) {
+                if ($card['name'] === 'Surin' || $card['name'] === 'Lame') {
+                    $weapon_found = true;
+                    $weapon_index = $index;
+                    // Ajouter l'arme à weapons_used
+                    $fights_data['weapons_used'][] = $card; // Assurez-vous que $fights_data est correctement défini
+                    break;
+                }
+            }
+            
+            if ($weapon_found) {
+                // Récupérer les infos du fight avec le statut 'processed' et le game_id
+                $stmt_fight = $pdo->prepare("SELECT * FROM fights WHERE status = 'procedeed' AND game_id = :game_id");
+                $stmt_fight->execute(['game_id' => $game_id]);
+                $fight_data = $stmt_fight->fetch(PDO::FETCH_ASSOC);
+        
+                // Enlever l'arme du deck de l'attaquant
+                unset($user_deck[$weapon_index]);
+                // Réindexer le tableau
+                $user_deck = array_values($user_deck);
+        
+                // Incrémenter le tour de fight
+                if($user_id == $attacker_id){
+                    $figt_id_turn = $fight_data['defender_id'];
+                } else {
+                    $figt_id_turn = $fight_data['attacker_id'];
+                }
+                
+                // Mettre à jour le tour et le joueur actif dans la base de données
+                $stmt_update_fight = $pdo->prepare("UPDATE fights SET turn = turn +1, fight_id_turn = :fight_id_turn WHERE game_id = :game_id");
+                $stmt_update_fight->execute([
+                    'fight_id_turn' => $figt_id_turn,
+                    'game_id' => $game_id
+                ]);
+        
+                // Mettre à jour le deck de l'attaquant dans la base de données
+                $stmt_update_user = $pdo->prepare("UPDATE joueurs SET deck = :deck WHERE ID = :user_id");
+                $stmt_update_user->execute(['deck' => json_encode($user_deck), 'user_id' => $user_id]);
+        
+                $stmt_update_weapons = $pdo->prepare("UPDATE fights SET weapons_used = :weapons_used WHERE game_id = :game_id");
+                $stmt_update_weapons->execute([
+                    'weapons_used' => json_encode($fights_data['weapons_used']),
+                    'game_id' => $game_id
+                ]);
+        
+                echo json_encode(['success' => true, 'message' => "Vous avez riposté avec succès avec l'arme " . $card['name'] . "."]);
+            } else {
+                echo json_encode(['success' => false, 'message' => "Vous n'avez pas d'arme pour riposter."]);
+            }
         }
-
+        
     } catch (PDOException $e) {
         echo json_encode(['success' => false, 'message' => "Erreur lors de la récupération du combat : " . $e->getMessage()]);
     }

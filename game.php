@@ -598,8 +598,12 @@ else if($game['team_activated'] == 1) { ?>
             <div id="combatDetails"></div>
             <div id="ennemy-deck-fight"></div>
             <div id="combat-table">
-                <button id="cooperate">Coopérer</button>
-                <button id="dontcooperate">Coopérer</button>
+                <div class="cooperate_riposter">
+                    <button id="cooperate">Coopérer</button>
+                    <button id="dontcooperate">Coopérer</button>
+                    <button id="riposter">Riposter</button>
+                    <button id="dontriposter">Riposter</button>
+                </div>
                 <div id="item_ask"></div>
                 <div id="weapons_used"></div>
                 <button id="giveup">Abandonner</button>
@@ -1941,6 +1945,8 @@ $(document).ready(function() {
 
         //DESIGN DE DUEL
         if(fightIdTurn  ==  '<?php echo $_SESSION['user_id']; ?>') {
+            $('#riposter').show();
+            $('#dontriposter').hide();
             if(defenderID == '<?php echo $_SESSION['user_id']; ?>' && Turn == 1){
                 if(HaveItem == "true"){
                     $('#cooperate').show();
@@ -1969,13 +1975,34 @@ $(document).ready(function() {
                 $('#dontcooperate').hide();
             }
         } else {
+            $('#riposter').hide();
+            $('#dontriposter').show();
             $('#cooperate').hide();
             $('#giveup').hide();
         }
 
+        $('#riposter').off('click').click(function() {
+            $.ajax({
+                url: 'cooperate_giveup_riposter_ajax.php',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    action: 'riposter',
+                    user_id: <?php echo isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 'null'; ?>,
+                    game_id: <?php echo isset($game_id) ? $game_id : 'null'; ?>,
+                },
+                success: function(response) {
+                    console.log(response);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Erreur:', status, error);
+                }
+            });
+        });
+
         $('#cooperate').off('click').click(function() {
             $.ajax({
-                url: 'cooperate_giveup_ajax.php',
+                url: 'cooperate_giveup_riposter_ajax.php',
                 type: 'POST',
                 dataType: 'json',
                 data: {
@@ -1994,7 +2021,7 @@ $(document).ready(function() {
 
         $('#giveup').off('click').click(function() {
             $.ajax({
-                url: 'cooperate_give_ajax.php',
+                url: 'cooperate_giveup_riposter_ajax.php',
                 type: 'POST',
                 dataType: 'json',
                 data: {
