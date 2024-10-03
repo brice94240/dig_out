@@ -84,6 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 }
 
                 if ($can_attack) {
+
                     // Enlever l'arme utilisée du deck de l'attaquant
                     if ($weapons_used[0]['name'] === 'Surin') {
                         // Récupérer les données surin_data actuelles
@@ -126,6 +127,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     
                     if($can_defend) {
                         // Mettre à jour le fight dans la BDD
+                        // Réduire le nombre d'actions
+                        $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET nb_action = nb_action - 1 WHERE ID = :user_id");
+                        $stmt_update_nb_action->execute(['user_id' => $attacker_id]);
+                        
                         $stmt_fight = $pdo->prepare("INSERT INTO fights (game_id, item_ask, weapons_used, attacker_id, defender_id, status, fight_id_turn, have_item) VALUES (:game_id, :item_ask, :weapons_used, :attacker_id, :defender_id, :status, :fight_id_turn, :have_item)");
                         $stmt_fight->execute([
                             'game_id' => $game_id,
@@ -137,13 +142,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             'fight_id_turn' => $target_id,
                             'have_item' => $have_item
                         ]);
-        
-                        // Réduire le nombre d'actions
-                        $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET nb_action = nb_action - 1 WHERE ID = :user_id");
-                        $stmt_update_nb_action->execute(['user_id' => $attacker_id]);
-        
                         echo json_encode(['success' => true, 'message' => 'Vous pouvez initier un racket.', 'canRacket' => true , 'can_defend' => $can_defend, 'items' => $items_available, 'have_item' => $have_item]);
                     } else {
+
+                        // Réduire le nombre d'actions
+                        // $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET nb_action = nb_action - 1 WHERE ID = :user_id");
+                        // $stmt_update_nb_action->execute(['user_id' => $attacker_id]);
+
                         // Mettre à jour le fight dans la BDD
                         $stmt_fight = $pdo->prepare("INSERT INTO fights (game_id, item_ask, weapons_used, attacker_id, defender_id, status, fight_id_turn, have_item, winner_id) VALUES (:game_id, :item_ask, :weapons_used, :attacker_id, :defender_id, :status, :fight_id_turn, :have_item, :winner_id)");
                         $stmt_fight->execute([
@@ -157,10 +162,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             'have_item' => $have_item,
                             'winner_id' => $attacker_id,
                         ]);
-        
-                        // Réduire le nombre d'actions
-                        $stmt_update_nb_action = $pdo->prepare("UPDATE joueurs SET nb_action = nb_action - 1 WHERE ID = :user_id");
-                        $stmt_update_nb_action->execute(['user_id' => $attacker_id]);
 
                         // Verifier si le joueur a la carte demandé
                         $stmt_target_deck = $pdo->prepare("SELECT raclee, deck FROM joueurs WHERE ID = :target_id");
@@ -288,8 +289,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                 echo json_encode(['success' => false, 'message' => "Le joueur cible n'a pas de carte à voler."]);
                             }
                         }
-                        
-        
+
                         echo json_encode(['success' => true, 'message' => 'Vous pouvez initier un racket.', 'canRacket' => true , 'can_defend' => $can_defend, 'items' => $items_available, 'have_item' => $have_item]);
                     }
                 } else {

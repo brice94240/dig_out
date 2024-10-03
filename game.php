@@ -1560,7 +1560,7 @@ $('#attackButton').click(function() {
     });
 
     // Gérer la sélection d'un objet à racketter
-    racketItems.click(function() {
+    racketItems.off('click').click(function() {
         const item = $(this).data('item');
         racketItem(item,target_id);
     });

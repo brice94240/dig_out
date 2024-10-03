@@ -60,6 +60,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_game'])) {
             $stmt_update_player_in_this_game = $pdo->prepare("UPDATE joueurs SET game_joined = NULL WHERE game_joined = :game_id");
             $stmt_update_player_in_this_game->execute(['game_id' => $game_id]);
 
+            $stmt_delete_game = $pdo->prepare("DELETE FROM logs WHERE game_id = :game_id");
+            $stmt_delete_game->execute(['game_id' => $game_id]);
+
+            $stmt_delete_game = $pdo->prepare("DELETE FROM chat_room WHERE game_id = :game_id");
+            $stmt_delete_game->execute(['game_id' => $game_id]);
+
+            $stmt_delete_game = $pdo->prepare("DELETE FROM fights WHERE game_id = :game_id");
+            $stmt_delete_game->execute(['game_id' => $game_id]);
+
             echo "Partie supprimée avec succès !";
         } else
         {

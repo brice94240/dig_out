@@ -19,8 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $stmt_update_point_turn_to_empty->execute(['point_turn' => 0, 'game_id' => $_POST['game_id']]);
 
              // Update the action to all players
-             $stmt_update_action_to_players = $pdo->prepare("UPDATE joueurs SET nb_action = :nb_action WHERE `game_joined` = :game_id");
-             $stmt_update_action_to_players->execute(['nb_action' => 0, 'game_id' => $_POST['game_id']]);
+            //  $stmt_update_action_to_players = $pdo->prepare("UPDATE joueurs SET nb_action = :nb_action WHERE `game_joined` = :game_id");
+            //  $stmt_update_action_to_players->execute(['nb_action' => 0, 'game_id' => $_POST['game_id']]);
 
             if($row['turn'] >= 2) {
                 $real_turn = $row['turn']-2;
@@ -45,9 +45,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $id = $row_info_joueur['ID'];
 
             if($localisation !== 6){
-                // Update the action to players playing
-                $stmt_update_action_to_player_playing = $pdo->prepare("UPDATE joueurs SET nb_action = :nb_action WHERE `game_joined` = :game_id AND ID = :player_id");
-                $stmt_update_action_to_player_playing->execute(['nb_action' => 2, 'game_id' => $_POST['game_id'], 'player_id' => $player_turn_id]);
+                // Vérifier si le joueur est deja en combat
+                $stmt_attacker_on_fight = $pdo->prepare("SELECT * FROM fights WHERE (attacker_id = :attacker_id OR defender_id = :defender_id) AND status = :status");
+                $stmt_attacker_on_fight->execute(['attacker_id' => $id, 'defender_id' => $id, 'status' => 'procedeed']);
+                $row_attacker_on_fight = $stmt_attacker_on_fight->fetchAll(PDO::FETCH_ASSOC);
+                if(count($row_attacker_on_fight) == 0){
+                    // Update the action to players playing
+                    $stmt_update_action_to_player_playing = $pdo->prepare("UPDATE joueurs SET nb_action = :nb_action WHERE `game_joined` = :game_id AND ID = :player_id");
+                    $stmt_update_action_to_player_playing->execute(['nb_action' => 2, 'game_id' => $_POST['game_id'], 'player_id' => $player_turn_id]);
+                }
             } else {
                 // Update the action to players playing
                 $stmt_update_action_to_player_playing = $pdo->prepare("UPDATE joueurs SET nb_action = :nb_action WHERE `game_joined` = :game_id AND ID = :player_id");
