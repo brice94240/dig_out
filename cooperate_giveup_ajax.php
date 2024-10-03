@@ -144,9 +144,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && ($_POST[
                     $stmt_update_attacker = $pdo->prepare("UPDATE joueurs SET deck = :deck WHERE ID = :id");
                     $stmt_update_attacker->execute(['deck' => json_encode($attacker_deck), 'id' => $attacker_id]);
 
-                    if($target_data['raclee'] > 0){
+                    if($target_data['raclee'] < 2){
                         // Mettre à jour le deck du joueur
-                        $stmt_update_heal= $pdo->prepare("UPDATE joueurs SET raclee = raclee -1 WHERE `ID` = :defender_id");
+                        $stmt_update_heal= $pdo->prepare("UPDATE joueurs SET raclee = raclee +1 WHERE `ID` = :defender_id");
                         $stmt_update_heal->execute(['defender_id' => $defender_id]);
                     }
 
@@ -167,8 +167,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && ($_POST[
             } else {
                 echo json_encode(['success' => false, 'message' => "L'objet demandé n'est pas disponible."]);
             }
-
-
         }
 
     } catch (PDOException $e) {
