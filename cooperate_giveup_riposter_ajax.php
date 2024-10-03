@@ -201,10 +201,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && ($_POST[
                 $user_deck = array_values($user_deck);
         
                 // Incrémenter le tour de fight
-                if($user_id == $fight_data['attacker_id']){
-                    $figt_id_turn = $fight_data['defender_id'];
-                } else {
+                if($user_id == $fight_data['defender_id']){
                     $figt_id_turn = $fight_data['attacker_id'];
+                } else {
+                    $figt_id_turn = $fight_data['defender_id'];
                 }
                 
                 // Mettre à jour le tour et le joueur actif dans la base de données

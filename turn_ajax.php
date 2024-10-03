@@ -211,16 +211,199 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $attacker_id = $row_attacker_on_fight['attacker_id'];
             $defender_id = $row_attacker_on_fight['defender_id'];
             $player_turn_name = $row_player_turn_details['pseudo'];
-            $item_ask = $row_attacker_on_fight['item_ask'];
             $weapons_used = $row_attacker_on_fight['weapons_used'];
             $turn = $row_attacker_on_fight['turn'];
             $have_item = $row_attacker_on_fight['have_item'];
-            
+            $item_ask = $row_attacker_on_fight['item_ask'];
+            $item_requested_json = json_decode($item_ask, true);
+            $item_requested = $item_requested_json[0]['name'];
+
+            if ($fight_id_turn == $_SESSION['user_id']) {
+                // Récupérer le deck de l'utilisateur actuel
+                $user_id = $_SESSION['user_id'];
+                $stmt_user_deck = $pdo->prepare("SELECT deck FROM joueurs WHERE ID = :user_id");
+                $stmt_user_deck->execute(['user_id' => $user_id]);
+                $user_data = $stmt_user_deck->fetch(PDO::FETCH_ASSOC);
+                $user_deck = json_decode($user_data['deck'], true);
+
+
+                // Vérifier si le deck contient une arme (Lame ou Surin)
+                $has_weapon = false;
+                foreach ($user_deck as $card) {
+                    if ($card['name'] === 'Lame' || $card['name'] === 'Surin') {
+                        $has_weapon = true;
+                        break;
+                    }
+                }
+                if (!$has_weapon) {
+                    if ($attacker_id == $_SESSION['user_id']) {
+                        // Si l'attaquant est l'utilisateur actuel
+                        $stmt_attacker_deck = $pdo->prepare("SELECT deck FROM joueurs WHERE ID = :attacker_id");
+                        $stmt_attacker_deck->execute(['attacker_id' => $attacker_id]);
+                        $attacker_data = $stmt_attacker_deck->fetch(PDO::FETCH_ASSOC);
+                        $attacker_deck = json_decode($attacker_data['deck'], true);
+                
+                        // Vérifier si l'attaquant a au moins une carte
+                        if (count($attacker_deck) > 0) {
+                            // Sélectionner une carte aléatoire dans le deck de l'attaquant
+                            $random_index = array_rand($attacker_deck);
+                            $random_card = $attacker_deck[$random_index];
+                
+                            // Ajouter la carte au deck du défenseur
+                            $stmt_defender_deck = $pdo->prepare("SELECT deck FROM joueurs WHERE ID = :defender_id");
+                            $stmt_defender_deck->execute(['defender_id' => $defender_id]);
+                            $defender_data = $stmt_defender_deck->fetch(PDO::FETCH_ASSOC);
+                            $defender_deck = json_decode($defender_data['deck'], true);
+                
+                            $defender_deck[] = $random_card;
+                
+                            // Supprimer la carte du deck de l'attaquant
+                            unset($attacker_deck[$random_index]);
+                            $attacker_deck = array_values($attacker_deck);
+                
+                            // Mettre à jour les decks dans la base de données
+                            $stmt_update_attacker = $pdo->prepare("UPDATE joueurs SET deck = :deck WHERE ID = :id");
+                            $stmt_update_attacker->execute(['deck' => json_encode($attacker_deck), 'id' => $attacker_id]);
+                
+                            $stmt_update_defender = $pdo->prepare("UPDATE joueurs SET deck = :deck WHERE ID = :id");
+                            $stmt_update_defender->execute(['deck' => json_encode($defender_deck), 'id' => $defender_id]);
+                
+                            // Log de l'action
+                            $message = "a donné une carte";
+                
+                            $stmt_logs = $pdo->prepare("INSERT INTO logs (game_id, user_id, message, target_id) VALUES (:game_id, :user_id, :message, :target_id)");
+                            $stmt_logs->execute([
+                                'game_id' => $game_id,
+                                'user_id' => $attacker_id,
+                                'message' => $message,
+                                'target_id' => $defender_id
+                            ]);
+                        } else {
+                            // Log de l'action
+                            $message = "a donné une raclée";
+                
+                            $stmt_logs = $pdo->prepare("INSERT INTO logs (game_id, user_id, message, target_id) VALUES (:game_id, :user_id, :message, :target_id)");
+                            $stmt_logs->execute([
+                                'game_id' => $game_id,
+                                'user_id' => $defender_id,
+                                'message' => $message,
+                                'target_id' => $attacker_id
+                            ]);
+                        }
+                    } else if ($defender_id == $_SESSION['user_id']) {
+                        // Si le défenseur est l'utilisateur actuel
+                        $stmt_defender_deck = $pdo->prepare("SELECT deck FROM joueurs WHERE ID = :defender_id");
+                        $stmt_defender_deck->execute(['defender_id' => $defender_id]);
+                        $defender_data = $stmt_defender_deck->fetch(PDO::FETCH_ASSOC);
+                        $defender_deck = json_decode($defender_data['deck'], true);
+                
+                        $item_found = false;
+                        foreach ($defender_deck as $index => $card) {
+                            if ($card['name'] === $item_requested) {
+                                $item_found = true;
+                                $requested_item = $card;
+                                $index_find = $index;
+                                break;
+                            }
+                        }
+                
+                        if ($item_found) {
+                            // Ajouter l'objet demandé au deck de l'attaquant
+                            $stmt_attacker_deck = $pdo->prepare("SELECT deck FROM joueurs WHERE ID = :attacker_id");
+                            $stmt_attacker_deck->execute(['attacker_id' => $attacker_id]);
+                            $attacker_data = $stmt_attacker_deck->fetch(PDO::FETCH_ASSOC);
+                            $attacker_deck = json_decode($attacker_data['deck'], true);
+                
+                            $attacker_deck[] = $requested_item;
+                
+                            // Supprimer l'objet du deck du défenseur
+                            unset($defender_deck[$index_find]);
+                            $defender_deck = array_values($defender_deck);
+                
+                            // Mettre à jour les decks dans la base de données
+                            $stmt_update_defender = $pdo->prepare("UPDATE joueurs SET deck = :deck WHERE ID = :id");
+                            $stmt_update_defender->execute(['deck' => json_encode($defender_deck), 'id' => $defender_id]);
+                
+                            $stmt_update_attacker = $pdo->prepare("UPDATE joueurs SET deck = :deck WHERE ID = :id");
+                            $stmt_update_attacker->execute(['deck' => json_encode($attacker_deck), 'id' => $attacker_id]);
+                
+                            // Log de l'action
+                            $message = "a volé une " . $requested_item['name'];
+                
+                            $stmt_logs = $pdo->prepare("INSERT INTO logs (game_id, user_id, message, target_id) VALUES (:game_id, :user_id, :message, :target_id)");
+                            $stmt_logs->execute([
+                                'game_id' => $game_id,
+                                'user_id' => $attacker_id,
+                                'message' => $message,
+                                'target_id' => $defender_id
+                            ]);
+                        } else {
+                            // Si l'objet demandé n'est pas disponible mais que le défenseur a d'autres cartes
+                            if (count($defender_deck) > 0) {
+                                // Sélectionner une carte aléatoire dans le deck du défenseur
+                                $random_index = array_rand($defender_deck);
+                                $random_card = $defender_deck[$random_index];
+                
+                                // Ajouter la carte au deck de l'attaquant
+                                $stmt_attacker_deck = $pdo->prepare("SELECT deck FROM joueurs WHERE ID = :attacker_id");
+                                $stmt_attacker_deck->execute(['attacker_id' => $attacker_id]);
+                                $attacker_data = $stmt_attacker_deck->fetch(PDO::FETCH_ASSOC);
+                                $attacker_deck = json_decode($attacker_data['deck'], true);
+                
+                                $attacker_deck[] = $random_card;
+                
+                                // Supprimer la carte du deck du défenseur
+                                unset($defender_deck[$random_index]);
+                                $defender_deck = array_values($defender_deck);
+                
+                                // Mettre à jour les decks dans la base de données
+                                $stmt_update_defender = $pdo->prepare("UPDATE joueurs SET deck = :deck WHERE ID = :id");
+                                $stmt_update_defender->execute(['deck' => json_encode($defender_deck), 'id' => $defender_id]);
+                
+                                $stmt_update_attacker = $pdo->prepare("UPDATE joueurs SET deck = :deck WHERE ID = :id");
+                                $stmt_update_attacker->execute(['deck' => json_encode($attacker_deck), 'id' => $attacker_id]);
+                
+                                // Log de l'action
+                                $message = "a donné une carte";
+                
+                                $stmt_logs = $pdo->prepare("INSERT INTO logs (game_id, user_id, message, target_id) VALUES (:game_id, :user_id, :message, :target_id)");
+                                $stmt_logs->execute([
+                                    'game_id' => $game_id,
+                                    'user_id' => $attacker_id,
+                                    'message' => $message,
+                                    'target_id' => $defender_id
+                                ]);
+                            } else {
+                                // Log de l'action
+                                $message = "a donné une raclée";
+                    
+                                $stmt_logs = $pdo->prepare("INSERT INTO logs (game_id, user_id, message, target_id) VALUES (:game_id, :user_id, :message, :target_id)");
+                                $stmt_logs->execute([
+                                    'game_id' => $game_id,
+                                    'user_id' => $attacker_id,
+                                    'message' => $message,
+                                    'target_id' => $defender_id
+                                ]);
+                            }
+                        }
+                    }
+                    // Mettre à jour les combats
+                    $stmt_update_fights = $pdo->prepare("UPDATE fights SET status = :status, winner_id = :winner_id, cooperate = :cooperate WHERE game_id = :game_id AND status = :last_status");
+                    $stmt_update_fights->execute(['status' => 'finished', 'winner_id' => $attacker_id, 'cooperate' => 0, 'game_id' => $game_id, 'last_status' => "procedeed"]);
+                    
+                    // Incrémenter les raclées du joueur qui gagne
+                    if ($user_data['raclee'] < 2) {
+                        $stmt_update_heal = $pdo->prepare("UPDATE joueurs SET raclee = raclee + 1 WHERE ID = :user_id");
+                        $stmt_update_heal->execute(['user_id' => $_SESSION['user_id']]);
+                    }
+                }
+            }
+
         } else {
             $on_fight = false;
         }
 
-        echo json_encode(['success' => true, 'turn' => $turn, 'new_turn' => '1', 'last_turn' => $_POST['turn'], 'real_turn' => $real_turn, 'player_turn_id' => $player_turn_id, 'player_turn_name' => $player_turn_name, 'player_tab' => $player_tab, 'playerData' => $playerData, 'nb_action' => $row_player_data['nb_action'], 'player_id' => $row_player_data['ID'], 'localisation' => $row_player_data['localisation'], 'team' => $row_player_data['team'], 'defausse_data' => $row['defausse_data'], 'pelle_data' => $pelle_data, 'pioche_data' => $pioche_data, 'cuillere_data' => $cuillere_data, 'surin_data' => $surin_data, 'cigarette' => $cigarette, 'raclee' => $raclee, 'logs_data' => $logs_data_reverse, 'team_a' => $team_a, 'team_b' => $team_b, 'new_fouille' => $new_fouille, 'on_fight' => $on_fight, 'fight_id_turn' => $fight_id_turn, 'attacker_weapon' => $attacker_weapon, 'defender_weapon' => $defender_weapon, 'player_turn_name' => $player_turn_name, 'attacker_deck' => $attacker_deck, 'defender_deck' => $defender_deck, 'attacker_id' => $attacker_id, 'defender_id' => $defender_id, 'item_ask' => $item_ask, 'weapons_used' => $weapons_used, 'turn' => $turn, 'have_item' => $have_item]);
+        echo json_encode(['success' => true, "item_found" => $item_found, 'turn' => $turn, 'new_turn' => '1', 'last_turn' => $_POST['turn'], 'real_turn' => $real_turn, 'player_turn_id' => $player_turn_id, 'player_turn_name' => $player_turn_name, 'player_tab' => $player_tab, 'playerData' => $playerData, 'nb_action' => $row_player_data['nb_action'], 'player_id' => $row_player_data['ID'], 'localisation' => $row_player_data['localisation'], 'team' => $row_player_data['team'], 'defausse_data' => $row['defausse_data'], 'pelle_data' => $pelle_data, 'pioche_data' => $pioche_data, 'cuillere_data' => $cuillere_data, 'surin_data' => $surin_data, 'cigarette' => $cigarette, 'raclee' => $raclee, 'logs_data' => $logs_data_reverse, 'team_a' => $team_a, 'team_b' => $team_b, 'new_fouille' => $new_fouille, 'on_fight' => $on_fight, 'fight_id_turn' => $fight_id_turn, 'attacker_weapon' => $attacker_weapon, 'defender_weapon' => $defender_weapon, 'player_turn_name' => $player_turn_name, 'attacker_deck' => $attacker_deck, 'defender_deck' => $defender_deck, 'attacker_id' => $attacker_id, 'defender_id' => $defender_id, 'item_ask' => $item_ask, 'weapons_used' => $weapons_used, 'turn' => $turn, 'have_item' => $have_item]);
 
     } catch (PDOException $e) {
         echo json_encode(['success' => false, 'message' => "Erreur lors de la récupération des parties : " . $e->getMessage()]);
