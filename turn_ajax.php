@@ -409,6 +409,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $on_fight = false;
         }
 
+        $player_tab = $player_tab ?? "";
+        $item_found = $item_found ?? null;
+        $new_fouille = $new_fouille ?? null;
+        $fight_id_turn = $fight_id_turn ?? null;
+        $attacker_weapon = $attacker_weapon ?? null;
+        $defender_weapon = $defender_weapon ?? null;
+        $attacker_deck = $attacker_deck ?? null;
+        $defender_deck = $defender_deck ?? null;
+        $attacker_id = $attacker_id ?? null;
+        $defender_id = $defender_id ?? null;
+        $item_ask = $item_ask ?? null;
+        $weapons_used = $weapons_used ?? null;
+        $have_item = $have_item ?? null;
+
         echo json_encode(['success' => true, "item_found" => $item_found, 'turn' => $turn, 'new_turn' => '1', 'last_turn' => $_POST['turn'], 'real_turn' => $real_turn, 'player_turn_id' => $player_turn_id, 'player_turn_name' => $player_turn_name, 'player_tab' => $player_tab, 'playerData' => $playerData, 'nb_action' => $row_player_data['nb_action'], 'player_id' => $row_player_data['ID'], 'localisation' => $row_player_data['localisation'], 'team' => $row_player_data['team'], 'defausse_data' => $row['defausse_data'], 'pelle_data' => $pelle_data, 'pioche_data' => $pioche_data, 'cuillere_data' => $cuillere_data, 'surin_data' => $surin_data, 'cigarette' => $cigarette, 'raclee' => $raclee, 'logs_data' => $logs_data_reverse, 'team_a' => $team_a, 'team_b' => $team_b, 'new_fouille' => $new_fouille, 'on_fight' => $on_fight, 'fight_id_turn' => $fight_id_turn, 'attacker_weapon' => $attacker_weapon, 'defender_weapon' => $defender_weapon, 'player_turn_name' => $player_turn_name, 'attacker_deck' => $attacker_deck, 'defender_deck' => $defender_deck, 'attacker_id' => $attacker_id, 'defender_id' => $defender_id, 'item_ask' => $item_ask, 'weapons_used' => $weapons_used, 'turn' => $turn, 'have_item' => $have_item]);
 
     } catch (PDOException $e) {

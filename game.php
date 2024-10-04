@@ -460,7 +460,7 @@ else if($game['team_activated'] == 1) { ?>
     <div class="map-container">
         <img src="./img/map_team.png" alt="Game Map" class="map-image">
         <!-- Zones des gangs -->
-        <div class="map-interactive-area" id="gang1" onclick="showGangInfo('<?php echo $gangs['gang6'][0]['gang_name']; ?>', '<?php echo $gangs['gang6'][0]['name']; ?>', '<?php echo $gangs['gang6'][0]['description']; ?>', '<?php echo $gangs['gang6'][0]['verso_card']; ?>')"></div>
+        <div class="map-interactive-area" id="gang1" onclick="showGangInfo('<?php echo $gangs['gang6'][0]['gang_name']; ?>', '<?php echo $gangs['gang6'][0]['name']; ?>', '<?php echo $gangs['gang6'][0]['description']; ?>')"></div>
         <div class="map-interactive-area" id="gang2" onclick="showGangInfo('<?php echo $gangs['gang5'][0]['gang_name']; ?>', '<?php echo $gangs['gang5'][0]['name']; ?>', '<?php echo $gangs['gang5'][0]['description']; ?>')"></div>
         <div class="map-interactive-area" id="gang3" onclick="showGangInfo('<?php echo $gangs['gang4'][0]['gang_name']; ?>', '<?php echo $gangs['gang4'][0]['name']; ?>', '<?php echo $gangs['gang4'][0]['description']; ?>')"></div>
         <div class="map-interactive-area" id="gang4" onclick="showGangInfo('<?php echo $gangs['gang3'][0]['gang_name']; ?>', '<?php echo $gangs['gang3'][0]['name']; ?>', '<?php echo $gangs['gang3'][0]['description']; ?>')"></div>
@@ -1679,7 +1679,7 @@ $(document).ready(function() {
                         $('#FinTurnButton').hide();
                     }
 
-                    if(response.defausse_data !== "") {
+                    if(response.defausse_data !== "" && response.defausse_data !== null) {
                         var tab_defausse = JSON.parse(response.defausse_data);
                         var globalDefausse = tab_defausse[0].img;
                         if(globalDefausse !== null){
@@ -1690,7 +1690,7 @@ $(document).ready(function() {
                         var globalDefausse = "";
                     }
 
-                    if(response.pelle_data !== "") {
+                    if(response.pelle_data !== "" && response.pelle_data !== null) {
                         var tab_pelle = JSON.parse(response.pelle_data);
                         var globalPelle = tab_pelle[0].img;
                     } else {
@@ -1699,7 +1699,7 @@ $(document).ready(function() {
                     var url_pelle = 'background-image:url("./img/'+globalPelle+'");background-size:cover;background-repeat:no-repeat;';
                     $("#carte4")[0].style = url_pelle;
 
-                    if(response.pioche_data !== "") {
+                    if(response.pioche_data !== "" && response.pioche_data !== null) {
                         var tab_pioche = JSON.parse(response.pioche_data);
                         var globalPioche = tab_pioche[0].img;
                     } else {
@@ -1708,7 +1708,7 @@ $(document).ready(function() {
                     var url_pioche = 'background-image:url("./img/'+globalPioche+'");background-size:cover;background-repeat:no-repeat;';
                     $("#carte3")[0].style = url_pioche;
 
-                    if(response.cuillere_data !== "") {
+                    if(response.cuillere_data !== "" && response.cuillere_data !== null) {
                         var tab_cuillere = JSON.parse(response.cuillere_data);
                         var globalCuillere = tab_cuillere[0].img;
                     } else {
@@ -1717,7 +1717,7 @@ $(document).ready(function() {
                     var url_cuillere = 'background-image:url("./img/'+globalCuillere+'");background-size:cover;background-repeat:no-repeat;transform: rotate(90deg);';
                     $("#carte6")[0].style = url_cuillere;
 
-                    if(response.surin_data !== "") {
+                    if(response.surin_data !== "" && response.surin_data !== null) {
                         var tab_surin = JSON.parse(response.surin_data);
                         var globalSurin = tab_surin[0].img;
                     } else {

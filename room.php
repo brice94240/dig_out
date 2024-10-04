@@ -27,6 +27,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_game'])) {
         if ($game['launched'] == 0) {
             $stmt = $pdo->prepare("UPDATE joueurs SET game_joined = :game_id WHERE ID = :user_id");
             $stmt->execute(['game_id' => $game_id, 'user_id' => $_SESSION['user_id']]);
+
+            $stmt = $pdo->prepare("UPDATE joueurs SET localisation = :localisation WHERE ID = :user_id");
+            $stmt->execute(['localisation' => 0, 'user_id' => $_SESSION['user_id']]);
+
+            $stmt = $pdo->prepare("UPDATE joueurs SET localisation = :localisation WHERE ID = :user_id");
+            $stmt->execute(['localisation' => 0, 'user_id' => $_SESSION['user_id']]);
+
+            $stmt = $pdo->prepare("UPDATE joueurs SET nb_action = :nb_action WHERE ID = :user_id");
+            $stmt->execute(['nb_action' => 0, 'user_id' => $_SESSION['user_id']]);
+
+            $stmt = $pdo->prepare("UPDATE joueurs SET dice_data = :dice_data WHERE ID = :user_id");
+            $stmt->execute(['dice_data' => "", 'user_id' => $_SESSION['user_id']]);
+
+            $stmt = $pdo->prepare("UPDATE joueurs SET point_turn = :point_turn WHERE ID = :user_id");
+            $stmt->execute(['point_turn' => 0, 'user_id' => $_SESSION['user_id']]);
+
+            $stmt = $pdo->prepare("UPDATE joueurs SET nb_point = :nb_point WHERE ID = :user_id");
+            $stmt->execute(['nb_point' => 0, 'user_id' => $_SESSION['user_id']]);
+
+            $stmt = $pdo->prepare("UPDATE joueurs SET deck = :deck WHERE ID = :user_id");
+            $stmt->execute(['deck' => "", 'user_id' => $_SESSION['user_id']]);
+
+            $stmt = $pdo->prepare("UPDATE joueurs SET team = :team WHERE ID = :user_id");
+            $stmt->execute(['team' => "", 'user_id' => $_SESSION['user_id']]);
+
+            $stmt = $pdo->prepare("UPDATE joueurs SET cigarette = :cigarette WHERE ID = :user_id");
+            $stmt->execute(['cigarette' => 0, 'user_id' => $_SESSION['user_id']]);
+
+            $stmt = $pdo->prepare("UPDATE joueurs SET raclee = :raclee WHERE ID = :user_id");
+            $stmt->execute(['raclee' => 0, 'user_id' => $_SESSION['user_id']]);
+
             echo "Vous avez rejoint la partie avec succès !";
 
             // Redirection vers la room de la partie
